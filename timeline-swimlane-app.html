@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline Swim Lane Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+        }
+
+        select, button {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            background: white;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button.secondary {
+            background: #6b7280;
+        }
+
+        button.secondary:hover {
+            background: #4b5563;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-wrapper label {
+            padding: 8px 16px;
+            background: #10b981;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+            display: inline-block;
+        }
+
+        .file-input-wrapper label:hover {
+            background: #059669;
+        }
+
+        .timeline-container {
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        .timeline {
+            position: relative;
+            min-width: 1200px;
+            transition: min-width 0.3s ease;
+        }
+
+        .time-axis {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #333;
+            position: relative;
+        }
+
+        .time-marker {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .swim-lane {
+            margin-bottom: 15px;
+            position: relative;
+            min-height: 80px;
+            border-left: 3px solid #667eea;
+            padding-left: 15px;
+        }
+
+        .lane-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .lane-header:hover {
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .lane-toggle {
+            margin-right: 8px;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+
+        .lane-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .lane-title {
+            font-weight: 700;
+            font-size: 15px;
+            color: #333;
+            min-width: 150px;
+        }
+
+        .lane-content {
+            position: relative;
+            min-height: 60px;
+            background: linear-gradient(to right, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 6px;
+            overflow: visible;
+            padding: 5px 0;
+        }
+
+        .lane-content.collapsed {
+            display: none;
+        }
+
+        .event {
+            position: absolute;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+        }
+
+        .event:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        .event.event-bar {
+            border-radius: 4px;
+            min-width: 40px;
+            justify-content: flex-start;
+        }
+
+        .event.event-point {
+            padding: 6px 10px;
+            border-radius: 50px;
+            font-weight: 600;
+        }
+
+        .event-milestone {
+            background: #f59e0b;
+            color: white;
+            border-left: 4px solid #d97706;
+        }
+
+        .event-task {
+            background: #3b82f6;
+            color: white;
+            border-left: 4px solid #2563eb;
+        }
+
+        .event-release {
+            background: #10b981;
+            color: white;
+            border-left: 4px solid #059669;
+        }
+
+        .event-meeting {
+            background: #8b5cf6;
+            color: white;
+            border-left: 4px solid #7c3aed;
+        }
+
+        .event-default {
+            background: #6b7280;
+            color: white;
+            border-left: 4px solid #4b5563;
+        }
+
+        .event .tag-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            margin-left: 6px;
+            font-weight: 600;
+        }
+
+        .tooltip {
+            position: fixed;
+            background: #333;
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 300px;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .tooltip.show {
+            display: block;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .info-box {
+            margin: 20px 30px;
+            padding: 15px;
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #1e40af;
+        }
+
+        .export-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .export-modal.show {
+            display: flex;
+        }
+
+        .export-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .export-content h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .export-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .export-options label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .export-options label:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .export-options input[type="radio"] {
+            cursor: pointer;
+        }
+        
+        .export-options > div {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .export-options > div label {
+            border: none;
+            padding: 5px;
+        }
+        
+        .export-options > div label:hover {
+            background: transparent;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Timeline Swim Lane Visualizer</h1>
+            <p>Visualize events with Gantt charts across parallel timelines</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="datasetSelect">Dataset:</label>
+                <select id="datasetSelect">
+                    <option value="multiProject">Multiple Projects</option>
+                    <option value="singleProject">Single Project (by Phase)</option>
+                    <option value="teamView">Single Project (by Team)</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="swimlaneSelect">Group By:</label>
+                <select id="swimlaneSelect"></select>
+            </div>
+            <div class="control-group">
+                <label for="filterType">Filter Type:</label>
+                <select id="filterType">
+                    <option value="all">All Types</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="filterTag">Filter Tag:</label>
+                <select id="filterTag">
+                    <option value="all">All Tags</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="filterOwner">Filter Owner:</label>
+                <select id="filterOwner">
+                    <option value="all">All Owners</option>
+                </select>
+            </div>
+            <div class="file-input-wrapper">
+                <input type="file" id="jsonFile" accept=".json">
+                <label for="jsonFile">📁 Load JSON</label>
+            </div>
+            <div class="file-input-wrapper">
+                <input type="file" id="csvFile" accept=".csv">
+                <label for="csvFile">📄 Load CSV</label>
+            </div>
+            <button id="resetBtn" class="secondary">Reset View</button>
+            <button id="exportBtn">📸 Export</button>
+        </div>
+
+        <div class="controls" style="border-top: 1px solid #e0e0e0; border-bottom: none;">
+            <div class="control-group">
+                <label for="zoomLevel">Timeline Zoom:</label>
+                <select id="zoomLevel">
+                    <option value="day">Day View</option>
+                    <option value="week">Week View</option>
+                    <option value="month" selected>Month View</option>
+                    <option value="quarter">Quarter View</option>
+                    <option value="year">Year View</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <strong>💡 CSV Format Guide:</strong>
+            <div style="margin-top: 8px; line-height: 1.6;">
+                <strong>Required:</strong> <code>name</code> column<br>
+                <strong>Dates:</strong> Use <code>date</code> for single-day events, OR <code>start_date</code> + <code>end_date</code> for duration (Gantt bars)<br>
+                <strong>Grouping:</strong> <code>project</code>, <code>team</code>, <code>phase</code>, <code>owner</code> become swim lane options<br>
+                <strong>Optional:</strong> <code>type</code> (milestone/task/release/meeting), <code>tags</code> (comma-separated), <code>description</code><br>
+                <strong>Format:</strong> All dates YYYY-MM-DD, save as CSV UTF-8
+            </div>
+        </div>
+
+        <div class="timeline-container">
+            <div class="timeline" id="timeline"></div>
+        </div>
+
+        <div class="legend" id="legend"></div>
+    </div>
+
+    <div class="export-modal" id="exportModal">
+        <div class="export-content">
+            <h3>Export Timeline</h3>
+            <div class="export-options">
+                <label>
+                    <input type="radio" name="exportType" value="image" id="exportTypeImage" checked>
+                    <strong>Image Export (PNG)</strong> - Static image for presentations
+                </label>
+                <div id="aspectRatioOptions" style="margin-left: 30px; margin-top: 8px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
+                    <label style="border: none; padding: 0;">
+                        <input type="radio" name="aspectRatio" value="16:9" checked>
+                        PowerPoint (16:9) - 1920x1080
+                    </label>
+                    <label style="border: none; padding: 0;">
+                        <input type="radio" name="aspectRatio" value="4:3">
+                        Standard (4:3) - 1600x1200
+                    </label>
+                    <label style="border: none; padding: 0;">
+                        <input type="radio" name="aspectRatio" value="current">
+                        Current Size
+                    </label>
+                </div>
+                <label>
+                    <input type="radio" name="exportType" value="html" id="exportTypeHtml">
+                    <strong>Interactive Export (HTML)</strong> - Scrollable with collapsible lanes
+                </label>
+            </div>
+            <div class="export-buttons">
+                <button id="doExport">Export</button>
+                <button id="cancelExport" class="secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+    <div class="loading-overlay" id="loadingOverlay">📸 Exporting timeline...</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        const datasets = {
+            multiProject: {
+                name: "Multiple Projects",
+                swimlaneField: "project",
+                dateField: "date",
+                events: [
+                    { id: 1, name: "Alpha Kickoff", type: "milestone", date: "2024-01-15", project: "Project Alpha", owner: "Internal", tags: ["kickoff"] },
+                    { id: 2, name: "Requirements Phase", type: "task", start_date: "2024-01-25", end_date: "2024-02-05", project: "Project Alpha", owner: "Internal", tags: ["documentation"] },
+                    { id: 3, name: "Design & Prototype", type: "task", start_date: "2024-02-10", end_date: "2024-02-28", project: "Project Alpha", owner: "Internal", tags: ["creative"] },
+                    { id: 4, name: "Alpha Release", type: "release", date: "2024-03-20", project: "Project Alpha", owner: "Internal", tags: ["milestone"] },
+                    { id: 5, name: "Beta Planning", type: "milestone", date: "2024-01-20", project: "Project Beta", owner: "Internal", tags: ["planning"] },
+                    { id: 6, name: "User Research", type: "task", start_date: "2024-02-05", end_date: "2024-02-15", project: "Project Beta", owner: "Customer", tags: ["research"] },
+                    { id: 7, name: "Development", type: "task", start_date: "2024-02-25", end_date: "2024-03-25", project: "Project Beta", owner: "Internal", tags: ["development"] },
+                    { id: 8, name: "Beta Launch", type: "release", date: "2024-04-01", project: "Project Beta", owner: "Internal", tags: ["milestone"] },
+                    { id: 9, name: "Gamma Start", type: "milestone", date: "2024-02-01", project: "Project Gamma", owner: "Internal", tags: ["kickoff"] },
+                    { id: 10, name: "Architecture Design", type: "task", start_date: "2024-02-15", end_date: "2024-02-25", project: "Project Gamma", owner: "Internal", tags: ["technical"] },
+                    { id: 11, name: "Sprint 1", type: "task", start_date: "2024-03-01", end_date: "2024-03-15", project: "Project Gamma", owner: "Internal", tags: ["sprint"] },
+                    { id: 12, name: "Sprint 2", type: "task", start_date: "2024-03-15", end_date: "2024-03-29", project: "Project Gamma", owner: "Internal", tags: ["sprint"] },
+                    { id: 13, name: "Gamma Release", type: "release", date: "2024-04-10", project: "Project Gamma", owner: "Internal", tags: ["milestone"] }
+                ]
+            },
+            singleProject: {
+                name: "Single Project by Phase",
+                swimlaneField: "phase",
+                dateField: "date",
+                events: [
+                    { id: 1, name: "Kickoff", type: "milestone", date: "2024-01-15", phase: "Planning", team: "Management", owner: "Internal", tags: ["kickoff"] },
+                    { id: 2, name: "Requirements", type: "task", start_date: "2024-01-20", end_date: "2024-01-28", phase: "Planning", team: "Product", owner: "Internal", tags: ["documentation"] },
+                    { id: 3, name: "Architecture", type: "task", start_date: "2024-02-05", end_date: "2024-02-15", phase: "Design", team: "Engineering", owner: "Internal", tags: ["technical"] },
+                    { id: 4, name: "UI Design", type: "task", start_date: "2024-02-12", end_date: "2024-02-20", phase: "Design", team: "Design", owner: "Internal", tags: ["creative"] },
+                    { id: 5, name: "API Development", type: "task", start_date: "2024-02-20", end_date: "2024-03-01", phase: "Development", team: "Backend", owner: "Internal", tags: ["backend"] },
+                    { id: 6, name: "UI Development", type: "task", start_date: "2024-02-25", end_date: "2024-03-10", phase: "Development", team: "Frontend", owner: "Internal", tags: ["frontend"] },
+                    { id: 7, name: "Integration", type: "task", start_date: "2024-02-22", end_date: "2024-03-05", phase: "Development", team: "Backend", owner: "Supplier", tags: ["integration"] },
+                    { id: 8, name: "QA Testing", type: "task", start_date: "2024-03-10", end_date: "2024-03-20", phase: "Testing", team: "QA", owner: "Internal", tags: ["testing"] },
+                    { id: 9, name: "User Testing", type: "task", start_date: "2024-03-15", end_date: "2024-03-25", phase: "Testing", team: "QA", owner: "Customer", tags: ["testing"] },
+                    { id: 10, name: "Beta Release", type: "release", date: "2024-04-01", phase: "Testing", team: "Engineering", owner: "Internal", tags: ["milestone"] },
+                    { id: 11, name: "Marketing", type: "task", start_date: "2024-04-10", end_date: "2024-04-25", phase: "Launch", team: "Marketing", owner: "Internal", tags: ["marketing"] },
+                    { id: 12, name: "Production Release", type: "release", date: "2024-04-20", phase: "Launch", team: "Engineering", owner: "Internal", tags: ["milestone"] }
+                ]
+            },
+            teamView: {
+                name: "Single Project by Team",
+                swimlaneField: "team",
+                dateField: "date",
+                events: [
+                    { id: 1, name: "Kickoff", type: "milestone", date: "2024-01-15", phase: "Planning", team: "Management", owner: "Internal", tags: ["kickoff"] },
+                    { id: 2, name: "Requirements", type: "task", start_date: "2024-01-20", end_date: "2024-01-28", phase: "Planning", team: "Product", owner: "Internal", tags: ["documentation"] },
+                    { id: 3, name: "UI Design", type: "task", start_date: "2024-02-12", end_date: "2024-02-20", phase: "Design", team: "Design", owner: "Internal", tags: ["creative"] },
+                    { id: 4, name: "Architecture", type: "task", start_date: "2024-02-05", end_date: "2024-02-15", phase: "Design", team: "Engineering", owner: "Internal", tags: ["technical"] },
+                    { id: 5, name: "API Development", type: "task", start_date: "2024-02-20", end_date: "2024-03-01", phase: "Development", team: "Backend", owner: "Internal", tags: ["backend"] },
+                    { id: 6, name: "Integration", type: "task", start_date: "2024-02-22", end_date: "2024-03-05", phase: "Development", team: "Backend", owner: "Supplier", tags: ["integration"] },
+                    { id: 7, name: "UI Development", type: "task", start_date: "2024-02-25", end_date: "2024-03-10", phase: "Development", team: "Frontend", owner: "Internal", tags: ["frontend"] },
+                    { id: 8, name: "QA Testing", type: "task", start_date: "2024-03-10", end_date: "2024-03-20", phase: "Testing", team: "QA", owner: "Internal", tags: ["testing"] },
+                    { id: 9, name: "User Testing", type: "task", start_date: "2024-03-15", end_date: "2024-03-25", phase: "Testing", team: "QA", owner: "Customer", tags: ["testing"] },
+                    { id: 10, name: "Beta Release", type: "release", date: "2024-04-01", phase: "Testing", team: "Engineering", owner: "Internal", tags: ["milestone"] },
+                    { id: 11, name: "Marketing Campaign", type: "task", start_date: "2024-04-10", end_date: "2024-04-25", phase: "Launch", team: "Marketing", owner: "Internal", tags: ["marketing"] },
+                    { id: 12, name: "Production Release", type: "release", date: "2024-04-20", phase: "Launch", team: "Engineering", owner: "Internal", tags: ["milestone"] }
+                ]
+            }
+        };
+
+        let currentData = null;
+        let currentDatasetKey = 'multiProject';
+        let currentZoomLevel = 'month';
+
+        const timeline = document.getElementById('timeline');
+        const datasetSelect = document.getElementById('datasetSelect');
+        const swimlaneSelect = document.getElementById('swimlaneSelect');
+        const filterType = document.getElementById('filterType');
+        const filterTag = document.getElementById('filterTag');
+        const filterOwner = document.getElementById('filterOwner');
+        const resetBtn = document.getElementById('resetBtn');
+        const tooltip = document.getElementById('tooltip');
+        const jsonFile = document.getElementById('jsonFile');
+        const csvFile = document.getElementById('csvFile');
+        const legend = document.getElementById('legend');
+        const exportBtn = document.getElementById('exportBtn');
+        const exportModal = document.getElementById('exportModal');
+        const doExport = document.getElementById('doExport');
+        const cancelExport = document.getElementById('cancelExport');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const zoomLevel = document.getElementById('zoomLevel');
+
+        loadDataset('multiProject');
+
+        function getDateRange(events, dateField) {
+            const dates = [];
+            events.forEach(e => {
+                if (e.start_date && e.end_date) {
+                    dates.push(new Date(e.start_date));
+                    dates.push(new Date(e.end_date));
+                } else if (e[dateField]) {
+                    dates.push(new Date(e[dateField]));
+                }
+            });
+            return {
+                min: new Date(Math.min(...dates)),
+                max: new Date(Math.max(...dates))
+            };
+        }
+
+        function getEventStartDate(event, dateField) {
+            return event.start_date || event[dateField];
+        }
+
+        function getEventEndDate(event, dateField) {
+            return event.end_date || event.start_date || event[dateField];
+        }
+
+        function hasDuration(event) {
+            return event.start_date && event.end_date;
+        }
+
+        function getPositionPercent(date, minDate, maxDate) {
+            const total = maxDate - minDate;
+            const current = new Date(date) - minDate;
+            return (current / total) * 100;
+        }
+
+        function assignEventRows(events, minDate, maxDate, dateField) {
+            const eventsWithPositions = events.map(event => {
+                const startDate = getEventStartDate(event, dateField);
+                const endDate = getEventEndDate(event, dateField);
+                const startPos = getPositionPercent(startDate, minDate, maxDate);
+                const endPos = getPositionPercent(endDate, minDate, maxDate);
+                
+                return {
+                    ...event,
+                    startPosition: startPos,
+                    endPosition: endPos,
+                    position: startPos,
+                    isDuration: hasDuration(event)
+                };
+            });
+
+            eventsWithPositions.sort((a, b) => a.startPosition - b.startPosition);
+
+            const rows = [];
+            eventsWithPositions.forEach(event => {
+                let rowIndex = 0;
+                let placed = false;
+
+                while (!placed) {
+                    if (!rows[rowIndex]) {
+                        rows[rowIndex] = [];
+                    }
+
+                    const canPlace = rows[rowIndex].every(placedEvent => {
+                        return event.startPosition > placedEvent.endPosition + 1 || 
+                               event.endPosition < placedEvent.startPosition - 1;
+                    });
+
+                    if (canPlace) {
+                        rows[rowIndex].push(event);
+                        event.row = rowIndex;
+                        placed = true;
+                    } else {
+                        rowIndex++;
+                    }
+                }
+            });
+
+            return { events: eventsWithPositions, rowCount: rows.length };
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function generateTimeAxis(minDate, maxDate, zoom) {
+            const markers = [];
+            const current = new Date(minDate);
+            
+            switch(zoom) {
+                case 'day':
+                    current.setHours(0, 0, 0, 0);
+                    while (current <= maxDate) {
+                        markers.push(new Date(current));
+                        current.setDate(current.getDate() + 1);
+                    }
+                    break;
+                    
+                case 'week':
+                    current.setHours(0, 0, 0, 0);
+                    current.setDate(current.getDate() - current.getDay());
+                    while (current <= maxDate) {
+                        markers.push(new Date(current));
+                        current.setDate(current.getDate() + 7);
+                    }
+                    break;
+                    
+                case 'month':
+                    current.setDate(1);
+                    while (current <= maxDate) {
+                        markers.push(new Date(current));
+                        current.setMonth(current.getMonth() + 1);
+                    }
+                    break;
+                    
+                case 'quarter':
+                    current.setDate(1);
+                    current.setMonth(Math.floor(current.getMonth() / 3) * 3);
+                    while (current <= maxDate) {
+                        markers.push(new Date(current));
+                        current.setMonth(current.getMonth() + 3);
+                    }
+                    break;
+                    
+                case 'year':
+                    current.setDate(1);
+                    current.setMonth(0);
+                    while (current <= maxDate) {
+                        markers.push(new Date(current));
+                        current.setFullYear(current.getFullYear() + 1);
+                    }
+                    break;
+            }
+            
+            return markers;
+        }
+        
+        function formatTimeMarker(date, zoom) {
+            switch(zoom) {
+                case 'day':
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                case 'week':
+                    return 'Week of ' + date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                case 'month':
+                    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                case 'quarter':
+                    const quarter = Math.floor(date.getMonth() / 3) + 1;
+                    return 'Q' + quarter + ' ' + date.getFullYear();
+                case 'year':
+                    return date.getFullYear().toString();
+                default:
+                    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            }
+        }
+        
+        function getTimelineWidth(markers, zoom) {
+            const baseWidths = {
+                'day': 80,
+                'week': 120,
+                'month': 150,
+                'quarter': 200,
+                'year': 250
+            };
+            return Math.max(1200, markers.length * (baseWidths[zoom] || 150));
+        }
+
+        function getUniqueValues(events, field) {
+            return [...new Set(events.map(e => e[field]))].filter(v => v !== undefined);
+        }
+
+        function getGroupableFields(events) {
+            if (events.length === 0) return [];
+            const sample = events[0];
+            return Object.keys(sample).filter(key => {
+                const value = sample[key];
+                return key !== 'id' && 
+                       key !== 'name' && 
+                       key !== 'description' &&
+                       key !== 'start_date' &&
+                       key !== 'end_date' &&
+                       typeof value === 'string' &&
+                       !isDateString(value);
+            });
+        }
+
+        function isDateString(str) {
+            const date = new Date(str);
+            return !isNaN(date.getTime()) && str.match(/^\d{4}-\d{2}-\d{2}/);
+        }
+
+        function populateSwimlaneSelector() {
+            const fields = getGroupableFields(currentData.events);
+            swimlaneSelect.innerHTML = '';
+            
+            fields.forEach(field => {
+                const option = document.createElement('option');
+                option.value = field;
+                option.textContent = field.charAt(0).toUpperCase() + field.slice(1);
+                if (field === currentData.swimlaneField) {
+                    option.selected = true;
+                }
+                swimlaneSelect.appendChild(option);
+            });
+        }
+
+        function populateTypeFilter() {
+            const types = getUniqueValues(currentData.events, 'type');
+            filterType.innerHTML = '<option value="all">All Types</option>';
+            
+            types.forEach(type => {
+                if (type) {
+                    const option = document.createElement('option');
+                    option.value = type;
+                    option.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+                    filterType.appendChild(option);
+                }
+            });
+        }
+
+        function populateTagFilter() {
+            const allTags = new Set();
+            currentData.events.forEach(event => {
+                if (event.tags && Array.isArray(event.tags)) {
+                    event.tags.forEach(tag => allTags.add(tag));
+                }
+            });
+            
+            filterTag.innerHTML = '<option value="all">All Tags</option>';
+            
+            [...allTags].sort().forEach(tag => {
+                const option = document.createElement('option');
+                option.value = tag;
+                option.textContent = tag;
+                filterTag.appendChild(option);
+            });
+        }
+
+        function populateOwnerFilter() {
+            const owners = getUniqueValues(currentData.events, 'owner');
+            filterOwner.innerHTML = '<option value="all">All Owners</option>';
+            
+            owners.sort().forEach(owner => {
+                if (owner) {
+                    const option = document.createElement('option');
+                    option.value = owner;
+                    option.textContent = owner;
+                    filterOwner.appendChild(option);
+                }
+            });
+        }
+
+        function updateLegend() {
+            const types = getUniqueValues(currentData.events, 'type');
+            const colorMap = {
+                'milestone': '#f59e0b',
+                'task': '#3b82f6',
+                'release': '#10b981',
+                'meeting': '#8b5cf6'
+            };
+
+            legend.innerHTML = '';
+            types.forEach(type => {
+                if (type) {
+                    const item = document.createElement('div');
+                    item.className = 'legend-item';
+                    
+                    const color = document.createElement('div');
+                    color.className = 'legend-color';
+                    color.style.background = colorMap[type] || '#6b7280';
+                    
+                    const label = document.createElement('span');
+                    label.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+                    
+                    item.appendChild(color);
+                    item.appendChild(label);
+                    legend.appendChild(item);
+                }
+            });
+        }
+
+        function loadDataset(key) {
+            currentDatasetKey = key;
+            currentData = JSON.parse(JSON.stringify(datasets[key]));
+            populateSwimlaneSelector();
+            populateTypeFilter();
+            populateTagFilter();
+            populateOwnerFilter();
+            updateLegend();
+            renderTimeline();
+        }
+
+        jsonFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        
+                        if (Array.isArray(data)) {
+                            currentData = {
+                                name: "Custom Data",
+                                events: data,
+                                swimlaneField: getGroupableFields(data)[0] || 'category',
+                                dateField: 'date'
+                            };
+                        } else if (data.events) {
+                            currentData = data;
+                            if (!currentData.swimlaneField) {
+                                currentData.swimlaneField = getGroupableFields(currentData.events)[0];
+                            }
+                            if (!currentData.dateField) {
+                                currentData.dateField = 'date';
+                            }
+                        }
+                        
+                        currentData.events = currentData.events.map(event => {
+                            if (event.tags && typeof event.tags === 'string') {
+                                event.tags = event.tags.split(',').map(t => t.trim());
+                            }
+                            return event;
+                        });
+                        
+                        populateSwimlaneSelector();
+                        populateTypeFilter();
+                        populateTagFilter();
+                        populateOwnerFilter();
+                        updateLegend();
+                        renderTimeline();
+                    } catch (err) {
+                        alert('Error parsing JSON: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        csvFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                Papa.parse(file, {
+                    header: true,
+                    dynamicTyping: false,
+                    skipEmptyLines: true,
+                    complete: (results) => {
+                        const processedData = results.data.map(row => {
+                            if (row.tags && typeof row.tags === 'string') {
+                                row.tags = row.tags.split(',').map(t => t.trim()).filter(t => t);
+                            } else if (!row.tags) {
+                                row.tags = [];
+                            }
+                            return row;
+                        });
+                        
+                        currentData = {
+                            name: "Custom CSV Data",
+                            events: processedData,
+                            swimlaneField: getGroupableFields(processedData)[0] || 'category',
+                            dateField: 'date'
+                        };
+                        
+                        populateSwimlaneSelector();
+                        populateTypeFilter();
+                        populateTagFilter();
+                        populateOwnerFilter();
+                        updateLegend();
+                        renderTimeline();
+                    },
+                    error: (err) => {
+                        alert('Error parsing CSV: ' + err.message);
+                    }
+                });
+            }
+        });
+
+        function groupEvents(events, groupField) {
+            const groups = {};
+            
+            events.forEach(event => {
+                const key = event[groupField] || 'Uncategorized';
+                if (!groups[key]) groups[key] = [];
+                groups[key].push(event);
+            });
+            
+            return groups;
+        }
+
+        function renderTimeline() {
+            timeline.innerHTML = '';
+            
+            let events = currentData.events;
+            const typeFilter = filterType.value;
+            const tagFilter = filterTag.value;
+            const ownerFilter = filterOwner.value;
+            const swimlaneField = swimlaneSelect.value;
+            
+            if (typeFilter !== 'all') {
+                events = events.filter(e => e.type === typeFilter);
+            }
+            
+            if (tagFilter !== 'all') {
+                events = events.filter(e => {
+                    return e.tags && Array.isArray(e.tags) && e.tags.includes(tagFilter);
+                });
+            }
+            
+            if (ownerFilter !== 'all') {
+                events = events.filter(e => e.owner === ownerFilter);
+            }
+            
+            if (events.length === 0) {
+                timeline.innerHTML = '<p style="text-align: center; padding: 40px; color: #666;">No events match the current filters</p>';
+                return;
+            }
+            
+            const dateField = currentData.dateField;
+            const dateRange = getDateRange(events, dateField);
+            const groups = groupEvents(events, swimlaneField);
+            const zoom = currentZoomLevel;
+            
+            const timeAxis = document.createElement('div');
+            timeAxis.className = 'time-axis';
+            
+            const markers = generateTimeAxis(dateRange.min, dateRange.max, zoom);
+            const timelineWidth = getTimelineWidth(markers, zoom);
+            
+            timeline.style.minWidth = timelineWidth + 'px';
+            
+            markers.forEach(marker => {
+                const markerEl = document.createElement('div');
+                markerEl.className = 'time-marker';
+                markerEl.textContent = formatTimeMarker(marker, zoom);
+                markerEl.style.flex = '1';
+                timeAxis.appendChild(markerEl);
+            });
+            
+            timeline.appendChild(timeAxis);
+            
+            Object.keys(groups).sort().forEach(groupName => {
+                const lane = document.createElement('div');
+                lane.className = 'swim-lane';
+                
+                const header = document.createElement('div');
+                header.className = 'lane-header';
+                
+                const toggle = document.createElement('span');
+                toggle.className = 'lane-toggle';
+                toggle.textContent = '▼';
+                
+                const title = document.createElement('div');
+                title.className = 'lane-title';
+                title.textContent = groupName;
+                
+                header.appendChild(toggle);
+                header.appendChild(title);
+                
+                header.addEventListener('click', () => {
+                    toggle.classList.toggle('collapsed');
+                    content.classList.toggle('collapsed');
+                });
+                
+                lane.appendChild(header);
+                
+                const content = document.createElement('div');
+                content.className = 'lane-content';
+                
+                const { events: positionedEvents, rowCount } = assignEventRows(groups[groupName], dateRange.min, dateRange.max, dateField);
+                
+                const rowHeight = 35;
+                content.style.minHeight = Math.max(60, (rowCount * rowHeight) + 10) + 'px';
+                
+                positionedEvents.forEach(event => {
+                    const eventEl = document.createElement('div');
+                    const eventType = event.type || 'default';
+                    const isDuration = event.isDuration;
+                    
+                    eventEl.className = 'event event-' + eventType + (isDuration ? ' event-bar' : ' event-point');
+                    
+                    let eventHTML = event.name;
+                    if (event.tags && Array.isArray(event.tags) && event.tags.length > 0) {
+                        eventHTML += '<span class="tag-badge">🏷️ ' + event.tags.length + '</span>';
+                    }
+                    eventEl.innerHTML = eventHTML;
+                    
+                    if (isDuration) {
+                        eventEl.style.left = event.startPosition + '%';
+                        const width = event.endPosition - event.startPosition;
+                        eventEl.style.width = Math.max(width, 0.5) + '%';
+                    } else {
+                        eventEl.style.left = event.position + '%';
+                    }
+                    
+                    eventEl.style.top = ((event.row * rowHeight) + 10) + 'px';
+                    
+                    eventEl.addEventListener('mouseenter', (e) => {
+                        let tooltipContent = '<strong>' + event.name + '</strong><br>';
+                        
+                        if (event.start_date && event.end_date) {
+                            tooltipContent += 'Start: ' + formatDate(event.start_date) + '<br>';
+                            tooltipContent += 'End: ' + formatDate(event.end_date) + '<br>';
+                            const days = Math.ceil((new Date(event.end_date) - new Date(event.start_date)) / (1000 * 60 * 60 * 24));
+                            tooltipContent += 'Duration: ' + days + ' days<br>';
+                        } else if (event.date) {
+                            tooltipContent += 'Date: ' + formatDate(event.date) + '<br>';
+                        }
+                        
+                        Object.keys(event).forEach(key => {
+                            if (key !== 'id' && key !== 'name' && key !== 'position' && key !== 'row' && 
+                                key !== 'tags' && key !== 'date' && key !== 'start_date' && key !== 'end_date' &&
+                                key !== 'startPosition' && key !== 'endPosition' && key !== 'isDuration') {
+                                tooltipContent += key.charAt(0).toUpperCase() + key.slice(1) + ': ' + event[key] + '<br>';
+                            }
+                        });
+                        
+                        if (event.tags && Array.isArray(event.tags) && event.tags.length > 0) {
+                            tooltipContent += 'Tags: ' + event.tags.join(', ');
+                        }
+                        tooltip.innerHTML = tooltipContent;
+                        tooltip.classList.add('show');
+                        updateTooltipPosition(e);
+                    });
+                    
+                    eventEl.addEventListener('mousemove', updateTooltipPosition);
+                    
+                    eventEl.addEventListener('mouseleave', () => {
+                        tooltip.classList.remove('show');
+                    });
+                    
+                    content.appendChild(eventEl);
+                });
+                
+                lane.appendChild(content);
+                timeline.appendChild(lane);
+            });
+        }
+
+        function updateTooltipPosition(e) {
+            const offset = 15;
+            let x = e.clientX + offset;
+            let y = e.clientY + offset;
+            
+            const tooltipRect = tooltip.getBoundingClientRect();
+            if (x + tooltipRect.width > window.innerWidth) {
+                x = e.clientX - tooltipRect.width - offset;
+            }
+            if (y + tooltipRect.height > window.innerHeight) {
+                y = e.clientY - tooltipRect.height - offset;
+            }
+            
+            tooltip.style.left = x + 'px';
+            tooltip.style.top = y + 'px';
+        }
+
+        datasetSelect.addEventListener('change', () => {
+            loadDataset(datasetSelect.value);
+        });
+
+        swimlaneSelect.addEventListener('change', () => {
+            renderTimeline();
+        });
+
+        filterType.addEventListener('change', () => {
+            renderTimeline();
+        });
+
+        filterTag.addEventListener('change', () => {
+            renderTimeline();
+        });
+
+        filterOwner.addEventListener('change', () => {
+            renderTimeline();
+        });
+
+        zoomLevel.addEventListener('change', () => {
+            currentZoomLevel = zoomLevel.value;
+            renderTimeline();
+        });
+
+        resetBtn.addEventListener('click', () => {
+            datasetSelect.value = 'multiProject';
+            filterType.value = 'all';
+            filterTag.value = 'all';
+            filterOwner.value = 'all';
+            zoomLevel.value = 'month';
+            currentZoomLevel = 'month';
+            loadDataset('multiProject');
+        });
+
+        exportBtn.addEventListener('click', () => {
+            exportModal.classList.add('show');
+            updateExportOptions();
+        });
+
+        function updateExportOptions() {
+            const aspectRatioDiv = document.getElementById('aspectRatioOptions');
+            const exportType = document.querySelector('input[name="exportType"]:checked').value;
+            aspectRatioDiv.style.display = exportType === 'image' ? 'flex' : 'none';
+        }
+
+        document.getElementById('exportTypeImage').addEventListener('change', updateExportOptions);
+        document.getElementById('exportTypeHtml').addEventListener('change', updateExportOptions);
+
+        cancelExport.addEventListener('click', () => {
+            exportModal.classList.remove('show');
+        });
+
+        exportModal.addEventListener('click', (e) => {
+            if (e.target === exportModal) {
+                exportModal.classList.remove('show');
+            }
+        });
+
+        doExport.addEventListener('click', async () => {
+            const exportType = document.querySelector('input[name="exportType"]:checked').value;
+            const aspectRatio = document.querySelector('input[name="aspectRatio"]:checked').value;
+            exportModal.classList.remove('show');
+            
+            loadingOverlay.textContent = exportType === 'image' ? '📸 Exporting timeline image...' : '📦 Creating interactive HTML...';
+            loadingOverlay.classList.add('show');
+
+            try {
+                if (exportType === 'image') {
+                    await exportAsImage(aspectRatio);
+                } else {
+                    await exportAsHTML();
+                }
+            } catch (error) {
+                alert('Export failed: ' + error.message);
+            } finally {
+                loadingOverlay.classList.remove('show');
+            }
+        });
+
+        async function exportAsImage(aspectRatio) {
+            const container = document.querySelector('.container');
+            const originalOverflow = document.body.style.overflow;
+            
+            document.body.style.overflow = 'visible';
+            
+            let width, height;
+            
+            if (aspectRatio === '16:9') {
+                width = 1920;
+                height = 1080;
+            } else if (aspectRatio === '4:3') {
+                width = 1600;
+                height = 1200;
+            } else {
+                width = container.offsetWidth * 2;
+                height = container.offsetHeight * 2;
+            }
+
+            const scale = Math.min(width / container.offsetWidth, height / container.offsetHeight);
+
+            const canvas = await html2canvas(container, {
+                scale: scale,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff',
+                width: container.offsetWidth,
+                height: container.offsetHeight,
+                windowWidth: container.offsetWidth,
+                windowHeight: container.offsetHeight,
+                onclone: (clonedDoc) => {
+                    const tooltip = clonedDoc.getElementById('tooltip');
+                    if (tooltip) tooltip.remove();
+                }
+            });
+
+            document.body.style.overflow = originalOverflow;
+
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                link.download = 'timeline-' + timestamp + '.png';
+                link.href = url;
+                link.click();
+                URL.revokeObjectURL(url);
+            }, 'image/png');
+        }
+
+        async function exportAsHTML() {
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            const exportDate = new Date().toLocaleString();
+            
+            let events = currentData.events;
+            const typeFilter = filterType.value;
+            const tagFilter = filterTag.value;
+            const ownerFilter = filterOwner.value;
+            
+            if (typeFilter !== 'all') {
+                events = events.filter(e => e.type === typeFilter);
+            }
+            if (tagFilter !== 'all') {
+                events = events.filter(e => e.tags && Array.isArray(e.tags) && e.tags.includes(tagFilter));
+            }
+            if (ownerFilter !== 'all') {
+                events = events.filter(e => e.owner === ownerFilter);
+            }
+            
+            const htmlContent = generateInteractiveHTML(events, exportDate);
+            
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = 'timeline-interactive-' + timestamp + '.html';
+            link.href = url;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function generateInteractiveHTML(events, exportDate) {
+            const swimlaneField = swimlaneSelect.value;
+            const zoom = currentZoomLevel;
+            const dateField = currentData.dateField;
+            
+            const dataStr = JSON.stringify({ events, swimlaneField, dateField, zoom });
+            
+            const html = [
+'<!DOCTYPE html>',
+'<html lang="en">',
+'<head>',
+'<meta charset="UTF-8">',
+'<title>Timeline Export</title>',
+'<style>',
+'* { margin: 0; padding: 0; box-sizing: border-box; }',
+'body { font-family: sans-serif; background: #f5f7fa; padding: 20px; }',
+'.container { max-width: 100%; background: white; border-radius: 12px; }',
+'.header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; }',
+'.export-info { background: #f8f9fa; padding: 15px 30px; border-bottom: 1px solid #e0e0e0; font-size: 13px; }',
+'.timeline-container { padding: 30px; overflow-x: auto; }',
+'.timeline { position: relative; min-width: 1200px; }',
+'.time-axis { display: flex; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #333; }',
+'.time-marker { text-align: center; font-size: 12px; color: #666; font-weight: 600; flex: 1; }',
+'.swim-lane { margin-bottom: 15px; border-left: 3px solid #667eea; padding-left: 15px; }',
+'.lane-header { display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; }',
+'.lane-header:hover { background: #f8f9fa; }',
+'.lane-toggle { margin-right: 8px; }',
+'.lane-toggle.collapsed { transform: rotate(-90deg); }',
+'.lane-title { font-weight: 700; font-size: 15px; }',
+'.lane-content { position: relative; min-height: 60px; background: #f8f9fa; border-radius: 6px; padding: 5px 0; }',
+'.lane-content.collapsed { display: none; }',
+'.event { position: absolute; padding: 8px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; white-space: nowrap; }',
+'.event.event-bar { border-radius: 4px; min-width: 40px; }',
+'.event.event-point { padding: 6px 10px; border-radius: 50px; font-weight: 600; }',
+'.event-milestone { background: #f59e0b; color: white; }',
+'.event-task { background: #3b82f6; color: white; }',
+'.event-release { background: #10b981; color: white; }',
+'.event-meeting { background: #8b5cf6; color: white; }',
+'.event-default { background: #6b7280; color: white; }',
+'.tooltip { position: fixed; background: #333; color: white; padding: 12px; border-radius: 6px; font-size: 13px; display: none; z-index: 1000; }',
+'.tooltip.show { display: block; }',
+'</style>',
+'</head>',
+'<body>',
+'<div class="container">',
+'<div class="header"><h1>Timeline Export</h1></div>',
+'<div class="export-info">Exported: ' + exportDate.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>',
+'<div class="timeline-container"><div class="timeline" id="timeline"></div></div>',
+'</div>',
+'<div class="tooltip" id="tooltip"></div>',
+'<' + 'script>',
+'var DATA=' + dataStr + ';',
+'function run(){',
+'var t=document.getElementById("timeline");',
+'var dates=[];DATA.events.forEach(function(e){if(e.start_date&&e.end_date){dates.push(new Date(e.start_date));dates.push(new Date(e.end_date))}else if(e[DATA.dateField]){dates.push(new Date(e[DATA.dateField]))}});',
+'var minD=new Date(Math.min.apply(null,dates));',
+'var maxD=new Date(Math.max.apply(null,dates));',
+'var groups={};',
+'DATA.events.forEach(function(e){var k=e[DATA.swimlaneField]||"Other";if(!groups[k])groups[k]=[];groups[k].push(e)});',
+'var axis=document.createElement("div");axis.className="time-axis";',
+'var m=[];var c=new Date(minD);c.setDate(1);while(c<=maxD){m.push(new Date(c));c.setMonth(c.getMonth()+1)}',
+'var w=Math.max(1200,m.length*150);t.style.minWidth=w+"px";',
+'m.forEach(function(d){var e=document.createElement("div");e.className="time-marker";e.textContent=d.toLocaleDateString("en-US",{month:"short",year:"numeric"});axis.appendChild(e)});',
+'t.appendChild(axis);',
+'Object.keys(groups).sort().forEach(function(gn){',
+'var lane=document.createElement("div");lane.className="swim-lane";',
+'var hdr=document.createElement("div");hdr.className="lane-header";',
+'var tog=document.createElement("span");tog.className="lane-toggle";tog.textContent="▼";',
+'var tit=document.createElement("div");tit.className="lane-title";tit.textContent=gn;',
+'hdr.appendChild(tog);hdr.appendChild(tit);',
+'var cont=document.createElement("div");cont.className="lane-content";',
+'hdr.onclick=function(){tog.classList.toggle("collapsed");cont.classList.toggle("collapsed")};',
+'lane.appendChild(hdr);',
+'var evs=groups[gn].map(function(e){var sd=e.start_date||e[DATA.dateField];var ed=e.end_date||e.start_date||e[DATA.dateField];var sp=((new Date(sd)-minD)/(maxD-minD))*100;var ep=((new Date(ed)-minD)/(maxD-minD))*100;return Object.assign({},e,{pos:sp,endPos:ep,isDur:!!(e.start_date&&e.end_date)})});',
+'evs.sort(function(a,b){return a.pos-b.pos});',
+'var rows=[];evs.forEach(function(e){var r=0;while(true){if(!rows[r])rows[r]=[];var ok=rows[r].every(function(x){return e.pos>x.endPos+1||e.endPos<x.pos-1});if(ok){rows[r].push(e);e.row=r;break}r++}});',
+'cont.style.minHeight=Math.max(60,rows.length*35+10)+"px";',
+'evs.forEach(function(e){',
+'var ev=document.createElement("div");ev.className="event event-"+(e.type||"default")+(e.isDur?" event-bar":" event-point");',
+'ev.textContent=e.name;',
+'if(e.isDur){ev.style.left=e.pos+"%";ev.style.width=Math.max(e.endPos-e.pos,0.5)+"%"}else{ev.style.left=e.pos+"%"}',
+'ev.style.top=(e.row*35+10)+"px";',
+'ev.onmouseenter=function(x){var tip=document.getElementById("tooltip");var txt=e.name;if(e.start_date&&e.end_date){txt+=" ("+e.start_date+" to "+e.end_date+")"}tip.textContent=txt;tip.classList.add("show");tip.style.left=(x.clientX+10)+"px";tip.style.top=(x.clientY+10)+"px"};',
+'ev.onmouseleave=function(){document.getElementById("tooltip").classList.remove("show")};',
+'cont.appendChild(ev)});',
+'lane.appendChild(cont);t.appendChild(lane)});',
+'}',
+'run();',
+'</' + 'script>',
+'</body>',
+'</html>'
+            ].join('\n');
+            
+            return html;
+        }
+    </script>
+</body>
+</html>

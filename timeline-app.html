@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline Manager - Local Version Control</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            background: #e0e0e0;
+        }
+
+        .tab.active {
+            background: #2196F3;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="file"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #1976D2;
+        }
+
+        button.secondary {
+            background: #666;
+        }
+
+        button.secondary:hover {
+            background: #555;
+        }
+
+        button.danger {
+            background: #f44336;
+        }
+
+        button.danger:hover {
+            background: #d32f2f;
+        }
+
+        .mapping-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .preview-table {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f5f5f5;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        .timeline-canvas {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: move;
+            background: white;
+        }
+
+        .timeline-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-bar {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge.added {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .badge.updated {
+            background: #FF9800;
+            color: white;
+        }
+
+        .badge.removed {
+            background: #f44336;
+            color: white;
+        }
+
+        .badge.unchanged {
+            background: #9E9E9E;
+            color: white;
+        }
+
+        .dry-run-results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+
+        .result-section {
+            margin-bottom: 20px;
+        }
+
+        .result-section h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .history-panel {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .version-row {
+            padding: 10px;
+            border-left: 3px solid #2196F3;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+        }
+
+        .version-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .field-change {
+            display: inline-block;
+            padding: 3px 8px;
+            margin: 2px;
+            background: #FFE082;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .branch-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+        }
+
+        .info-box {
+            background: #E3F2FD;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: #FFF3E0;
+            border-left: 4px solid #FF9800;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .flex-row > * {
+            flex: 1;
+        }
+
+        #compareMode {
+            display: none;
+        }
+
+        #compareMode.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>📊 Timeline Manager</h1>
+            <p class="subtitle">Local-only version control for tasks, milestones, releases & meetings</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('import')">1. Import/Map</button>
+            <button class="tab" onclick="switchTab('update')">2. Update/Append</button>
+            <button class="tab" onclick="switchTab('view')">3. View Timeline</button>
+            <button class="tab" onclick="switchTab('compare')">4. Compare Branches</button>
+            <button class="tab" onclick="switchTab('history')">5. History</button>
+        </div>
+
+        <!-- IMPORT TAB -->
+        <div id="import-tab" class="tab-content active">
+            <h2>Import Data</h2>
+            
+            <div class="form-group">
+                <label>Choose File (CSV or JSON)</label>
+                <input type="file" id="importFile" accept=".csv,.json">
+            </div>
+
+            <div class="form-group">
+                <label>Branch Target</label>
+                <div class="branch-selector">
+                    <select id="importBranch">
+                        <option value="main">main</option>
+                    </select>
+                    <button onclick="createNewBranch()">+ New Branch</button>
+                </div>
+            </div>
+
+            <div id="mappingSection" style="display:none;">
+                <h3>Column Mapping</h3>
+                <div class="mapping-grid">
+                    <div class="form-group">
+                        <label>Title Column *</label>
+                        <select id="mapTitle"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Type Column *</label>
+                        <select id="mapType"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date Column</label>
+                        <select id="mapStartDate"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>End Date Column</label>
+                        <select id="mapEndDate"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Owner Column</label>
+                        <select id="mapOwner"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Lane Column</label>
+                        <select id="mapLane"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Project Column</label>
+                        <select id="mapProject"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tags Column</label>
+                        <select id="mapTags"></select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>ID Strategy</label>
+                    <select id="idStrategy">
+                        <option value="generate">Generate new UUIDs</option>
+                        <option value="column">Use column as ID</option>
+                        <option value="match">Match by key (project + title)</option>
+                    </select>
+                </div>
+
+                <div id="idColumnSection" class="form-group" style="display:none;">
+                    <label>ID Column</label>
+                    <select id="mapId"></select>
+                </div>
+
+                <div class="form-group">
+                    <label>Tags Delimiter</label>
+                    <select id="tagsDelimiter">
+                        <option value=",">Comma (,)</option>
+                        <option value=";">Semicolon (;)</option>
+                        <option value="json">JSON Array</option>
+                    </select>
+                </div>
+
+                <div class="action-buttons">
+                    <button onclick="runDryRun()">Run Dry-Run</button>
+                    <button class="secondary" onclick="saveProfile()">Save as Profile</button>
+                </div>
+
+                <div id="dryRunResults" class="dry-run-results" style="display:none;">
+                    <!-- Results will be populated here -->
+                </div>
+
+                <div id="commitSection" style="display:none; margin-top: 20px;">
+                    <button onclick="commitImport()">✓ Commit Import</button>
+                </div>
+            </div>
+
+            <div id="previewSection" class="preview-table" style="display:none;">
+                <h3>Data Preview (first 10 rows)</h3>
+                <div id="previewContent"></div>
+            </div>
+        </div>
+
+        <!-- UPDATE TAB -->
+        <div id="update-tab" class="tab-content">
+            <h2>Update or Append</h2>
+            
+            <div class="info-box">
+                Re-import data using a saved profile or new mapping. Choose to update existing items or append new ones.
+            </div>
+
+            <div class="form-group">
+                <label>Load Profile</label>
+                <select id="profileSelect">
+                    <option value="">-- None --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Update Mode</label>
+                <select id="updateMode">
+                    <option value="upsert">Update matches, append new items</option>
+                    <option value="update-only">Update matches only (ignore new)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Choose File</label>
+                <input type="file" id="updateFile" accept=".csv,.json">
+            </div>
+
+            <div class="action-buttons">
+                <button onclick="runUpdateDryRun()">Run Dry-Run</button>
+            </div>
+
+            <div id="updateResults" style="display:none; margin-top: 20px;">
+                <!-- Results here -->
+            </div>
+        </div>
+
+        <!-- VIEW TIMELINE TAB -->
+        <div id="view-tab" class="tab-content">
+            <h2>Timeline View</h2>
+            
+            <div class="timeline-controls">
+                <div class="filter-group">
+                    <label>Branch:</label>
+                    <select id="viewBranch">
+                        <option value="main">main</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Lane By:</label>
+                    <select id="laneBy">
+                        <option value="lane">Lane</option>
+                        <option value="project">Project</option>
+                        <option value="owner">Owner</option>
+                        <option value="type">Type</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Zoom:</label>
+                    <select id="zoomLevel">
+                        <option value="day">Day</option>
+                        <option value="week">Week</option>
+                        <option value="month">Month</option>
+                        <option value="quarter">Quarter</option>
+                        <option value="year">Year</option>
+                    </select>
+                </div>
+
+                <button onclick="renderTimeline()">Refresh</button>
+                <button class="secondary" onclick="exportPNG()">Export PNG</button>
+                <button class="secondary" onclick="exportHTML()">Export HTML</button>
+                <button class="secondary" onclick="saveSnapshot()">Save Snapshot</button>
+            </div>
+
+            <div class="timeline-controls">
+                <div class="filter-group">
+                    <label>Filter Type:</label>
+                    <select id="filterType" onchange="renderTimeline()">
+                        <option value="">All</option>
+                        <option value="task">Task</option>
+                        <option value="milestone">Milestone</option>
+                        <option value="release">Release</option>
+                        <option value="meeting">Meeting</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Filter Project:</label>
+                    <input type="text" id="filterProject" placeholder="All" onchange="renderTimeline()" style="width: 150px;">
+                </div>
+            </div>
+
+            <canvas id="timelineCanvas" class="timeline-canvas"></canvas>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #2196F3;"></div>
+                    <span>Task</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #4CAF50; border-radius: 50%;"></div>
+                    <span>Milestone</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #FF9800;"></div>
+                    <span>Release</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #9C27B0;"></div>
+                    <span>Meeting</span>
+                </div>
+            </div>
+
+            <div class="status-bar" id="timelineStatus">
+                Ready to render. Click item to view history.
+            </div>
+        </div>
+
+        <!-- COMPARE BRANCHES TAB -->
+        <div id="compare-tab" class="tab-content">
+            <h2>Compare Branches</h2>
+            
+            <div class="info-box">
+                Compare two branches to see what changed. Base branch shows original state, comparison branch overlays changes.
+            </div>
+
+            <div class="flex-row">
+                <div class="form-group">
+                    <label>Base Branch (A)</label>
+                    <select id="compareBranchA">
+                        <option value="main">main</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Compare Branch (B)</label>
+                    <select id="compareBranchB">
+                        <option value="main">main</option>
+                    </select>
+                </div>
+            </div>
+
+            <button onclick="runComparison()">Compare Branches</button>
+
+            <div id="compareResults" style="display:none; margin-top: 20px;">
+                <h3>Comparison Summary</h3>
+                <div id="compareSummary"></div>
+                
+                <div class="preview-table" style="margin-top: 20px;">
+                    <h3>Changes Detail</h3>
+                    <div id="compareDetail"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div id="history-tab" class="tab-content">
+            <h2>Item History</h2>
+            
+            <div class="form-group">
+                <label>Search Item by Title</label>
+                <input type="text" id="historySearch" placeholder="Enter item title">
+            </div>
+
+            <div class="form-group">
+                <label>Branch</label>
+                <select id="historyBranch">
+                    <option value="main">main</option>
+                </select>
+            </div>
+
+            <button onclick="searchHistory()">Search</button>
+
+            <div id="historyResults" style="display:none; margin-top: 20px;">
+                <h3>Version History</h3>
+                <div id="historyContent" class="history-panel"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let db = null;
+        let currentData = null;
+        let currentMapping = null;
+        let dryRunData = null;
+        let timelineOffset = { x: 0, y: 0 };
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
+
+        // Initialize app
+        async function initApp() {
+            try {
+                const SQL = await initSqlJs({
+                    locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+                });
+                db = new SQL.Database();
+                
+                initDatabase();
+                loadBranches();
+                loadProfiles();
+                setupEventListeners();
+                
+                console.log('App initialized successfully');
+            } catch (error) {
+                console.error('Failed to initialize app:', error);
+                alert('Failed to initialize database: ' + error.message);
+            }
+        }
+
+        function initDatabase() {
+            // Create main tables
+            db.run(`
+                CREATE TABLE IF NOT EXISTS item (
+                    id TEXT NOT NULL,
+                    type TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    start_date TEXT,
+                    end_date TEXT,
+                    owner TEXT,
+                    lane TEXT,
+                    project TEXT,
+                    tags TEXT,
+                    source_id TEXT,
+                    source_row_hash TEXT,
+                    branch_id TEXT DEFAULT 'main',
+                    updated_at TEXT DEFAULT (datetime('now')),
+                    PRIMARY KEY (id, branch_id),
+                    CHECK(type IN ('task','milestone','release','meeting')),
+                    CHECK(end_date IS NULL OR end_date >= start_date)
+                )
+            `);
+
+            db.run(`
+                CREATE TABLE IF NOT EXISTS item_history (
+                    id TEXT NOT NULL,
+                    branch_id TEXT NOT NULL,
+                    version INTEGER NOT NULL,
+                    op TEXT NOT NULL,
+                    snapshot_at TEXT DEFAULT (datetime('now')),
+                    type TEXT,
+                    title TEXT,
+                    start_date TEXT,
+                    end_date TEXT,
+                    owner TEXT,
+                    lane TEXT,
+                    project TEXT,
+                    tags TEXT,
+                    PRIMARY KEY(id, branch_id, version)
+                )
+            `);
+
+            db.run(`CREATE INDEX IF NOT EXISTS idx_history_branch ON item_history(branch_id, snapshot_at)`);
+            db.run(`CREATE INDEX IF NOT EXISTS idx_item_branch ON item(branch_id, type)`);
+            db.run(`CREATE INDEX IF NOT EXISTS idx_item_dates ON item(start_date, end_date)`);
+
+            db.run(`
+                CREATE TABLE IF NOT EXISTS branches (
+                    branch_id TEXT PRIMARY KEY,
+                    label TEXT,
+                    created_from TEXT,
+                    note TEXT,
+                    created_at TEXT DEFAULT (datetime('now'))
+                )
+            `);
+
+            db.run(`INSERT OR IGNORE INTO branches (branch_id, label) VALUES ('main', 'Main Branch')`);
+
+            db.run(`
+                CREATE TABLE IF NOT EXISTS import_profiles (
+                    name TEXT PRIMARY KEY,
+                    json TEXT NOT NULL,
+                    created_at TEXT DEFAULT (datetime('now'))
+                )
+            `);
+
+            db.run(`
+                CREATE TABLE IF NOT EXISTS app_params (
+                    key TEXT PRIMARY KEY,
+                    value TEXT
+                )
+            `);
+
+            // Create triggers for history
+            db.run(`
+                CREATE TRIGGER IF NOT EXISTS item_insert_history
+                AFTER INSERT ON item
+                BEGIN
+                    INSERT INTO item_history (id, branch_id, version, op, type, title, start_date, end_date, owner, lane, project, tags)
+                    SELECT NEW.id, NEW.branch_id, 
+                           COALESCE((SELECT MAX(version) FROM item_history WHERE id = NEW.id AND branch_id = NEW.branch_id), 0) + 1,
+                           'insert', NEW.type, NEW.title, NEW.start_date, NEW.end_date, NEW.owner, NEW.lane, NEW.project, NEW.tags;
+                END;
+            `);
+
+            db.run(`
+                CREATE TRIGGER IF NOT EXISTS item_update_history
+                AFTER UPDATE ON item
+                BEGIN
+                    INSERT INTO item_history (id, branch_id, version, op, type, title, start_date, end_date, owner, lane, project, tags)
+                    SELECT NEW.id, NEW.branch_id,
+                           (SELECT MAX(version) FROM item_history WHERE id = NEW.id AND branch_id = NEW.branch_id) + 1,
+                           'update', NEW.type, NEW.title, NEW.start_date, NEW.end_date, NEW.owner, NEW.lane, NEW.project, NEW.tags;
+                END;
+            `);
+
+            console.log('Database initialized');
+        }
+
+        function setupEventListeners() {
+            document.getElementById('importFile').addEventListener('change', handleFileSelect);
+            document.getElementById('idStrategy').addEventListener('change', function() {
+                document.getElementById('idColumnSection').style.display = 
+                    this.value === 'column' ? 'block' : 'none';
+            });
+
+            // Canvas drag
+            const canvas = document.getElementById('timelineCanvas');
+            canvas.addEventListener('mousedown', startDrag);
+            canvas.addEventListener('mousemove', drag);
+            canvas.addEventListener('mouseup', endDrag);
+            canvas.addEventListener('mouseleave', endDrag);
+        }
+
+        // File handling
+        async function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                if (file.name.endsWith('.csv')) {
+                    currentData = parseCSV(content);
+                } else if (file.name.endsWith('.json')) {
+                    currentData = JSON.parse(content);
+                }
+                
+                displayPreview();
+                setupMapping();
+            };
+            reader.readAsText(file);
+        }
+
+        function parseCSV(text) {
+            const lines = text.trim().split('\n');
+            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+            
+            return lines.slice(1).map(line => {
+                const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+                const obj = {};
+                headers.forEach((header, i) => {
+                    obj[header] = values[i] || '';
+                });
+                return obj;
+            });
+        }
+
+        function displayPreview() {
+            const preview = document.getElementById('previewSection');
+            const content = document.getElementById('previewContent');
+            
+            if (!currentData || currentData.length === 0) return;
+
+            const headers = Object.keys(currentData[0]);
+            let html = '<table><thead><tr>';
+            headers.forEach(h => html += `<th>${h}</th>`);
+            html += '</tr></thead><tbody>';
+            
+            currentData.slice(0, 10).forEach(row => {
+                html += '<tr>';
+                headers.forEach(h => html += `<td>${row[h] || ''}</td>`);
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            
+            content.innerHTML = html;
+            preview.style.display = 'block';
+        }
+
+        function setupMapping() {
+            const headers = Object.keys(currentData[0]);
+            const selects = ['mapTitle', 'mapType', 'mapStartDate', 'mapEndDate', 
+                           'mapOwner', 'mapLane', 'mapProject', 'mapTags', 'mapId'];
+            
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                select.innerHTML = '<option value="">-- None --</option>';
+                headers.forEach(h => {
+                    select.innerHTML += `<option value="${h}">${h}</option>`;
+                });
+            });
+
+            // Auto-detect common mappings
+            const autoMap = {
+                'title': ['title', 'name', 'task', 'item'],
+                'type': ['type', 'kind', 'category'],
+                'start_date': ['start', 'start_date', 'begin'],
+                'end_date': ['end', 'end_date', 'finish', 'due'],
+                'owner': ['owner', 'assignee', 'assigned_to'],
+                'lane': ['lane', 'swim_lane', 'track'],
+                'project': ['project', 'epic'],
+                'tags': ['tags', 'labels']
+            };
+
+            Object.keys(autoMap).forEach(field => {
+                const header = headers.find(h => 
+                    autoMap[field].some(pattern => h.toLowerCase().includes(pattern))
+                );
+                if (header) {
+                    document.getElementById('map' + field.split('_').map(w => 
+                        w.charAt(0).toUpperCase() + w.slice(1)).join('')).value = header;
+                }
+            });
+
+            document.getElementById('mappingSection').style.display = 'block';
+        }
+
+        // Dry run
+        function runDryRun() {
+            const mapping = getMapping();
+            if (!validateMapping(mapping)) {
+                alert('Please map at least Title and Type columns');
+                return;
+            }
+
+            const branchId = document.getElementById('importBranch').value;
+            const idStrategy = document.getElementById('idStrategy').value;
+            
+            dryRunData = performDryRun(currentData, mapping, branchId, idStrategy);
+            displayDryRunResults(dryRunData);
+        }
+
+        function getMapping() {
+            return {
+                title: document.getElementById('mapTitle').value,
+                type: document.getElementById('mapType').value,
+                start_date: document.getElementById('mapStartDate').value,
+                end_date: document.getElementById('mapEndDate').value,
+                owner: document.getElementById('mapOwner').value,
+                lane: document.getElementById('mapLane').value,
+                project: document.getElementById('mapProject').value,
+                tags: document.getElementById('mapTags').value,
+                id: document.getElementById('mapId').value,
+                idStrategy: document.getElementById('idStrategy').value,
+                tagsDelimiter: document.getElementById('tagsDelimiter').value
+            };
+        }
+
+        function validateMapping(mapping) {
+            return mapping.title && mapping.type;
+        }
+
+        function performDryRun(data, mapping, branchId, idStrategy) {
+            const results = {
+                added: [],
+                updated: [],
+                skipped: [],
+                conflicts: []
+            };
+
+            // Get existing items
+            const existing = db.exec(`SELECT * FROM item WHERE branch_id = ?`, [branchId]);
+            const existingMap = new Map();
+            
+            if (existing.length > 0) {
+                existing[0].values.forEach(row => {
+                    const obj = {};
+                    existing[0].columns.forEach((col, i) => obj[col] = row[i]);
+                    const key = idStrategy === 'match' ? 
+                        `${obj.project || ''}:${obj.title}` : obj.id;
+                    existingMap.set(key, obj);
+                });
+            }
+
+            data.forEach((row, idx) => {
+                const item = mapRow(row, mapping, idx, idStrategy);
+                if (!item) {
+                    results.skipped.push({ row, reason: 'Missing required fields' });
+                    return;
+                }
+
+                const matchKey = idStrategy === 'match' ? 
+                    `${item.project || ''}:${item.title}` : item.id;
+                
+                if (existingMap.has(matchKey)) {
+                    results.updated.push({ item, existing: existingMap.get(matchKey) });
+                } else {
+                    results.added.push({ item });
+                }
+            });
+
+            return results;
+        }
+
+        function mapRow(row, mapping, idx, idStrategy) {
+            const title = row[mapping.title];
+            const type = row[mapping.type];
+            
+            if (!title || !type) return null;
+
+            const item = {
+                id: idStrategy === 'column' && mapping.id ? 
+                    row[mapping.id] : generateUUID(),
+                title: title,
+                type: type.toLowerCase(),
+                start_date: row[mapping.start_date] || null,
+                end_date: row[mapping.end_date] || null,
+                owner: row[mapping.owner] || null,
+                lane: row[mapping.lane] || null,
+                project: row[mapping.project] || null,
+                tags: row[mapping.tags] || null,
+                source_row_hash: hashRow(row)
+            };
+
+            // Normalize dates
+            if (item.start_date) item.start_date = normalizeDate(item.start_date);
+            if (item.end_date) item.end_date = normalizeDate(item.end_date);
+
+            return item;
+        }
+
+        function normalizeDate(dateStr) {
+            if (!dateStr) return null;
+            
+            // Try parsing common formats
+            const formats = [
+                /^\d{4}-\d{2}-\d{2}$/,  // YYYY-MM-DD
+                /^\d{1,2}\/\d{1,2}\/\d{4}$/,  // M/D/YYYY
+                /^\d{1,2}-\d{1,2}-\d{4}$/   // M-D-YYYY
+            ];
+
+            if (formats[0].test(dateStr)) return dateStr;
+            
+            // Convert other formats
+            if (formats[1].test(dateStr) || formats[2].test(dateStr)) {
+                const parts = dateStr.split(/[\/\-]/);
+                const month = parts[0].padStart(2, '0');
+                const day = parts[1].padStart(2, '0');
+                const year = parts[2];
+                return `${year}-${month}-${day}`;
+            }
+
+            return dateStr;
+        }
+
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        function hashRow(row) {
+            return JSON.stringify(row).split('').reduce((a, b) => {
+                a = ((a << 5) - a) + b.charCodeAt(0);
+                return a & a;
+            }, 0).toString(36);
+        }
+
+        function displayDryRunResults(results) {
+            const container = document.getElementById('dryRunResults');
+            let html = '<h3>Dry-Run Results</h3>';
+            html += `<p><span class="badge added">${results.added.length} Added</span> `;
+            html += `<span class="badge updated">${results.updated.length} Updated</span> `;
+            html += `<span class="badge">${results.skipped.length} Skipped</span></p>`;
+
+            if (results.added.length > 0) {
+                html += '<div class="result-section"><h4>Sample Added Items (first 5)</h4><table><thead><tr>';
+                html += '<th>Title</th><th>Type</th><th>Start</th><th>End</th></tr></thead><tbody>';
+                results.added.slice(0, 5).forEach(({item}) => {
+                    html += `<tr><td>${item.title}</td><td>${item.type}</td><td>${item.start_date || '-'}</td><td>${item.end_date || '-'}</td></tr>`;
+                });
+                html += '</tbody></table></div>';
+            }
+
+            if (results.updated.length > 0) {
+                html += '<div class="result-section"><h4>Sample Updated Items (first 5)</h4><table><thead><tr>';
+                html += '<th>Title</th><th>Type</th><th>Action</th></tr></thead><tbody>';
+                results.updated.slice(0, 5).forEach(({item}) => {
+                    html += `<tr><td>${item.title}</td><td>${item.type}</td><td>Will update</td></tr>`;
+                });
+                html += '</tbody></table></div>';
+            }
+
+            container.innerHTML = html;
+            container.style.display = 'block';
+            document.getElementById('commitSection').style.display = 'block';
+        }
+
+        // Commit import
+        function commitImport() {
+            if (!dryRunData) {
+                alert('Please run dry-run first');
+                return;
+            }
+
+            const branchId = document.getElementById('importBranch').value;
+
+            try {
+                db.run('BEGIN TRANSACTION');
+
+                // Insert new items
+                dryRunData.added.forEach(({item}) => {
+                    db.run(`
+                        INSERT INTO item (id, type, title, start_date, end_date, owner, lane, project, tags, source_row_hash, branch_id)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    `, [item.id, item.type, item.title, item.start_date, item.end_date, 
+                        item.owner, item.lane, item.project, item.tags, item.source_row_hash, branchId]);
+                });
+
+                // Update existing items
+                dryRunData.updated.forEach(({item, existing}) => {
+                    db.run(`
+                        UPDATE item SET 
+                            type = ?, title = ?, start_date = ?, end_date = ?, 
+                            owner = ?, lane = ?, project = ?, tags = ?, 
+                            source_row_hash = ?, updated_at = datetime('now')
+                        WHERE id = ? AND branch_id = ?
+                    `, [item.type, item.title, item.start_date, item.end_date,
+                        item.owner, item.lane, item.project, item.tags, 
+                        item.source_row_hash, existing.id, branchId]);
+                });
+
+                db.run('COMMIT');
+
+                alert(`✓ Import complete!\n${dryRunData.added.length} added, ${dryRunData.updated.length} updated`);
+                
+                // Reset state
+                dryRunData = null;
+                document.getElementById('dryRunResults').style.display = 'none';
+                document.getElementById('commitSection').style.display = 'none';
+                
+                loadBranches();
+            } catch (error) {
+                db.run('ROLLBACK');
+                alert('Import failed: ' + error.message);
+            }
+        }
+
+        // Branch management
+        function loadBranches() {
+            const branches = db.exec('SELECT branch_id, label FROM branches ORDER BY branch_id');
+            if (branches.length === 0) return;
+
+            const selects = ['importBranch', 'viewBranch', 'compareBranchA', 'compareBranchB', 'historyBranch'];
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                const current = select.value;
+                select.innerHTML = '';
+                
+                branches[0].values.forEach(([id, label]) => {
+                    select.innerHTML += `<option value="${id}">${label || id}</option>`;
+                });
+                
+                if (current) select.value = current;
+            });
+        }
+
+        function createNewBranch() {
+            const name = prompt('Enter branch name:');
+            if (!name) return;
+
+            const branchId = name.toLowerCase().replace(/\s+/g, '-');
+            const from = document.getElementById('importBranch').value;
+
+            try {
+                db.run('INSERT INTO branches (branch_id, label, created_from) VALUES (?, ?, ?)',
+                    [branchId, name, from]);
+
+                // Copy items from source branch
+                db.run(`
+                    INSERT INTO item 
+                    SELECT id, type, title, start_date, end_date, owner, lane, project, tags, 
+                           source_id, source_row_hash, ?, updated_at
+                    FROM item WHERE branch_id = ?
+                `, [branchId, from]);
+
+                loadBranches();
+                document.getElementById('importBranch').value = branchId;
+                alert('Branch created: ' + name);
+            } catch (error) {
+                alert('Failed to create branch: ' + error.message);
+            }
+        }
+
+        // Profile management
+        function saveProfile() {
+            const name = prompt('Enter profile name:');
+            if (!name) return;
+
+            const mapping = getMapping();
+            db.run('INSERT OR REPLACE INTO import_profiles (name, json) VALUES (?, ?)',
+                [name, JSON.stringify(mapping)]);
+            
+            loadProfiles();
+            alert('Profile saved: ' + name);
+        }
+
+        function loadProfiles() {
+            const profiles = db.exec('SELECT name FROM import_profiles ORDER BY name');
+            const select = document.getElementById('profileSelect');
+            select.innerHTML = '<option value="">-- None --</option>';
+            
+            if (profiles.length > 0) {
+                profiles[0].values.forEach(([name]) => {
+                    select.innerHTML += `<option value="${name}">${name}</option>`;
+                });
+            }
+        }
+
+        // Timeline rendering
+        function renderTimeline() {
+            const canvas = document.getElementById('timelineCanvas');
+            const ctx = canvas.getContext('2d');
+            const branchId = document.getElementById('viewBranch').value;
+            const laneBy = document.getElementById('laneBy').value;
+            const zoomLevel = document.getElementById('zoomLevel').value;
+            
+            // Set canvas size
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Get filtered items
+            let query = `SELECT * FROM item WHERE branch_id = ?`;
+            const params = [branchId];
+            
+            const typeFilter = document.getElementById('filterType').value;
+            if (typeFilter) {
+                query += ` AND type = ?`;
+                params.push(typeFilter);
+            }
+            
+            const projectFilter = document.getElementById('filterProject').value;
+            if (projectFilter) {
+                query += ` AND project LIKE ?`;
+                params.push(`%${projectFilter}%`);
+            }
+            
+            query += ` ORDER BY start_date, title`;
+            
+            const result = db.exec(query, params);
+            if (result.length === 0) {
+                ctx.font = '14px sans-serif';
+                ctx.fillText('No items to display', 20, 30);
+                return;
+            }
+
+            const items = result[0].values.map(row => {
+                const obj = {};
+                result[0].columns.forEach((col, i) => obj[col] = row[i]);
+                return obj;
+            });
+
+            // Group by lanes
+            const lanes = groupByLane(items, laneBy);
+            drawTimeline(ctx, lanes, items, canvas.width, canvas.height, zoomLevel);
+            
+            document.getElementById('timelineStatus').textContent = 
+                `Showing ${items.length} items in ${Object.keys(lanes).length} lanes`;
+        }
+
+        function groupByLane(items, laneBy) {
+            const lanes = {};
+            items.forEach(item => {
+                const lane = item[laneBy] || 'Unassigned';
+                if (!lanes[lane]) lanes[lane] = [];
+                lanes[lane].push(item);
+            });
+            return lanes;
+        }
+
+        function drawTimeline(ctx, lanes, items, width, height, zoomLevel) {
+            const margin = { top: 40, right: 20, bottom: 40, left: 150 };
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+            
+            // Find date range
+            const dates = items.flatMap(item => [item.start_date, item.end_date].filter(Boolean));
+            if (dates.length === 0) return;
+            
+            const minDate = new Date(Math.min(...dates.map(d => new Date(d))));
+            const maxDate = new Date(Math.max(...dates.map(d => new Date(d))));
+            
+            // Extend range slightly
+            minDate.setDate(minDate.getDate() - 7);
+            maxDate.setDate(maxDate.getDate() + 7);
+            
+            const timeRange = maxDate - minDate;
+            
+            // Draw lanes
+            const laneNames = Object.keys(lanes);
+            const laneHeight = Math.max(40, chartHeight / laneNames.length);
+            
+            ctx.save();
+            ctx.translate(timelineOffset.x, timelineOffset.y);
+            
+            // Background
+            ctx.fillStyle = '#f5f5f5';
+            ctx.fillRect(margin.left, margin.top, chartWidth, chartHeight);
+            
+            // Lane backgrounds
+            laneNames.forEach((lane, i) => {
+                const y = margin.top + i * laneHeight;
+                
+                if (i % 2 === 0) {
+                    ctx.fillStyle = '#fafafa';
+                    ctx.fillRect(margin.left, y, chartWidth, laneHeight);
+                }
+                
+                // Lane label
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 12px sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText(lane, margin.left - 10, y + laneHeight / 2 + 4);
+                
+                // Lane separator
+                ctx.strokeStyle = '#ddd';
+                ctx.beginPath();
+                ctx.moveTo(margin.left, y);
+                ctx.lineTo(margin.left + chartWidth, y);
+                ctx.stroke();
+            });
+
+            // Draw time axis
+            drawTimeAxis(ctx, margin, chartWidth, minDate, maxDate, zoomLevel);
+            
+            // Draw items
+            items.forEach(item => {
+                const laneIndex = laneNames.indexOf(item[document.getElementById('laneBy').value] || 'Unassigned');
+                const y = margin.top + laneIndex * laneHeight;
+                
+                drawItem(ctx, item, margin.left, y, chartWidth, laneHeight, minDate, maxDate, timeRange);
+            });
+            
+            ctx.restore();
+        }
+
+        function drawTimeAxis(ctx, margin, chartWidth, minDate, maxDate, zoomLevel) {
+            ctx.strokeStyle = '#999';
+            ctx.lineWidth = 1;
+            
+            // Axis line
+            ctx.beginPath();
+            ctx.moveTo(margin.left, margin.top - 10);
+            ctx.lineTo(margin.left + chartWidth, margin.top - 10);
+            ctx.stroke();
+            
+            // Date ticks
+            ctx.font = '11px sans-serif';
+            ctx.fillStyle = '#666';
+            ctx.textAlign = 'center';
+            
+            const timeRange = maxDate - minDate;
+            let tickInterval;
+            
+            switch(zoomLevel) {
+                case 'day': tickInterval = 86400000; break; // 1 day
+                case 'week': tickInterval = 86400000 * 7; break;
+                case 'month': tickInterval = 86400000 * 30; break;
+                case 'quarter': tickInterval = 86400000 * 90; break;
+                case 'year': tickInterval = 86400000 * 365; break;
+            }
+            
+            let currentDate = new Date(minDate);
+            while (currentDate <= maxDate) {
+                const x = margin.left + ((currentDate - minDate) / timeRange) * chartWidth;
+                
+                ctx.beginPath();
+                ctx.moveTo(x, margin.top - 10);
+                ctx.lineTo(x, margin.top - 5);
+                ctx.stroke();
+                
+                const label = zoomLevel === 'day' || zoomLevel === 'week' ? 
+                    currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) :
+                    zoomLevel === 'month' || zoomLevel === 'quarter' ?
+                    currentDate.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }) :
+                    currentDate.getFullYear().toString();
+                
+                ctx.fillText(label, x, margin.top - 15);
+                
+                currentDate = new Date(currentDate.getTime() + tickInterval);
+            }
+        }
+
+        function drawItem(ctx, item, x, y, width, height, minDate, maxDate, timeRange) {
+            const colors = {
+                task: '#2196F3',
+                milestone: '#4CAF50',
+                release: '#FF9800',
+                meeting: '#9C27B0'
+            };
+            
+            const color = colors[item.type] || '#999';
+            const padding = 5;
+            
+            if (item.type === 'milestone' || !item.end_date) {
+                // Draw milestone as diamond
+                const startDate = new Date(item.start_date);
+                const mx = x + ((startDate - minDate) / timeRange) * width;
+                const my = y + height / 2;
+                const size = 8;
+                
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.moveTo(mx, my - size);
+                ctx.lineTo(mx + size, my);
+                ctx.lineTo(mx, my + size);
+                ctx.lineTo(mx - size, my);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Label
+                ctx.fillStyle = '#333';
+                ctx.font = '11px sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(item.title, mx + size + 5, my + 4);
+            } else {
+                // Draw task as bar
+                const startDate = new Date(item.start_date);
+                const endDate = new Date(item.end_date);
+                const x1 = x + ((startDate - minDate) / timeRange) * width;
+                const x2 = x + ((endDate - minDate) / timeRange) * width;
+                const barWidth = Math.max(x2 - x1, 2);
+                const barHeight = height - padding * 2;
+                
+                ctx.fillStyle = color;
+                ctx.fillRect(x1, y + padding, barWidth, barHeight);
+                
+                // Label
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 11px sans-serif';
+                ctx.textAlign = 'left';
+                
+                const text = item.title;
+                const textWidth = ctx.measureText(text).width;
+                
+                if (textWidth + 10 < barWidth) {
+                    ctx.fillText(text, x1 + 5, y + height / 2 + 4);
+                } else {
+                    ctx.fillStyle = '#333';
+                    ctx.fillText(text, x2 + 5, y + height / 2 + 4);
+                }
+            }
+        }
+
+        // Canvas dragging
+        function startDrag(e) {
+            isDragging = true;
+            dragStart = { x: e.offsetX - timelineOffset.x, y: e.offsetY - timelineOffset.y };
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            timelineOffset = {
+                x: e.offsetX - dragStart.x,
+                y: e.offsetY - dragStart.y
+            };
+            renderTimeline();
+        }
+
+        function endDrag() {
+            isDragging = false;
+        }
+
+        // Branch comparison
+        function runComparison() {
+            const branchA = document.getElementById('compareBranchA').value;
+            const branchB = document.getElementById('compareBranchB').value;
+            
+            if (branchA === branchB) {
+                alert('Please select different branches');
+                return;
+            }
+
+            const query = `
+                SELECT 
+                    COALESCE(a.id, b.id) as id,
+                    COALESCE(a.title, b.title) as title,
+                    CASE 
+                        WHEN a.id IS NULL THEN 'added'
+                        WHEN b.id IS NULL THEN 'removed'
+                        WHEN a.title != b.title OR a.start_date != b.start_date OR a.end_date != b.end_date THEN 'changed'
+                        ELSE 'unchanged'
+                    END as status,
+                    a.start_date as a_start, b.start_date as b_start,
+                    a.end_date as a_end, b.end_date as b_end,
+                    a.type as a_type, b.type as b_type
+                FROM 
+                    (SELECT * FROM item WHERE branch_id = ?) a
+                FULL OUTER JOIN 
+                    (SELECT * FROM item WHERE branch_id = ?) b
+                ON a.id = b.id
+                ORDER BY status, title
+            `;
+
+            const result = db.exec(query, [branchA, branchB]);
+            if (result.length === 0) {
+                alert('No data to compare');
+                return;
+            }
+
+            displayComparisonResults(result[0], branchA, branchB);
+        }
+
+        function displayComparisonResults(result, branchA, branchB) {
+            const items = result.values.map(row => {
+                const obj = {};
+                result.columns.forEach((col, i) => obj[col] = row[i]);
+                return obj;
+            });
+
+            const summary = {
+                added: items.filter(i => i.status === 'added').length,
+                removed: items.filter(i => i.status === 'removed').length,
+                changed: items.filter(i => i.status === 'changed').length,
+                unchanged: items.filter(i => i.status === 'unchanged').length
+            };
+
+            let html = `
+                <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                    <div><span class="badge added">${summary.added} Added in ${branchB}</span></div>
+                    <div><span class="badge removed">${summary.removed} Removed in ${branchB}</span></div>
+                    <div><span class="badge updated">${summary.changed} Changed</span></div>
+                    <div><span class="badge unchanged">${summary.unchanged} Unchanged</span></div>
+                </div>
+            `;
+
+            document.getElementById('compareSummary').innerHTML = html;
+
+            html = '<table><thead><tr><th>Title</th><th>Status</th><th>Details</th></tr></thead><tbody>';
+            
+            items.filter(i => i.status !== 'unchanged').slice(0, 50).forEach(item => {
+                let details = '';
+                if (item.status === 'changed') {
+                    if (item.a_start !== item.b_start) details += `Start: ${item.a_start} → ${item.b_start}; `;
+                    if (item.a_end !== item.b_end) details += `End: ${item.a_end} → ${item.b_end}`;
+                }
+                
+                html += `<tr>
+                    <td>${item.title}</td>
+                    <td><span class="badge ${item.status}">${item.status}</span></td>
+                    <td>${details || '-'}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+
+            document.getElementById('compareDetail').innerHTML = html;
+            document.getElementById('compareResults').style.display = 'block';
+        }
+
+        // History
+        function searchHistory() {
+            const searchTerm = document.getElementById('historySearch').value;
+            const branchId = document.getElementById('historyBranch').value;
+            
+            if (!searchTerm) {
+                alert('Please enter a search term');
+                return;
+            }
+
+            const query = `
+                SELECT * FROM item_history 
+                WHERE branch_id = ? AND title LIKE ?
+                ORDER BY id, version DESC
+            `;
+            
+            const result = db.exec(query, [branchId, `%${searchTerm}%`]);
+            if (result.length === 0) {
+                alert('No items found');
+                return;
+            }
+
+            displayHistory(result[0]);
+        }
+
+        function displayHistory(result) {
+            const versions = result.values.map(row => {
+                const obj = {};
+                result.columns.forEach((col, i) => obj[col] = row[i]);
+                return obj;
+            });
+
+            let html = '';
+            let currentId = null;
+            
+            versions.forEach(v => {
+                if (v.id !== currentId) {
+                    if (currentId) html += '<hr style="margin: 20px 0;">';
+                    html += `<h4>${v.title}</h4>`;
+                    currentId = v.id;
+                }
+                
+                html += `<div class="version-row">
+                    <div class="version-header">
+                        <span>Version ${v.version} - ${v.op}</span>
+                        <span>${v.snapshot_at}</span>
+                    </div>
+                    <div>
+                        <span class="field-change">Type: ${v.type}</span>
+                        ${v.start_date ? `<span class="field-change">Start: ${v.start_date}</span>` : ''}
+                        ${v.end_date ? `<span class="field-change">End: ${v.end_date}</span>` : ''}
+                        ${v.owner ? `<span class="field-change">Owner: ${v.owner}</span>` : ''}
+                    </div>
+                </div>`;
+            });
+
+            document.getElementById('historyContent').innerHTML = html;
+            document.getElementById('historyResults').style.display = 'block';
+        }
+
+        // Export functions
+        function exportPNG() {
+            const canvas = document.getElementById('timelineCanvas');
+            const link = document.createElement('a');
+            link.download = `timeline-${Date.now()}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        function exportHTML() {
+            const branchId = document.getElementById('viewBranch').value;
+            const result = db.exec('SELECT * FROM item WHERE branch_id = ?', [branchId]);
+            
+            if (result.length === 0) {
+                alert('No data to export');
+                return;
+            }
+
+            const items = result[0].values.map(row => {
+                const obj = {};
+                result[0].columns.forEach((col, i) => obj[col] = row[i]);
+                return obj;
+            });
+
+            const html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Timeline Export - ${branchId}</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f5f5f5; }
+        .footer { margin-top: 20px; color: #666; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>Timeline: ${branchId}</h1>
+    <p>Exported: ${new Date().toISOString()}</p>
+    <p>Total items: ${items.length}</p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th><th>Type</th><th>Start</th><th>End</th>
+                <th>Owner</th><th>Project</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${items.map(item => `
+                <tr>
+                    <td>${item.title}</td>
+                    <td>${item.type}</td>
+                    <td>${item.start_date || '-'}</td>
+                    <td>${item.end_date || '-'}</td>
+                    <td>${item.owner || '-'}</td>
+                    <td>${item.project || '-'}</td>
+                </tr>
+            `).join('')}
+        </tbody>
+    </table>
+    
+    <div class="footer">
+        Branch: ${branchId} | Generated by Timeline Manager
+    </div>
+</body>
+</html>
+            `;
+
+            const blob = new Blob([html], { type: 'text/html' });
+            const link = document.createElement('a');
+            link.download = `timeline-${branchId}-${Date.now()}.html`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        }
+
+        function saveSnapshot() {
+            const name = prompt('Enter snapshot name:');
+            if (!name) return;
+            
+            const timestamp = new Date().toISOString();
+            db.run('INSERT OR REPLACE INTO app_params (key, value) VALUES (?, ?)',
+                [`snapshot:${name}`, timestamp]);
+            
+            alert('Snapshot saved: ' + name);
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            if (tabName === 'view') {
+                renderTimeline();
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('load', initApp);
+    </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+title,type,start_date,end_date,owner,lane,project,tags
+Setup Development Environment,task,2025-01-15,2025-01-20,Alice,Engineering,Alpha,backend,setup
+Design System Architecture,task,2025-01-18,2025-01-25,Bob,Engineering,Alpha,architecture,design
+Q1 Planning Complete,milestone,2025-01-25,,,Management,Alpha,planning
+Implement Core Features,task,2025-01-22,2025-02-10,Alice,Engineering,Alpha,backend,features
+UI Component Library,task,2025-01-20,2025-02-05,Carol,Design,Alpha,frontend,ui
+Team Sync Meeting,meeting,2025-02-01,2025-02-01,Bob,Management,Alpha,meeting
+Database Migration,task,2025-02-03,2025-02-08,Alice,Engineering,Alpha,backend,database
+Security Audit,task,2025-02-05,2025-02-12,David,Security,Alpha,audit,security
+Alpha Release,release,2025-02-15,,,Management,Alpha,release
+Market Research,task,2025-01-10,2025-01-30,Eve,Product,Beta,research
+Competitor Analysis,task,2025-01-15,2025-01-28,Eve,Product,Beta,research,analysis
+Feature Specification,task,2025-01-25,2025-02-08,Frank,Product,Beta,documentation
+Prototype Development,task,2025-02-01,2025-02-20,Carol,Engineering,Beta,prototype,frontend
+User Testing,task,2025-02-18,2025-02-28,Eve,Product,Beta,testing,ux
+Beta Launch Preparation,task,2025-02-25,2025-03-10,Frank,Product,Beta,launch
+Infrastructure Setup,task,2025-01-20,2025-02-15,David,DevOps,Infrastructure,infrastructure,cloud
+CI/CD Pipeline,task,2025-02-01,2025-02-20,David,DevOps,Infrastructure,automation,ci-cd
+Monitoring Setup,task,2025-02-15,2025-03-01,David,DevOps,Infrastructure,monitoring,observability
+Documentation Sprint,task,2025-02-10,2025-02-25,Frank,Product,Documentation,docs,content
+Customer Onboarding,task,2025-03-01,2025-03-15,Eve,Product,Launch,onboarding
+Marketing Campaign,task,2025-02-20,2025-03-20,Grace,Marketing,Launch,marketing,campaign
+Public Beta Launch,release,2025-03-15,,,Management,Launch,release
+End of Q1 Review,milestone,2025-03-31,,,Management,Planning,review
+Performance Optimization,task,2025-03-05,2025-03-25,Alice,Engineering,Optimization,performance,backend
+Load Testing,task,2025-03-10,2025-03-22,David,DevOps,Optimization,testing,performance
