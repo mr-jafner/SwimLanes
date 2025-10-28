@@ -1,0 +1,22 @@
+# Build outputs
+dist
+dist-single
+coverage
+
+# Dependencies
+node_modules
+
+# Lock files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Minified files
+*.min.js
+*.min.css
+
+# Git hooks
+.husky
+
+# Legacy files
+legacy

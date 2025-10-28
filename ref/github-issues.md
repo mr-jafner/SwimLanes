@@ -51,9 +51,11 @@ Component Labels:
 
 ```markdown
 ## Description
+
 Set up the base project with Vite, React 18, and TypeScript in strict mode.
 
 ## Tasks
+
 - [ ] Run `npm create vite@latest` and select React + TypeScript
 - [ ] Configure `tsconfig.json` with strict mode
 - [ ] Set up path aliases (`@/` for src)
@@ -62,12 +64,14 @@ Set up the base project with Vite, React 18, and TypeScript in strict mode.
 - [ ] Create initial folder structure (src/components, src/services, etc.)
 
 ## Acceptance Criteria
+
 - Dev server runs without errors
 - TypeScript strict mode enabled
 - Path aliases working
 - Basic folder structure in place
 
 ## Labels
+
 `type:feature` `phase:1` `component:infra` `priority:critical`
 ```
 
@@ -77,9 +81,11 @@ Set up the base project with Vite, React 18, and TypeScript in strict mode.
 
 ```markdown
 ## Description
+
 Install and configure Tailwind CSS with basic theming.
 
 ## Tasks
+
 - [ ] Install Tailwind CSS (`npm install -D tailwindcss postcss autoprefixer`)
 - [ ] Run `npx tailwindcss init -p`
 - [ ] Configure `tailwind.config.js` content paths
@@ -88,12 +94,14 @@ Install and configure Tailwind CSS with basic theming.
 - [ ] Test with basic styled component
 
 ## Acceptance Criteria
+
 - Tailwind classes work in components
 - JIT mode enabled
 - Custom theme configured
 - No console warnings
 
 ## Labels
+
 `type:feature` `phase:1` `component:ui` `priority:high`
 ```
 
@@ -103,9 +111,11 @@ Install and configure Tailwind CSS with basic theming.
 
 ```markdown
 ## Description
+
 Set up shadcn/ui for copy-paste component library.
 
 ## Tasks
+
 - [ ] Install shadcn/ui CLI (`npx shadcn-ui@latest init`)
 - [ ] Configure components.json
 - [ ] Add initial components: button, dialog, select, toast
@@ -113,11 +123,13 @@ Set up shadcn/ui for copy-paste component library.
 - [ ] Document how to add new components
 
 ## Acceptance Criteria
+
 - shadcn/ui configured properly
 - Components render correctly
 - Documentation added to README
 
 ## Labels
+
 `type:feature` `phase:1` `component:ui` `priority:high`
 ```
 
@@ -127,9 +139,11 @@ Set up shadcn/ui for copy-paste component library.
 
 ```markdown
 ## Description
+
 Configure code quality tools for consistent formatting and linting.
 
 ## Tasks
+
 - [ ] Install ESLint with TypeScript plugin
 - [ ] Create `.eslintrc.cjs` configuration
 - [ ] Install Prettier
@@ -139,12 +153,14 @@ Configure code quality tools for consistent formatting and linting.
 - [ ] Fix any existing lint errors
 
 ## Acceptance Criteria
+
 - `npm run lint` works without errors
 - Prettier auto-formats on save
 - ESLint catches TypeScript errors
 - All files pass linting
 
 ## Labels
+
 `type:feature` `phase:1` `component:infra` `priority:medium`
 ```
 
@@ -154,9 +170,11 @@ Configure code quality tools for consistent formatting and linting.
 
 ```markdown
 ## Description
+
 Configure primary Vite build for production deployment to swimlanes.jafner.com.
 
 ## Tasks
+
 - [ ] Configure `vite.config.ts` for production
 - [ ] Enable code splitting
 - [ ] Configure chunk size limits
@@ -166,12 +184,14 @@ Configure primary Vite build for production deployment to swimlanes.jafner.com.
 - [ ] Verify bundle size (<500 KB gzipped)
 
 ## Acceptance Criteria
+
 - Build completes without errors
 - Code splitting works
 - Bundle size optimized
 - Build output in `dist/` directory
 
 ## Labels
+
 `type:feature` `phase:1` `component:infra` `priority:critical`
 ```
 
@@ -181,9 +201,11 @@ Configure primary Vite build for production deployment to swimlanes.jafner.com.
 
 ```markdown
 ## Description
+
 Configure secondary Vite build that outputs a single HTML file for easy sharing.
 
 ## Tasks
+
 - [ ] Install `vite-plugin-singlefile`
 - [ ] Create `vite.single.config.ts`
 - [ ] Configure inline everything (JS, CSS, images)
@@ -193,12 +215,14 @@ Configure secondary Vite build that outputs a single HTML file for easy sharing.
 - [ ] Add build script to package.json
 
 ## Acceptance Criteria
+
 - Single HTML file builds successfully
 - File size reasonable (~300-500 KB)
 - Works when opened directly in browser
 - Build output in `dist-single/` directory
 
 ## Labels
+
 `type:feature` `phase:1` `component:infra` `priority:high`
 ```
 
@@ -208,9 +232,11 @@ Configure secondary Vite build that outputs a single HTML file for easy sharing.
 
 ```markdown
 ## Description
+
 Configure Vitest for unit and integration testing.
 
 ## Tasks
+
 - [ ] Install Vitest and dependencies
 - [ ] Install React Testing Library
 - [ ] Create `vitest.config.ts`
@@ -221,12 +247,14 @@ Configure Vitest for unit and integration testing.
 - [ ] Document testing conventions
 
 ## Acceptance Criteria
+
 - `npm test` runs tests
 - Example test passes
 - Coverage report generates
 - Tests run in CI-like environment
 
 ## Labels
+
 `type:feature` `phase:1` `component:testing` `priority:high`
 ```
 
@@ -236,9 +264,11 @@ Configure Vitest for unit and integration testing.
 
 ```markdown
 ## Description
+
 Set up GitHub Actions workflow to run tests on every pull request.
 
 ## Tasks
+
 - [ ] Create `.github/workflows/test.yml`
 - [ ] Configure Node.js setup (v20)
 - [ ] Add typecheck step
@@ -249,15 +279,18 @@ Set up GitHub Actions workflow to run tests on every pull request.
 - [ ] Test workflow on a PR
 
 ## Acceptance Criteria
+
 - Workflow runs on PRs
 - All steps pass
 - Coverage report available
 - Fast execution (<5 min)
 
 ## Related Files
+
 - See `ref/deployment.md` for workflow template
 
 ## Labels
+
 `type:feature` `phase:1` `component:infra` `priority:critical`
 ```
 
@@ -267,9 +300,11 @@ Set up GitHub Actions workflow to run tests on every pull request.
 
 ```markdown
 ## Description
+
 Set up GitHub Actions workflow to deploy to OpenBSD server on push to main.
 
 ## Tasks
+
 - [ ] Create `.github/workflows/deploy.yml`
 - [ ] Configure SSH key setup
 - [ ] Add build steps (both versions)
@@ -280,15 +315,18 @@ Set up GitHub Actions workflow to deploy to OpenBSD server on push to main.
 - [ ] Add rollback documentation
 
 ## Acceptance Criteria
+
 - Deployment succeeds on push to main
 - Both builds deploy correctly
 - Post-deployment script runs
 - Rollback procedure documented
 
 ## Related Files
+
 - See `ref/deployment.md` for workflow template
 
 ## Labels
+
 `type:feature` `phase:1` `component:infra` `priority:critical`
 ```
 
@@ -298,9 +336,11 @@ Set up GitHub Actions workflow to deploy to OpenBSD server on push to main.
 
 ```markdown
 ## Description
+
 Define core TypeScript interfaces for database entities and application state.
 
 ## Tasks
+
 - [ ] Create `src/types/database.types.ts`
 - [ ] Define `Item` interface (id, type, title, dates, etc.)
 - [ ] Define `ItemHistory` interface
@@ -312,12 +352,14 @@ Define core TypeScript interfaces for database entities and application state.
 - [ ] Document type usage
 
 ## Acceptance Criteria
+
 - All types compile without errors
 - Types match database schema
 - Barrel export works
 - Types documented with JSDoc
 
 ## Labels
+
 `type:feature` `phase:1` `component:database` `priority:critical`
 ```
 
@@ -327,9 +369,11 @@ Define core TypeScript interfaces for database entities and application state.
 
 ```markdown
 ## Description
+
 Create service layer to wrap sql.js and manage database connection.
 
 ## Tasks
+
 - [ ] Create `src/services/database.service.ts`
 - [ ] Implement DatabaseService class
 - [ ] Add `initialize()` method (loads sql.js)
@@ -340,12 +384,14 @@ Create service layer to wrap sql.js and manage database connection.
 - [ ] Write unit tests
 
 ## Acceptance Criteria
+
 - Database initializes successfully
 - Schema created properly
 - Version tracking works
 - Tests pass (>80% coverage)
 
 ## Labels
+
 `type:feature` `phase:1` `component:database` `priority:critical`
 ```
 
@@ -355,9 +401,11 @@ Create service layer to wrap sql.js and manage database connection.
 
 ```markdown
 ## Description
+
 Port all CREATE TABLE, INDEX, and TRIGGER statements from prototype to TypeScript.
 
 ## Tasks
+
 - [ ] Create `src/db/schema.ts`
 - [ ] Port `item` table definition
 - [ ] Port `item_history` table definition
@@ -370,12 +418,14 @@ Port all CREATE TABLE, INDEX, and TRIGGER statements from prototype to TypeScrip
 - [ ] Add schema validation
 
 ## Acceptance Criteria
+
 - All tables create successfully
 - Triggers fire correctly
 - Indexes improve query performance
 - Schema version tracking works
 
 ## Labels
+
 `type:feature` `phase:1` `component:database` `priority:critical`
 ```
 
@@ -385,9 +435,11 @@ Port all CREATE TABLE, INDEX, and TRIGGER statements from prototype to TypeScrip
 
 ```markdown
 ## Description
+
 Create service to save/load database from IndexedDB for offline persistence.
 
 ## Tasks
+
 - [ ] Create `src/services/persistence.service.ts`
 - [ ] Implement `saveToIndexedDB(dbName, data)`
 - [ ] Implement `loadFromIndexedDB(dbName)`
@@ -398,12 +450,14 @@ Create service to save/load database from IndexedDB for offline persistence.
 - [ ] Write unit tests
 
 ## Acceptance Criteria
+
 - Database persists across page refreshes
 - Auto-save runs without blocking UI
 - Clear data function works
 - Error handling for quota issues
 
 ## Labels
+
 `type:feature` `phase:1` `component:database` `priority:critical`
 ```
 
@@ -413,9 +467,11 @@ Create service to save/load database from IndexedDB for offline persistence.
 
 ```markdown
 ## Description
+
 Create typed query builder functions for common database operations.
 
 ## Tasks
+
 - [ ] Create `src/db/queries/items.queries.ts`
   - [ ] getItems(branchId, filters)
   - [ ] insertItem(item)
@@ -432,12 +488,14 @@ Create typed query builder functions for common database operations.
 - [ ] Write unit tests for each query
 
 ## Acceptance Criteria
+
 - All queries return typed results
 - Parameterized queries used
 - Tests pass (>80% coverage)
 - Queries are performant
 
 ## Labels
+
 `type:feature` `phase:1` `component:database` `priority:high`
 ```
 
@@ -449,9 +507,11 @@ Create typed query builder functions for common database operations.
 
 ```markdown
 ## Description
+
 Set up Zustand state management stores for global and feature-specific state.
 
 ## Tasks
+
 - [ ] Create `src/stores/app.store.ts` (global state)
 - [ ] Create `src/stores/timeline.store.ts` (view state)
 - [ ] Create `src/stores/import.store.ts` (import workflow)
@@ -462,12 +522,14 @@ Set up Zustand state management stores for global and feature-specific state.
 - [ ] Write unit tests for stores
 
 ## Acceptance Criteria
+
 - All stores initialized
 - State updates reactively
 - Persistence works for preferences
 - Tests pass
 
 ## Labels
+
 `type:feature` `phase:2` `component:ui` `priority:critical`
 ```
 
@@ -477,9 +539,11 @@ Set up Zustand state management stores for global and feature-specific state.
 
 ```markdown
 ## Description
+
 Migrate CSV parsing logic from prototype to TypeScript service.
 
 ## Tasks
+
 - [ ] Create `src/services/csv-parser.service.ts`
 - [ ] Implement parseCSV(text) function
 - [ ] Handle quoted values, escaped commas
@@ -489,12 +553,14 @@ Migrate CSV parsing logic from prototype to TypeScript service.
 - [ ] Write comprehensive unit tests
 
 ## Acceptance Criteria
+
 - Parses sample-data.csv correctly
 - Handles edge cases gracefully
 - Tests pass (>90% coverage)
 - Performance: <100ms for 1000 rows
 
 ## Labels
+
 `type:feature` `phase:2` `component:import` `priority:high`
 ```
 
@@ -504,9 +570,11 @@ Migrate CSV parsing logic from prototype to TypeScript service.
 
 ```markdown
 ## Description
+
 Create React components for import workflow (file selection, column mapping, dry-run).
 
 ## Tasks
+
 - [ ] Create `components/import/ImportForm.tsx`
   - [ ] File upload input (CSV/JSON)
   - [ ] File preview table
@@ -523,6 +591,7 @@ Create React components for import workflow (file selection, column mapping, dry
 - [ ] Write component tests
 
 ## Acceptance Criteria
+
 - All components render correctly
 - File upload works
 - Column mapping functional
@@ -530,6 +599,7 @@ Create React components for import workflow (file selection, column mapping, dry
 - Component tests pass
 
 ## Labels
+
 `type:feature` `phase:2` `component:import` `priority:critical`
 ```
 
@@ -539,9 +609,11 @@ Create React components for import workflow (file selection, column mapping, dry
 
 ```markdown
 ## Description
+
 Create service for import dry-run and commit operations.
 
 ## Tasks
+
 - [ ] Create `src/services/import.service.ts`
 - [ ] Implement performDryRun(data, mapping, branch, strategy)
 - [ ] Implement commitImport(dryRunResults, branch)
@@ -552,12 +624,14 @@ Create service for import dry-run and commit operations.
 - [ ] Write integration tests
 
 ## Acceptance Criteria
+
 - Dry-run correctly categorizes rows
 - Commit inserts/updates database
 - Conflicts detected properly
 - Integration tests pass
 
 ## Labels
+
 `type:feature` `phase:2` `component:import` `priority:critical`
 ```
 
@@ -567,9 +641,11 @@ Create service for import dry-run and commit operations.
 
 ```markdown
 ## Description
+
 Install react-konva and create basic timeline canvas structure.
 
 ## Tasks
+
 - [ ] Install `react-konva` and `konva`
 - [ ] Create `components/timeline/TimelineCanvas.tsx`
 - [ ] Set up Stage and Layer components
@@ -580,6 +656,7 @@ Install react-konva and create basic timeline canvas structure.
 - [ ] Write component tests
 
 ## Acceptance Criteria
+
 - Canvas renders at full viewport
 - Panning works smoothly
 - Zoom works (mouse wheel)
@@ -587,6 +664,7 @@ Install react-konva and create basic timeline canvas structure.
 - Tests pass
 
 ## Labels
+
 `type:feature` `phase:2` `component:timeline` `priority:critical`
 ```
 
@@ -596,9 +674,11 @@ Install react-konva and create basic timeline canvas structure.
 
 ```markdown
 ## Description
+
 Create service to calculate timeline layout and render items on canvas.
 
 ## Tasks
+
 - [ ] Create `src/services/timeline.service.ts`
 - [ ] Implement groupItemsByLane(items, groupBy)
 - [ ] Implement calculateDateRange(items)
@@ -609,12 +689,14 @@ Create service to calculate timeline layout and render items on canvas.
 - [ ] Write unit tests
 
 ## Acceptance Criteria
+
 - Items render at correct positions
 - Different item types render correctly
 - Performance good with 1000+ items
 - Tests pass (>80% coverage)
 
 ## Labels
+
 `type:feature` `phase:2` `component:timeline` `priority:critical`
 ```
 
@@ -624,9 +706,11 @@ Create service to calculate timeline layout and render items on canvas.
 
 ```markdown
 ## Description
+
 Create controls for timeline view (zoom, filters, branch selector).
 
 ## Tasks
+
 - [ ] Create `components/timeline/TimelineControls.tsx`
 - [ ] Add branch selector dropdown
 - [ ] Add zoom level selector
@@ -638,12 +722,14 @@ Create controls for timeline view (zoom, filters, branch selector).
 - [ ] Write component tests
 
 ## Acceptance Criteria
+
 - All controls render correctly
 - State updates on change
 - Timeline re-renders on control change
 - Tests pass
 
 ## Labels
+
 `type:feature` `phase:2` `component:timeline` `priority:high`
 ```
 
@@ -653,9 +739,11 @@ Create controls for timeline view (zoom, filters, branch selector).
 
 ```markdown
 ## Description
+
 Create components for creating, switching, and managing branches.
 
 ## Tasks
+
 - [ ] Create `components/branches/BranchSelector.tsx`
   - [ ] Dropdown to switch branches
   - [ ] Current branch indicator
@@ -669,6 +757,7 @@ Create components for creating, switching, and managing branches.
 - [ ] Write component tests
 
 ## Acceptance Criteria
+
 - Can create new branches
 - Can switch between branches
 - Can edit branch metadata
@@ -676,6 +765,7 @@ Create components for creating, switching, and managing branches.
 - Tests pass
 
 ## Labels
+
 `type:feature` `phase:2` `component:branches` `priority:high`
 ```
 
@@ -685,9 +775,11 @@ Create components for creating, switching, and managing branches.
 
 ```markdown
 ## Description
+
 Create UI to compare two branches and show differences.
 
 ## Tasks
+
 - [ ] Create `components/branches/BranchCompare.tsx`
   - [ ] Select base branch (A)
   - [ ] Select compare branch (B)
@@ -701,12 +793,14 @@ Create UI to compare two branches and show differences.
 - [ ] Write tests
 
 ## Acceptance Criteria
+
 - Can select and compare two branches
 - Differences displayed correctly
 - Added/removed/changed categorized
 - Tests pass
 
 ## Labels
+
 `type:feature` `phase:2` `component:branches` `priority:high`
 ```
 
@@ -716,9 +810,11 @@ Create UI to compare two branches and show differences.
 
 ```markdown
 ## Description
+
 Create UI to search and view item version history.
 
 ## Tasks
+
 - [ ] Create `components/history/HistorySearch.tsx`
   - [ ] Search input (by title)
   - [ ] Branch selector
@@ -733,12 +829,14 @@ Create UI to search and view item version history.
 - [ ] Write tests
 
 ## Acceptance Criteria
+
 - Can search for items by title
 - Version history displays correctly
 - Field changes highlighted
 - Tests pass
 
 ## Labels
+
 `type:feature` `phase:2` `component:history` `priority:medium`
 ```
 
@@ -748,9 +846,11 @@ Create UI to search and view item version history.
 
 ```markdown
 ## Description
+
 Add functionality to revert an item to a previous version from history.
 
 ## Tasks
+
 - [ ] Create `components/history/RevertDialog.tsx`
   - [ ] Show version details
   - [ ] Confirmation dialog
@@ -761,6 +861,7 @@ Add functionality to revert an item to a previous version from history.
 - [ ] Write integration tests
 
 ## Acceptance Criteria
+
 - Can click "Revert" on any version
 - Item updates to selected version
 - New history entry created
@@ -768,6 +869,7 @@ Add functionality to revert an item to a previous version from history.
 - Tests pass
 
 ## Labels
+
 `type:feature` `phase:2` `component:history` `priority:high`
 ```
 
@@ -777,9 +879,11 @@ Add functionality to revert an item to a previous version from history.
 
 ```markdown
 ## Description
+
 Create undo/redo stack for all user operations.
 
 ## Tasks
+
 - [ ] Enhance `stores/undo.store.ts` with operation tracking
 - [ ] Add inverse functions for each operation type
 - [ ] Implement Ctrl+Z keyboard shortcut
@@ -790,6 +894,7 @@ Create undo/redo stack for all user operations.
 - [ ] Write comprehensive tests
 
 ## Acceptance Criteria
+
 - Ctrl+Z undoes last operation
 - Ctrl+Y redoes undone operation
 - Works for import, update, delete
@@ -797,6 +902,7 @@ Create undo/redo stack for all user operations.
 - Tests pass
 
 ## Labels
+
 `type:feature` `phase:2` `component:ui` `priority:medium`
 ```
 
@@ -808,9 +914,11 @@ Create undo/redo stack for all user operations.
 
 ```markdown
 ## Description
+
 Add support for task dependencies (which items depend on others).
 
 ## Tasks
+
 - [ ] Add `dependencies` column to schema (JSON array of IDs)
 - [ ] Update TypeScript types
 - [ ] Create UI to add/remove dependencies
@@ -819,12 +927,14 @@ Add support for task dependencies (which items depend on others).
 - [ ] Write tests
 
 ## Acceptance Criteria
+
 - Dependencies column exists
 - Can add/remove dependencies via UI
 - Circular dependency validation works
 - Tests pass
 
 ## Labels
+
 `type:feature` `phase:3` `component:timeline` `priority:medium`
 ```
 
@@ -834,9 +944,11 @@ Add support for task dependencies (which items depend on others).
 
 ```markdown
 ## Description
+
 Render dependency arrows between items on the timeline canvas.
 
 ## Tasks
+
 - [ ] Calculate arrow paths (start item end → dependent item start)
 - [ ] Render arrows using Konva Line with arrow
 - [ ] Add arrow hover effects
@@ -845,12 +957,14 @@ Render dependency arrows between items on the timeline canvas.
 - [ ] Write tests
 
 ## Acceptance Criteria
+
 - Arrows render between dependent items
 - Arrows positioned correctly
 - Performance good with 100+ arrows
 - Tests pass
 
 ## Labels
+
 `type:feature` `phase:3` `component:timeline` `priority:low`
 ```
 
@@ -860,9 +974,11 @@ Render dependency arrows between items on the timeline canvas.
 
 ```markdown
 ## Description
+
 Calculate and highlight the critical path based on dependencies.
 
 ## Tasks
+
 - [ ] Implement critical path algorithm (longest path through dependency graph)
 - [ ] Highlight critical path items (different color)
 - [ ] Add critical path toggle control
@@ -871,12 +987,14 @@ Calculate and highlight the critical path based on dependencies.
 - [ ] Write algorithm tests
 
 ## Acceptance Criteria
+
 - Critical path calculated correctly
 - Items on critical path highlighted
 - Toggle works
 - Tests pass (including edge cases)
 
 ## Labels
+
 `type:feature` `phase:3` `component:timeline` `priority:low`
 ```
 
@@ -886,9 +1004,11 @@ Calculate and highlight the critical path based on dependencies.
 
 ```markdown
 ## Description
+
 Implement dark mode theme toggle.
 
 ## Tasks
+
 - [ ] Configure Tailwind dark mode
 - [ ] Create dark color palette
 - [ ] Add theme toggle button
@@ -898,12 +1018,14 @@ Implement dark mode theme toggle.
 - [ ] Write tests
 
 ## Acceptance Criteria
+
 - Can toggle between light/dark
 - All components look good in dark mode
 - Theme persists across sessions
 - Tests pass
 
 ## Labels
+
 `type:enhancement` `phase:3` `component:ui` `priority:medium`
 ```
 
@@ -913,9 +1035,11 @@ Implement dark mode theme toggle.
 
 ```markdown
 ## Description
+
 Add PDF, Excel, and iCal export options.
 
 ## Tasks
+
 - [ ] Install jsPDF for PDF export
 - [ ] Create multi-page PDF export
 - [ ] Install xlsx library for Excel export
@@ -925,12 +1049,14 @@ Add PDF, Excel, and iCal export options.
 - [ ] Write integration tests
 
 ## Acceptance Criteria
+
 - PDF export creates readable document
 - Excel export maintains formatting
 - iCal export works in calendar apps
 - Tests pass
 
 ## Labels
+
 `type:feature` `phase:3` `component:export` `priority:low`
 ```
 
@@ -940,9 +1066,11 @@ Add PDF, Excel, and iCal export options.
 
 ```markdown
 ## Description
+
 Implement full-text search across all item fields.
 
 ## Tasks
+
 - [ ] Create search input component
 - [ ] Implement search query logic (title, tags, project, owner)
 - [ ] Highlight search results
@@ -952,12 +1080,14 @@ Implement full-text search across all item fields.
 - [ ] Write tests
 
 ## Acceptance Criteria
+
 - Search works across all fields
 - Results highlight correctly
 - Performance good with 5000+ items
 - Tests pass
 
 ## Labels
+
 `type:feature` `phase:3` `component:ui` `priority:medium`
 ```
 
@@ -967,9 +1097,11 @@ Implement full-text search across all item fields.
 
 ```markdown
 ## Description
+
 Add toggle for business days (exclude weekends).
 
 ## Tasks
+
 - [ ] Create business days utility
 - [ ] Add weekend exclusion logic
 - [ ] Add holiday configuration (optional)
@@ -978,12 +1110,14 @@ Add toggle for business days (exclude weekends).
 - [ ] Write comprehensive tests
 
 ## Acceptance Criteria
+
 - Business days toggle works
 - Weekends excluded from counts
 - Duration displays update correctly
 - Tests pass (including edge cases)
 
 ## Labels
+
 `type:feature` `phase:3` `component:timeline` `priority:low`
 ```
 
@@ -993,9 +1127,11 @@ Add toggle for business days (exclude weekends).
 
 ```markdown
 ## Description
+
 Make app work well on tablets and mobile devices.
 
 ## Tasks
+
 - [ ] Add responsive breakpoints
 - [ ] Create mobile navigation
 - [ ] Optimize timeline for touch
@@ -1004,6 +1140,7 @@ Make app work well on tablets and mobile devices.
 - [ ] Write responsive tests
 
 ## Acceptance Criteria
+
 - Works on tablet (768px+)
 - Usable on mobile (375px+)
 - Touch interactions work
@@ -1011,6 +1148,7 @@ Make app work well on tablets and mobile devices.
 - Tests pass
 
 ## Labels
+
 `type:enhancement` `phase:3` `component:ui` `priority:medium`
 ```
 
@@ -1020,9 +1158,11 @@ Make app work well on tablets and mobile devices.
 
 ```markdown
 ## Description
+
 Ensure app is accessible to users with disabilities.
 
 ## Tasks
+
 - [ ] Add ARIA labels to all interactive elements
 - [ ] Ensure keyboard navigation works
 - [ ] Add focus indicators
@@ -1032,6 +1172,7 @@ Ensure app is accessible to users with disabilities.
 - [ ] Write a11y tests
 
 ## Acceptance Criteria
+
 - All interactive elements keyboard-accessible
 - Screen reader announces correctly
 - Focus visible on all elements
@@ -1039,6 +1180,7 @@ Ensure app is accessible to users with disabilities.
 - Tests pass
 
 ## Labels
+
 `type:enhancement` `phase:3` `component:ui` `priority:high`
 ```
 
@@ -1050,9 +1192,11 @@ Ensure app is accessible to users with disabilities.
 
 ```markdown
 ## Description
+
 Write comprehensive unit and integration tests.
 
 ## Tasks
+
 - [ ] Identify untested code (coverage report)
 - [ ] Write unit tests for services
 - [ ] Write unit tests for utilities
@@ -1062,12 +1206,14 @@ Write comprehensive unit and integration tests.
 - [ ] Set up coverage threshold in CI
 
 ## Acceptance Criteria
+
 - Test coverage >80%
 - All critical paths tested
 - No flaky tests
 - CI fails if coverage drops
 
 ## Labels
+
 `type:test` `phase:4` `component:testing` `priority:critical`
 ```
 
@@ -1077,9 +1223,11 @@ Write comprehensive unit and integration tests.
 
 ```markdown
 ## Description
+
 Test application on all major browsers.
 
 ## Tasks
+
 - [ ] Test on Chrome/Edge (Windows)
 - [ ] Test on Firefox
 - [ ] Test on Safari (macOS)
@@ -1089,12 +1237,14 @@ Test application on all major browsers.
 - [ ] Add browser compatibility notice
 
 ## Acceptance Criteria
+
 - Works on all major browsers
 - Critical features work on mobile browsers
 - Known issues documented
 - Compatibility notice in UI
 
 ## Labels
+
 `type:test` `phase:4` `component:ui` `priority:high`
 ```
 
@@ -1104,9 +1254,11 @@ Test application on all major browsers.
 
 ```markdown
 ## Description
+
 Profile and optimize app performance.
 
 ## Tasks
+
 - [ ] Profile timeline rendering (React DevTools)
 - [ ] Optimize canvas rendering (layer caching)
 - [ ] Implement virtualization for large datasets
@@ -1116,12 +1268,14 @@ Profile and optimize app performance.
 - [ ] Run Lighthouse audit
 
 ## Acceptance Criteria
+
 - Timeline renders 1000 items in <1s
 - Bundle size <500 KB gzipped
 - Lighthouse performance score >90
 - No memory leaks
 
 ## Labels
+
 `type:enhancement` `phase:4` `component:timeline` `priority:high`
 ```
 
@@ -1131,9 +1285,11 @@ Profile and optimize app performance.
 
 ```markdown
 ## Description
+
 Review application for security vulnerabilities.
 
 ## Tasks
+
 - [ ] Check for XSS vulnerabilities
 - [ ] Verify parameterized queries (SQL injection)
 - [ ] Review dependencies for known CVEs
@@ -1143,6 +1299,7 @@ Review application for security vulnerabilities.
 - [ ] Document security considerations
 
 ## Acceptance Criteria
+
 - No XSS vulnerabilities found
 - All queries parameterized
 - No high-severity CVEs in dependencies
@@ -1150,6 +1307,7 @@ Review application for security vulnerabilities.
 - Documentation complete
 
 ## Labels
+
 `type:enhancement` `phase:4` `component:infra` `priority:critical`
 ```
 
@@ -1159,9 +1317,11 @@ Review application for security vulnerabilities.
 
 ```markdown
 ## Description
+
 Create comprehensive user guide and developer documentation.
 
 ## Tasks
+
 - [ ] Write user guide (features, workflows)
 - [ ] Add inline help tooltips
 - [ ] Create keyboard shortcuts reference
@@ -1171,12 +1331,14 @@ Create comprehensive user guide and developer documentation.
 - [ ] Add examples and screenshots
 
 ## Acceptance Criteria
+
 - User guide covers all features
 - Developer setup guide works
 - Screenshots up-to-date
 - Troubleshooting guide helpful
 
 ## Labels
+
 `type:docs` `phase:4` `priority:medium`
 ```
 
@@ -1188,9 +1350,11 @@ Create comprehensive user guide and developer documentation.
 
 ```markdown
 ## Description
+
 Deploy application to production server.
 
 ## Tasks
+
 - [ ] Verify GitHub Actions workflows work
 - [ ] Configure OpenBSD httpd
 - [ ] Set up SSL/TLS (Let's Encrypt)
@@ -1200,15 +1364,18 @@ Deploy application to production server.
 - [ ] Test all features on production
 
 ## Acceptance Criteria
+
 - Site accessible at swimlanes.jafner.com
 - HTTPS works
 - All features functional
 - No console errors
 
 ## Related Files
+
 - See `ref/deployment.md`
 
 ## Labels
+
 `type:feature` `phase:5` `component:infra` `priority:critical`
 ```
 
@@ -1218,9 +1385,11 @@ Deploy application to production server.
 
 ```markdown
 ## Description
+
 Tag v1.0.0 release and create GitHub release with downloadable HTML.
 
 ## Tasks
+
 - [ ] Ensure all v1.0 features complete
 - [ ] Update version in package.json
 - [ ] Create git tag `v1.0.0`
@@ -1230,12 +1399,14 @@ Tag v1.0.0 release and create GitHub release with downloadable HTML.
 - [ ] Write release notes
 
 ## Acceptance Criteria
+
 - GitHub release created
 - Single HTML file downloadable
 - Release notes clear
 - Version tag pushed
 
 ## Labels
+
 `type:feature` `phase:5` `component:infra` `priority:high`
 ```
 
@@ -1245,9 +1416,11 @@ Tag v1.0.0 release and create GitHub release with downloadable HTML.
 
 ```markdown
 ## Description
+
 Invite 2-3 coworkers to test the application and provide feedback.
 
 ## Tasks
+
 - [ ] Identify beta testers
 - [ ] Send invitation email with link
 - [ ] Provide quick start guide
@@ -1257,12 +1430,14 @@ Invite 2-3 coworkers to test the application and provide feedback.
 - [ ] Prioritize and fix critical issues
 
 ## Acceptance Criteria
+
 - At least 2 coworkers testing
 - Feedback collected
 - Critical issues fixed
 - UX improvements identified
 
 ## Labels
+
 `type:test` `phase:5` `priority:high`
 ```
 
@@ -1272,9 +1447,11 @@ Invite 2-3 coworkers to test the application and provide feedback.
 
 ```markdown
 ## Description
+
 Set up basic monitoring for production site.
 
 ## Tasks
+
 - [ ] Configure uptime monitoring (UptimeRobot, Pingdom)
 - [ ] Set up error tracking (Sentry) - optional
 - [ ] Configure analytics (Plausible) - optional
@@ -1283,12 +1460,14 @@ Set up basic monitoring for production site.
 - [ ] Document monitoring procedures
 
 ## Acceptance Criteria
+
 - Uptime alerts configured
 - Error tracking works (if enabled)
 - Analytics collecting (if enabled)
 - Logs reviewed regularly
 
 ## Labels
+
 `type:feature` `phase:5` `component:infra` `priority:low`
 ```
 
@@ -1297,6 +1476,7 @@ Set up basic monitoring for production site.
 ## Quick Start: Creating Issues in GitHub
 
 **Option 1: Manual Copy-Paste**
+
 1. Go to your GitHub repo → Issues → New Issue
 2. Copy title and body from above
 3. Add appropriate labels
@@ -1324,20 +1504,24 @@ Create a Node.js script to parse this file and create all issues automatically. 
 ## Issue Tracking Tips
 
 **Milestones:**
+
 - Create milestones for each phase (Phase 1, Phase 2, etc.)
 - Assign issues to appropriate milestone
 - Track progress via milestone view
 
 **Projects:**
+
 - Create GitHub Project board (Kanban)
 - Columns: Backlog, Todo, In Progress, In Review, Done
 - Drag issues between columns
 
 **Estimation:**
+
 - Add time estimates as labels (e.g., `estimate:1d`, `estimate:4h`)
 - Or use custom fields in GitHub Projects
 
 **Dependencies:**
+
 - Link related issues (e.g., "Depends on #10")
 - Use task lists in issue body
 

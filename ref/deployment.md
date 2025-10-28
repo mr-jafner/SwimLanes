@@ -815,6 +815,7 @@ ls -lh dist/assets/*.js.gz
 ### CDN (Optional Future Enhancement)
 
 If traffic grows, consider:
+
 - Cloudflare (free tier, CDN + DDoS protection)
 - Serve static assets from CDN
 - Keep dynamic API calls (if added) on origin
@@ -826,17 +827,20 @@ If traffic grows, consider:
 ### Automated Backups
 
 **Pre-deployment backups:**
+
 - Created automatically by `deploy-swimlanes.sh`
 - Stored in `/var/www/swimlanes-backups/`
 - Keep last 10 versions
 - Compressed with gzip
 
 **Server-level backups:**
+
 - Vultr provides snapshots (manual or scheduled)
 - Take snapshot before major updates
 - Cost: ~$1/mo for 10 GB snapshot
 
 **Git backups:**
+
 - Source code in GitHub (always recoverable)
 - Tagged releases contain single-file builds
 
@@ -861,19 +865,23 @@ If traffic grows, consider:
 ## Maintenance Schedule
 
 **Daily:**
+
 - GitHub Actions checks every push
 - SSL cert auto-renewal check (via cron)
 
 **Weekly:**
+
 - Review error logs
 - Check disk space
 
 **Monthly:**
+
 - Review old backups (auto-cleaned, verify)
 - Update dependencies (`npm outdated`)
 - Security updates (`pkg_add -u`)
 
 **Quarterly:**
+
 - Full server OS update
 - Review and update documentation
 - Load testing (if usage grows)
@@ -883,18 +891,21 @@ If traffic grows, consider:
 ## Future Enhancements
 
 **CI/CD Improvements:**
+
 - [ ] Add deployment to staging environment
 - [ ] Automated smoke tests post-deployment
 - [ ] Slack/Discord notifications on deploy
 - [ ] Deploy preview for PRs
 
 **Monitoring:**
+
 - [ ] Uptime monitoring (UptimeRobot, Pingdom)
 - [ ] Error tracking (Sentry)
 - [ ] Analytics (Plausible, self-hosted)
 - [ ] Performance monitoring (Lighthouse CI)
 
 **Infrastructure:**
+
 - [ ] Cloudflare for CDN + DDoS protection
 - [ ] Multiple deployment regions (if needed)
 - [ ] Database backups to S3-compatible storage

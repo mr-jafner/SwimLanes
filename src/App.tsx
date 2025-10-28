@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import './App.css'
-import { Button } from '@/components/ui/button'
+import { useState } from 'react';
+import './App.css';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -8,19 +8,19 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Toaster } from '@/components/ui/sonner'
-import { toast } from 'sonner'
+} from '@/components/ui/select';
+import { Toaster } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 function App() {
-  const [selectedItem, setSelectedItem] = useState<string>('')
+  const [selectedItem, setSelectedItem] = useState<string>('');
 
   return (
     <div className="min-h-screen bg-background text-foreground dark">
@@ -70,8 +70,8 @@ function App() {
               <DialogHeader>
                 <DialogTitle>SwimLanes Dialog</DialogTitle>
                 <DialogDescription>
-                  This is a dialog component from shadcn/ui. It's accessible, customizable, and works
-                  great with Tailwind CSS v4.
+                  This is a dialog component from shadcn/ui. It's accessible, customizable, and
+                  works great with Tailwind CSS v4.
                 </DialogDescription>
               </DialogHeader>
               <div className="py-4">
@@ -87,10 +87,12 @@ function App() {
         <section className="mb-12">
           <h2 className="text-2xl font-semibold mb-6">Select Component</h2>
           <div className="max-w-xs">
-            <Select onValueChange={(value) => {
-              setSelectedItem(value)
-              toast.success(`Selected: ${value}`)
-            }}>
+            <Select
+              onValueChange={(value) => {
+                setSelectedItem(value);
+                toast.success(`Selected: ${value}`);
+              }}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select an item type" />
               </SelectTrigger>
@@ -161,7 +163,7 @@ function App() {
         </footer>
       </div>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

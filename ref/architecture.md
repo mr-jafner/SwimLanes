@@ -202,17 +202,20 @@ swimlanes/
 ### Core Technologies
 
 **Frontend Framework:**
+
 - **React 18+** - UI library
   - Chosen for: Mature ecosystem, team familiarity, great tooling
   - Used with: Functional components, hooks, no class components
 
 **Language:**
+
 - **TypeScript 5.x** - Type-safe JavaScript
   - Strict mode enabled
   - No implicit any
   - Configured for React JSX
 
 **Build Tool:**
+
 - **Vite 5.x** - Fast build and dev server
   - Lightning-fast HMR (Hot Module Replacement)
   - Optimized production builds
@@ -221,12 +224,14 @@ swimlanes/
 ### UI & Styling
 
 **CSS Framework:**
+
 - **Tailwind CSS 3.x** - Utility-first CSS
   - JIT (Just-In-Time) compilation
   - Custom theme configuration
   - Purged unused styles in production
 
 **Component Library:**
+
 - **shadcn/ui** - Copy-paste component collection
   - Built on Radix UI primitives
   - Fully customizable (you own the code)
@@ -234,6 +239,7 @@ swimlanes/
   - Components: Button, Dialog, Select, Dropdown, Toast, etc.
 
 **Canvas Rendering:**
+
 - **react-konva 18.x** - React wrapper for Konva.js
   - Declarative canvas rendering
   - Built-in event handling
@@ -243,6 +249,7 @@ swimlanes/
 ### State Management
 
 **Global State:**
+
 - **Zustand 4.x** - Lightweight state management
   - ~1 KB bundle size
   - No boilerplate
@@ -250,6 +257,7 @@ swimlanes/
   - Middleware for persistence, devtools
 
 **State Organization:**
+
 ```typescript
 // Multiple stores by domain
 - appStore: Global app state (current tab, theme, etc.)
@@ -263,18 +271,21 @@ swimlanes/
 ### Database & Persistence
 
 **In-Browser Database:**
+
 - **sql.js 1.8+** - SQLite compiled to WebAssembly
   - Full SQL support
   - Triggers, indexes, constraints
   - Loaded from CDN: https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/
 
 **Persistence Layer:**
+
 - **IndexedDB** - Browser storage API
   - Auto-save every 5 seconds
   - Stores database as Blob
   - ~50 MB+ quota (can request more)
 
 **Backup Strategy:**
+
 - Manual export to .sqlite file
 - Manual import from .sqlite file
 - GitHub releases include example databases
@@ -282,18 +293,21 @@ swimlanes/
 ### Testing
 
 **Unit/Integration Testing:**
+
 - **Vitest 1.x** - Vite-native test framework
   - Fast, uses same config as Vite
   - Compatible with Jest API
   - Built-in coverage (c8)
 
 **React Testing:**
+
 - **React Testing Library** - Component testing
   - User-centric testing
   - Queries by accessibility attributes
   - Avoids implementation details
 
 **E2E Testing (Future):**
+
 - **Playwright** - Cross-browser E2E testing
   - Test on Chromium, Firefox, WebKit
   - Parallel execution
@@ -302,6 +316,7 @@ swimlanes/
 ### Development Tools
 
 **Code Quality:**
+
 - **ESLint** - JavaScript/TypeScript linting
   - `@typescript-eslint` plugin
   - React hooks rules
@@ -312,10 +327,12 @@ swimlanes/
   - Auto-format on save
 
 **Version Control:**
+
 - **Git** - Source control
 - **GitHub** - Repository hosting, CI/CD, releases
 
 **CI/CD:**
+
 - **GitHub Actions** - Automated workflows
   - Test on every PR
   - Deploy on push to main
@@ -328,6 +345,7 @@ swimlanes/
 ### Development Build
 
 **Vite Dev Server:**
+
 ```bash
 npm run dev
 # Starts dev server on http://localhost:5173
@@ -337,6 +355,7 @@ npm run dev
 ```
 
 **Configuration:**
+
 ```typescript
 // vite.config.ts
 export default defineConfig({
@@ -366,6 +385,7 @@ npm run build
 ```
 
 **Optimizations:**
+
 - Code splitting by route (lazy loading)
 - Tree shaking (remove unused code)
 - Minification (Terser)
@@ -374,6 +394,7 @@ npm run build
 - Target: ES2020 (modern browsers)
 
 **Configuration:**
+
 ```typescript
 // vite.config.ts
 export default defineConfig({
@@ -404,6 +425,7 @@ npm run build:single
 ```
 
 **Configuration:**
+
 ```typescript
 // vite.single.config.ts
 import { defineConfig } from 'vite';
@@ -430,6 +452,7 @@ export default defineConfig({
 ```
 
 **Result:**
+
 - Single `index.html` file (~300-500 KB)
 - No external dependencies
 - Works offline, can be emailed
@@ -598,7 +621,7 @@ export class DatabaseService {
 
   async initialize(): Promise<void> {
     const SQL = await initSqlJs({
-      locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+      locateFile: (file) => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`,
     });
 
     // Try to load from IndexedDB
@@ -684,13 +707,14 @@ export const useTimelineStore = create<TimelineState>()(
       setLaneGroupBy: (groupBy) => set({ laneGroupBy: groupBy }),
       setFilters: (filters) => set(filters),
       setPanOffset: (offset) => set({ panOffset: offset }),
-      reset: () => set({
-        zoomLevel: 'month',
-        laneGroupBy: 'lane',
-        filterType: '',
-        filterProject: '',
-        panOffset: { x: 0, y: 0 },
-      }),
+      reset: () =>
+        set({
+          zoomLevel: 'month',
+          laneGroupBy: 'lane',
+          filterType: '',
+          filterProject: '',
+          panOffset: { x: 0, y: 0 },
+        }),
     }),
     {
       name: 'timeline-preferences', // localStorage key
@@ -750,10 +774,11 @@ export const useUndoStore = create<UndoState>((set, get) => ({
   past: [],
   future: [],
 
-  addOperation: (op) => set((state) => ({
-    past: [...state.past, op],
-    future: [], // Clear redo stack
-  })),
+  addOperation: (op) =>
+    set((state) => ({
+      past: [...state.past, op],
+      future: [], // Clear redo stack
+    })),
 
   undo: async () => {
     const { past } = get();
@@ -899,11 +924,13 @@ swimlanes.jafner.com
 ### Client-Side Security
 
 **XSS Prevention:**
+
 - React auto-escapes by default
 - Never use `dangerouslySetInnerHTML` without sanitization
 - Validate all user inputs
 
 **SQL Injection (sql.js):**
+
 - Always use parameterized queries
 - Never concatenate user input into SQL strings
 
@@ -916,6 +943,7 @@ db.run('SELECT * FROM item WHERE title = ?', [userInput]);
 ```
 
 **Data Privacy:**
+
 - All data stored locally (IndexedDB)
 - No analytics/tracking by default
 - Optional: Add encryption layer for sensitive data
@@ -933,6 +961,7 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains
 ```
 
 **HTTPS:**
+
 - SSL/TLS certificate (Let's Encrypt)
 - Redirect HTTP → HTTPS
 - HSTS enabled
@@ -946,6 +975,7 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains
 **Target:** < 500 KB (gzipped)
 
 **Techniques:**
+
 - Code splitting (lazy load routes)
 - Tree shaking (remove unused code)
 - Minification (Terser)
@@ -955,6 +985,7 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains
 ### Runtime Performance
 
 **Timeline Rendering:**
+
 - Use react-konva layers for caching
 - Virtualize items (only render visible viewport)
 - Debounce pan/zoom updates
@@ -964,19 +995,19 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains
 // Virtualization example
 const visibleItems = useMemo(() => {
   const { startDate, endDate } = viewportDateRange;
-  return items.filter(item =>
-    item.start_date >= startDate && item.start_date <= endDate
-  );
+  return items.filter((item) => item.start_date >= startDate && item.start_date <= endDate);
 }, [items, viewportDateRange]);
 ```
 
 **Database Queries:**
+
 - Use indexes for common queries
 - Prepare statements for repeated queries
 - Batch operations in transactions
 - Limit result sets (pagination)
 
 **Auto-Save:**
+
 - Debounce save operations
 - Use Web Workers for export (future)
 - Compress before saving to IndexedDB

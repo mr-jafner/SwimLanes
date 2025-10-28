@@ -1,13 +1,13 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
   /* SwimLanes item type colors (from CLAUDE.md) */
-  --color-task: #3b82f6;      /* blue */
-  --color-milestone: #22c55e;  /* green */
-  --color-release: #f97316;    /* orange */
-  --color-meeting: #a855f7;    /* purple */
+  --color-task: #3b82f6; /* blue */
+  --color-milestone: #22c55e; /* green */
+  --color-release: #f97316; /* orange */
+  --color-meeting: #a855f7; /* purple */
 }
 
 @theme inline {

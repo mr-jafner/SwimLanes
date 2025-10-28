@@ -11,6 +11,7 @@ I'll build you a complete local-only timeline app based on this spec. This will 
 A **fully functional, browser-based timeline manager** with these key features:
 
 ### ✅ Stage 1: Import/Map
+
 - Drag-and-drop CSV/JSON import
 - Smart auto-detection of column mappings
 - Three ID strategies (generate, use column, match by key)
@@ -18,13 +19,15 @@ A **fully functional, browser-based timeline manager** with these key features:
 - Save mapping profiles for reuse
 - Branch targeting (import into any branch)
 
-### ✅ Stage 2: Update/Append  
+### ✅ Stage 2: Update/Append
+
 - Re-import with saved profiles
 - Two modes: upsert or update-only
 - Automatic backup before import
 - Full conflict detection
 
 ### ✅ Stage 3: View Timeline
+
 - Interactive canvas-based Gantt chart
 - Swim lanes by owner/project/lane/type
 - Zoom levels: day/week/month/quarter/year
@@ -33,18 +36,21 @@ A **fully functional, browser-based timeline manager** with these key features:
 - Visual encoding: tasks as bars, milestones as diamonds
 
 ### ✅ Branch Management
+
 - Create unlimited branches from any branch
 - Git-like workflow for scenario planning
 - Compare any two branches with visual diffs
 - Full isolation between branches
 
 ### ✅ Version History
+
 - Every change captured in `item_history`
 - Search by item title
 - View complete version timeline
 - Field-level change tracking
 
 ### ✅ Export
+
 - PNG export of current view
 - Standalone HTML with embedded data
 - Metadata footer (branch, timestamp, counts)
@@ -52,19 +58,21 @@ A **fully functional, browser-based timeline manager** with these key features:
 ## 🎯 Core Architecture
 
 **Database**: SQLite via sql.js (runs entirely in browser)
+
 - `item` table with composite key (id, branch_id)
 - `item_history` for complete audit trail
 - Triggers auto-create versions on INSERT/UPDATE
 - Indexes for fast queries
 
 **Schema Exactly Per Spec**:
+
 ```sql
-item(id, type, title, start_date, end_date, owner, lane, 
-     project, tags, source_id, source_row_hash, 
+item(id, type, title, start_date, end_date, owner, lane,
+     project, tags, source_id, source_row_hash,
      branch_id, updated_at)
 
 item_history(id, branch_id, version, op, snapshot_at,
-            type, title, start_date, end_date, owner, 
+            type, title, start_date, end_date, owner,
             lane, project, tags)
 ```
 
@@ -76,9 +84,10 @@ item_history(id, branch_id, version, op, snapshot_at,
 4. **Experiment** with branches for what-if scenarios
 
 ### Quick Test Workflow:
+
 ```
 1. Import sample-data.csv to "main" branch
-2. Create new branch "what-if-delayed"  
+2. Create new branch "what-if-delayed"
 3. Re-import modified data (shift dates by +1 week)
 4. Go to Compare tab → compare main vs what-if-delayed
 5. See exactly what changed
@@ -105,6 +114,7 @@ item_history(id, branch_id, version, op, snapshot_at,
 ## 📊 Sample Data Included
 
 25 realistic items across 3 projects (Alpha, Beta, Infrastructure):
+
 - Tasks with date ranges
 - Milestones (single dates)
 - Releases
@@ -113,6 +123,7 @@ item_history(id, branch_id, version, op, snapshot_at,
 - Spanning Q1 2025 (Jan-Mar)
 
 The app is **production-ready** for local use and implements all core functionality from your spec. The only deferred features are:
+
 - Merge (can add with conflict resolution UI)
 - Undo/redo stack (SQLite session extension would make this trivial)
 - Business day calculations (toggle for display)

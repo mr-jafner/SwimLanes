@@ -10,6 +10,7 @@
 ## Project Goals
 
 Transform the current HTML prototype into a production-ready web application that:
+
 - ✅ Maintains local-first, offline-capable architecture
 - ✅ Provides modern development experience with testing and maintainability
 - ✅ Deploys as both hosted web app (swimlanes.jafner.com) and downloadable single HTML file
@@ -23,16 +24,19 @@ Transform the current HTML prototype into a production-ready web application tha
 ### Chosen Path: **Option B1 + B2 (Enhanced Modular Web App)**
 
 **Not Tauri (Option A)** - Rejected due to:
+
 - Corporate environment installation friction (admin rights required)
 - Difficult distribution via email/SharePoint (.exe files blocked)
 - Overhead for simple coworker sharing use case
 
 **Not Refined Prototype (Option C)** - Rejected due to:
+
 - Poor maintainability and testability
 - Technical debt accumulation
 - Difficulty adding complex features
 
 **Selected Approach Benefits:**
+
 - Modern TypeScript development with proper tooling
 - Builds to both hosted SPA and single HTML file
 - No installation barriers for coworkers
@@ -43,26 +47,31 @@ Transform the current HTML prototype into a production-ready web application tha
 ## Tech Stack
 
 **Core:**
+
 - React 18+
 - TypeScript 5.x (strict mode)
 - Vite (build tool)
 
 **State & Data:**
+
 - Zustand (state management)
 - sql.js (SQLite in browser via WASM)
 - IndexedDB (auto-save persistence)
 
 **UI/Styling:**
+
 - Tailwind CSS
 - shadcn/ui (copy-paste components)
 - react-konva (canvas timeline rendering)
 
 **Testing:**
+
 - Vitest (unit/integration)
 - React Testing Library
 - Playwright (E2E, added later)
 
 **Deployment:**
+
 - Self-hosted OpenBSD (Vultr) via GitHub Actions
 - Domain: swimlanes.jafner.com
 - Web server: OpenBSD httpd
@@ -110,6 +119,7 @@ Transform the current HTML prototype into a production-ready web application tha
    - Document structure in README
 
 **Deliverables:**
+
 - ✅ Working Vite project with both build targets
 - ✅ Automated deployment pipeline
 - ✅ Testing framework configured
@@ -155,6 +165,7 @@ Transform the current HTML prototype into a production-ready web application tha
    - Add clear local data function
 
 **Deliverables:**
+
 - ✅ Fully typed database layer
 - ✅ All prototype SQL migrated to services
 - ✅ IndexedDB persistence working
@@ -207,6 +218,7 @@ Transform the current HTML prototype into a production-ready web application tha
    - Add store persistence to localStorage for UI preferences
 
 **Deliverables:**
+
 - ✅ Full import/map workflow migrated
 - ✅ Interactive timeline visualization
 - ✅ Filters and controls working
@@ -248,6 +260,7 @@ Transform the current HTML prototype into a production-ready web application tha
    - Add keyboard shortcut listeners
 
 **Deliverables:**
+
 - ✅ Full branch management system
 - ✅ Version history with revert capability
 - ✅ Branch comparison working
@@ -294,6 +307,7 @@ Transform the current HTML prototype into a production-ready web application tha
    - Update duration displays
 
 **Deliverables:**
+
 - ✅ Dependency arrows and critical path
 - ✅ Enhanced export options
 - ✅ Advanced filtering
@@ -334,6 +348,7 @@ Transform the current HTML prototype into a production-ready web application tha
    - Create video tutorial (optional)
 
 **Deliverables:**
+
 - ✅ Polished, professional UI
 - ✅ Accessible application
 - ✅ Performant with large datasets
@@ -378,6 +393,7 @@ Transform the current HTML prototype into a production-ready web application tha
    - Test on mobile viewport
 
 **Deliverables:**
+
 - ✅ >80% test coverage
 - ✅ All critical paths tested
 - ✅ CI/CD runs tests on every commit
@@ -415,6 +431,7 @@ Transform the current HTML prototype into a production-ready web application tha
    - Create developer onboarding guide
 
 **Deliverables:**
+
 - ✅ Cross-browser compatibility verified
 - ✅ Performance optimized
 - ✅ Security reviewed
@@ -469,12 +486,14 @@ Transform the current HTML prototype into a production-ready web application tha
 ### Launch Announcement
 
 **Internal (Coworkers):**
+
 - Email with link to swimlanes.jafner.com
 - Quick start guide
 - Link to download single-file version
 - Support contact info
 
 **External (Optional):**
+
 - GitHub repository public
 - Blog post
 - Product Hunt launch
@@ -487,12 +506,14 @@ Transform the current HTML prototype into a production-ready web application tha
 ### Potential v2.0 Features
 
 **Collaboration (if backend added):**
+
 - Real-time collaboration
 - Cloud sync (optional)
 - Shared workspaces
 - Comments and annotations
 
 **Advanced Planning:**
+
 - Resource allocation tracking
 - Budget/cost tracking
 - Recurring items
@@ -500,6 +521,7 @@ Transform the current HTML prototype into a production-ready web application tha
 - Gantt chart export to Project/Excel
 
 **Integrations:**
+
 - Import from Jira
 - Import from GitHub Projects
 - Import from Linear
@@ -507,6 +529,7 @@ Transform the current HTML prototype into a production-ready web application tha
 - Slack notifications
 
 **Analytics:**
+
 - Velocity tracking
 - Burndown charts
 - Team capacity planning
@@ -519,18 +542,22 @@ Transform the current HTML prototype into a production-ready web application tha
 ### Known Risks
 
 **Risk: Browser storage limits (IndexedDB)**
+
 - Mitigation: Warn users at 80% capacity, encourage export
 - Fallback: Download-only mode (no persistence)
 
 **Risk: Large datasets (5000+ items) performance**
+
 - Mitigation: Implement virtualization, lazy loading
 - Fallback: Pagination or branch splitting
 
 **Risk: Browser compatibility (Safari quirks)**
+
 - Mitigation: Test early and often on Safari
 - Fallback: Show browser compatibility warning
 
 **Risk: Deployment to OpenBSD issues**
+
 - Mitigation: Test deployment early in Phase 1
 - Fallback: Deploy to Vercel/Netlify temporarily
 
@@ -539,18 +566,21 @@ Transform the current HTML prototype into a production-ready web application tha
 ## Success Metrics
 
 ### Development Metrics
+
 - ✅ Test coverage >80%
 - ✅ Build time <30 seconds
 - ✅ Bundle size <500 KB (gzipped)
 - ✅ Lighthouse score >90
 
 ### User Metrics
+
 - ✅ Page load <2 seconds
 - ✅ Timeline renders 1000 items in <1 second
 - ✅ No data loss (IndexedDB reliable)
 - ✅ Works offline (PWA)
 
 ### Adoption Metrics (Post-Launch)
+
 - Track active users
 - Track timelines created
 - Collect feedback
@@ -561,11 +591,13 @@ Transform the current HTML prototype into a production-ready web application tha
 ## Resource Requirements
 
 ### Development Time
+
 - **Total:** 5-6 weeks
 - **Daily:** 4-6 hours/day
 - **Critical path:** Phases 1-2 (weeks 1-4)
 
 ### Tools & Services
+
 - ✅ GitHub (repository, actions) - Free
 - ✅ Vultr VPS (existing) - $0
 - ✅ Domain (jafner.com) - $0 (existing)
@@ -577,18 +609,21 @@ Transform the current HTML prototype into a production-ready web application tha
 ## Rollout Strategy
 
 ### Beta Testing (Week 5-6)
+
 - Internal testing with 2-3 coworkers
 - Collect feedback
 - Fix critical bugs
 - Iterate on UX
 
 ### v1.0 Launch (Week 6)
+
 - Broader coworker rollout
 - Monitor for issues
 - Provide support
 - Gather feature requests
 
 ### v1.1+ Updates (Ongoing)
+
 - Address bugs
 - Add minor features
 - Improve performance
@@ -601,6 +636,7 @@ Transform the current HTML prototype into a production-ready web application tha
 ### Issue Labels
 
 **Type:**
+
 - `type:bug` - Something isn't working
 - `type:feature` - New feature request
 - `type:enhancement` - Improve existing feature
@@ -608,12 +644,14 @@ Transform the current HTML prototype into a production-ready web application tha
 - `type:refactor` - Code cleanup
 
 **Priority:**
+
 - `priority:critical` - Blocks users, must fix immediately
 - `priority:high` - Important, fix in next sprint
 - `priority:medium` - Nice to have
 - `priority:low` - Backlog
 
 **Phase:**
+
 - `phase:1` - Foundation
 - `phase:2` - Features
 - `phase:3` - Polish
@@ -621,6 +659,7 @@ Transform the current HTML prototype into a production-ready web application tha
 - `phase:5` - Deployment
 
 **Component:**
+
 - `component:database` - Database layer
 - `component:import` - Import/map features
 - `component:timeline` - Timeline visualization

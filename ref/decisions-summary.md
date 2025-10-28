@@ -22,17 +22,20 @@ This document summarizes all key architectural and technical decisions made for 
 ### Architecture Choice: **Option B1 + B2 (Enhanced Modular Web App)**
 
 **Why NOT Tauri (Desktop App):**
+
 - ❌ Requires admin rights to install (corporate restriction)
 - ❌ .exe files blocked by email filters
 - ❌ Difficult to distribute to coworkers
 - ❌ Overhead for simple sharing use case
 
 **Why NOT Refined Prototype:**
+
 - ❌ Poor maintainability
 - ❌ Difficult to test
 - ❌ Technical debt accumulation
 
 **Why YES to Enhanced Web App:**
+
 - ✅ No installation required
 - ✅ Works in any browser
 - ✅ Easy to share (just send link or HTML file)
@@ -46,44 +49,44 @@ This document summarizes all key architectural and technical decisions made for 
 
 ### Core Technologies
 
-| Category | Technology | Version | Reason |
-|----------|-----------|---------|--------|
-| **Framework** | React | 18+ | Team familiarity, mature ecosystem |
-| **Language** | TypeScript | 5.x | Type safety, better DX |
-| **Build Tool** | Vite | 5.x | Fast builds, HMR, modern |
+| Category       | Technology | Version | Reason                             |
+| -------------- | ---------- | ------- | ---------------------------------- |
+| **Framework**  | React      | 18+     | Team familiarity, mature ecosystem |
+| **Language**   | TypeScript | 5.x     | Type safety, better DX             |
+| **Build Tool** | Vite       | 5.x     | Fast builds, HMR, modern           |
 
 ### State & Data
 
-| Category | Technology | Reason |
-|----------|-----------|--------|
-| **State Management** | Zustand | Minimal boilerplate, lightweight (~1 KB) |
-| **Database** | sql.js (SQLite WASM) | Full SQL, runs in browser, existing prototype uses it |
-| **Persistence** | IndexedDB | Large storage, async, standard API |
+| Category             | Technology           | Reason                                                |
+| -------------------- | -------------------- | ----------------------------------------------------- |
+| **State Management** | Zustand              | Minimal boilerplate, lightweight (~1 KB)              |
+| **Database**         | sql.js (SQLite WASM) | Full SQL, runs in browser, existing prototype uses it |
+| **Persistence**      | IndexedDB            | Large storage, async, standard API                    |
 
 ### UI & Styling
 
-| Category | Technology | Reason |
-|----------|-----------|--------|
-| **CSS Framework** | Tailwind CSS | Team uses it in other project, utility-first |
-| **Components** | shadcn/ui | Copy-paste (not a dependency), highly customizable |
-| **Canvas** | react-konva | Declarative React API, performant, event handling |
+| Category          | Technology   | Reason                                             |
+| ----------------- | ------------ | -------------------------------------------------- |
+| **CSS Framework** | Tailwind CSS | Team uses it in other project, utility-first       |
+| **Components**    | shadcn/ui    | Copy-paste (not a dependency), highly customizable |
+| **Canvas**        | react-konva  | Declarative React API, performant, event handling  |
 
 ### Testing
 
-| Category | Technology | Reason |
-|----------|-----------|--------|
-| **Unit/Integration** | Vitest | Fast, Vite-native, Jest-compatible API |
-| **React Testing** | React Testing Library | User-centric, standard for React |
-| **E2E (future)** | Playwright | Cross-browser, reliable |
+| Category             | Technology            | Reason                                 |
+| -------------------- | --------------------- | -------------------------------------- |
+| **Unit/Integration** | Vitest                | Fast, Vite-native, Jest-compatible API |
+| **React Testing**    | React Testing Library | User-centric, standard for React       |
+| **E2E (future)**     | Playwright            | Cross-browser, reliable                |
 
 ### Build & Deploy
 
-| Category | Technology | Reason |
-|----------|-----------|--------|
-| **CI/CD** | GitHub Actions | Free, integrated with GitHub |
-| **Hosting** | Self-hosted OpenBSD | Existing Vultr server, full control |
-| **Web Server** | httpd (OpenBSD) | Built-in, simple, performant |
-| **Domain** | swimlanes.jafner.com | Custom domain on existing infrastructure |
+| Category       | Technology           | Reason                                   |
+| -------------- | -------------------- | ---------------------------------------- |
+| **CI/CD**      | GitHub Actions       | Free, integrated with GitHub             |
+| **Hosting**    | Self-hosted OpenBSD  | Existing Vultr server, full control      |
+| **Web Server** | httpd (OpenBSD)      | Built-in, simple, performant             |
+| **Domain**     | swimlanes.jafner.com | Custom domain on existing infrastructure |
 
 ---
 
@@ -92,11 +95,13 @@ This document summarizes all key architectural and technical decisions made for 
 ### 1. State Management: Zustand
 
 **Options Considered:**
+
 - Redux Toolkit (too much boilerplate)
 - Jotai (less familiar)
 - React Context + useReducer (too basic)
 
 **Decision:** Zustand
+
 - Minimal API, easy to learn
 - Perfect for TypeScript
 - Middleware for persistence
@@ -105,11 +110,13 @@ This document summarizes all key architectural and technical decisions made for 
 ### 2. UI Components: shadcn/ui
 
 **Options Considered:**
+
 - Build everything custom (too much work)
 - Headless UI (still need to style everything)
 - Radix UI (shadcn uses this under the hood)
 
 **Decision:** shadcn/ui
+
 - Not a dependency (copies components to your codebase)
 - Uses Radix UI primitives (accessible)
 - Pre-styled with Tailwind
@@ -118,11 +125,13 @@ This document summarizes all key architectural and technical decisions made for 
 ### 3. Canvas Rendering: react-konva
 
 **Options Considered:**
+
 - Raw Canvas API (too imperative, hard to maintain)
 - Fabric.js (not React-friendly)
 - Konva.js directly (react-konva is better for React)
 
 **Decision:** react-konva
+
 - Declarative React components for canvas
 - Built-in drag, events, transforms
 - Performant (1000+ shapes no problem)
@@ -131,17 +140,20 @@ This document summarizes all key architectural and technical decisions made for 
 ### 4. Database Persistence: IndexedDB Auto-Save
 
 **Options Considered:**
+
 - In-memory only (lost on refresh)
 - localStorage (too small, 5-10 MB limit)
 - Manual file only (users must remember to save)
 
 **Decision:** IndexedDB with auto-save + manual export
+
 - Auto-save every 5 seconds (convenience)
 - Manual export to .sqlite file (sharing, backup)
 - Clear local data button (transparency)
 - 100% local (privacy)
 
 **User Control:**
+
 - Clear UI showing data is local
 - Export/import buttons prominently displayed
 - "Clear local data" option available
@@ -149,11 +161,13 @@ This document summarizes all key architectural and technical decisions made for 
 ### 5. Deployment: Self-Hosted OpenBSD
 
 **Options Considered:**
+
 - Vercel (easier, but want self-hosted)
 - Netlify (easier, but want self-hosted)
 - Cloudflare Pages (easier, but want self-hosted)
 
 **Decision:** OpenBSD on Vultr via GitHub Actions
+
 - Already have server running
 - Full control over infrastructure
 - No vendor lock-in
@@ -164,11 +178,13 @@ This document summarizes all key architectural and technical decisions made for 
 **Decision:** Build both versions automatically
 
 **Hosted Version (dist/):**
+
 - Code-split, optimized SPA
 - Served at swimlanes.jafner.com
 - Best performance
 
 **Single-File Version (dist-single/):**
+
 - Everything inlined (HTML + CSS + JS)
 - Downloadable at swimlanes.jafner.com/download/swimlanes.html
 - Easy sharing (email, network drive)
@@ -176,15 +192,18 @@ This document summarizes all key architectural and technical decisions made for 
 ### 7. Project Structure: Layer-Based
 
 **Options Considered:**
+
 - Feature-based (group by feature)
 - Layer-based (group by type)
 
 **Decision:** Layer-based
+
 - Simpler for app of this size
 - Clear separation: components, services, stores, types
 - Easy to navigate
 
 **Structure:**
+
 ```
 src/
 ├── components/  # All React components
@@ -199,16 +218,19 @@ src/
 ### 8. Migrations: Version Tracking Only (For Now)
 
 **Options Considered:**
+
 - Full migration system from day 1 (overhead)
 - No versioning at all (risky)
 
 **Decision:** Version tracking table + friendly errors
+
 - Track schema version in database
 - Detect version mismatches
 - Show friendly message: "Please export/re-import"
 - Add full migrations later (before public release)
 
 **Rationale:**
+
 - Early users (coworkers) can tolerate export/re-import
 - Faster iteration without migration baggage
 - Add proper migrations when schema stabilizes
@@ -216,12 +238,14 @@ src/
 ### 9. TypeScript: Strict Mode
 
 **Decision:** Full strict mode enabled
+
 - Building for coworkers (quality matters)
 - Catches bugs early
 - Better refactoring
 - Self-documenting code
 
 **tsconfig.json:**
+
 ```json
 {
   "compilerOptions": {
@@ -235,11 +259,13 @@ src/
 ### 10. Testing: Unit + Integration
 
 **Options Considered:**
+
 - No tests (too risky)
 - Unit only (not enough coverage)
 - Full E2E from start (too slow)
 
 **Decision:** Unit + Integration tests, E2E later
+
 - Test services and utilities (unit)
 - Test component interactions (integration)
 - Add Playwright E2E after v1.0
@@ -254,6 +280,7 @@ src/
 Electron was considered as desktop app alternative to Tauri.
 
 **Rejected because:**
+
 - Much larger bundle size (120+ MB vs Tauri's 5-10 MB)
 - Higher memory usage
 - Still requires installation (same problem as Tauri)
@@ -264,6 +291,7 @@ Electron was considered as desktop app alternative to Tauri.
 Both are excellent frameworks.
 
 **Rejected because:**
+
 - Team already using React in another project (consistency)
 - Larger ecosystem and community
 - More familiar to team
@@ -275,6 +303,7 @@ Both are excellent frameworks.
 Redux Toolkit is a solid choice for complex apps.
 
 **Rejected because:**
+
 - Too much boilerplate for this app's needs
 - Zustand simpler and lighter
 - Can always migrate to Redux later if needed
@@ -284,6 +313,7 @@ Redux Toolkit is a solid choice for complex apps.
 Options like Firebase, Supabase considered.
 
 **Rejected because:**
+
 - Spec explicitly requires local-only
 - No server dependency
 - Privacy concerns (coworkers may handle sensitive data)
@@ -296,17 +326,20 @@ Options like Firebase, Supabase considered.
 These were discussed but deferred:
 
 **Optional Backend (Future):**
+
 - If team wants collaboration features
 - Cloud sync could be added optionally
 - Local-first would still be default
 - Backend would be opt-in, not required
 
 **Mobile Apps (Future):**
+
 - Could build native apps with React Native
 - Or progressive web app (PWA) for mobile browsers
 - Not needed for v1.0 (desktop-first)
 
 **Real-Time Collaboration (Future):**
+
 - Could add if backend is added
 - WebSockets or CRDTs for sync
 - Not needed for initial use case
@@ -328,6 +361,7 @@ These requirements shaped all decisions:
 ## Success Criteria
 
 **Technical:**
+
 - ✅ Test coverage >80%
 - ✅ Build time <30 seconds
 - ✅ Bundle size <500 KB (gzipped)
@@ -335,6 +369,7 @@ These requirements shaped all decisions:
 - ✅ Works in Chrome, Firefox, Safari, Edge
 
 **User Experience:**
+
 - ✅ Page load <2 seconds
 - ✅ Timeline renders 1000 items in <1 second
 - ✅ No data loss (reliable auto-save)
@@ -342,6 +377,7 @@ These requirements shaped all decisions:
 - ✅ Intuitive UI (minimal training needed)
 
 **Deployment:**
+
 - ✅ Automated via GitHub Actions
 - ✅ Deploys in <5 minutes
 - ✅ Rollback in <2 minutes
@@ -364,6 +400,7 @@ These requirements shaped all decisions:
 ## Resources
 
 **Documentation:**
+
 - `roadmap.md` - Detailed phased plan
 - `architecture.md` - Technical architecture
 - `deployment.md` - Deployment procedures
@@ -371,10 +408,12 @@ These requirements shaped all decisions:
 - `CLAUDE.md` - Context for Claude Code
 
 **Reference:**
+
 - `claude_description.md` - Original Claude spec
 - `chatgpt_description.md` - Original ChatGPT spec
 
 **Legacy:**
+
 - `../legacy/timeline-app.html` - Working prototype
 - `../legacy/timeline-swimlane-app.html` - Older prototype
 
@@ -392,6 +431,7 @@ These requirements shaped all decisions:
 ## Change Log
 
 **v1.0 (2025-01-25):**
+
 - Initial decisions document
 - All architectural decisions finalized
 - Ready to begin development

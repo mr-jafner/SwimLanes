@@ -51,24 +51,29 @@ To test the original working prototype: open `legacy/timeline-app.html` in a bro
 ## Tech Stack
 
 **Core:**
+
 - React 18 + TypeScript 5.x (strict mode)
 - Vite 5.x (build tool, dev server)
 - Tailwind CSS (TODO: Issue #2)
 
 **State & Data:**
+
 - Zustand (state management) (TODO: Issue #15)
 - sql.js (SQLite WASM for local database)
 - IndexedDB (auto-save persistence) (TODO: Issue #13)
 
 **UI & Canvas:**
+
 - shadcn/ui (component library) (TODO: Issue #3)
 - react-konva (timeline canvas rendering) (TODO: Issue #19)
 
 **Testing:**
+
 - Vitest + React Testing Library (TODO: Issue #7)
 - Playwright for E2E (future)
 
 **Deployment:**
+
 - Self-hosted OpenBSD (Vultr) via GitHub Actions (TODO: Issue #9, #41)
 - Domain: swimlanes.jafner.com
 
@@ -165,11 +170,13 @@ SwimLanes/
 **Project Board:** https://github.com/mr-jafner/SwimLanes/projects
 
 **Organization:**
+
 - 40 issues created across 5 milestones (Phase 1-5)
 - Labels: `type:*`, `priority:*`, `phase:*`, `component:*`
 - Kanban board: Backlog → Todo → In Progress → In Review → Done
 
 **Milestones:**
+
 - Phase 1: Foundation & Architecture (Due: Feb 8, 2025)
 - Phase 2: Feature Migration & Completeness (Due: Feb 22, 2025)
 - Phase 3: Advanced Features & Polish (Due: Mar 1, 2025)
@@ -215,35 +222,43 @@ The database uses a versioned data model with automatic history tracking:
 ### Main Tables
 
 **`item`** - Current state with composite key `(id, branch_id)`
+
 - Fields: id, type, title, start_date, end_date, owner, lane, project, tags, dependencies (future), source_row_hash, branch_id, updated_at
 - Primary Key: (id, branch_id) - enables branch isolation
 - Check constraints: type IN ('task', 'milestone', 'release', 'meeting'), end_date >= start_date
 
 **`item_history`** - Complete audit trail with versioning
+
 - Every INSERT/UPDATE triggers automatic snapshot
 - Fields: id, branch_id, version, op, snapshot_at, [all item fields]
 - Primary Key: (id, branch_id, version)
 - Version auto-increments per (id, branch_id)
 
 **`branches`** - Branch metadata
+
 - Fields: branch_id (PK), label, created_from, note, created_at
 
 **`import_profiles`** - Saved column mapping configurations
+
 - Fields: name (PK), json, created_at
 
 **`app_params`** - Miscellaneous app settings
+
 - Fields: key (PK), value
 
 **`_schema_version`** - Schema version tracking
+
 - Fields: version (PK), applied_at
 
 ### Database Triggers
 
 **`item_insert_history`** - Fires AFTER INSERT on item
+
 - Creates snapshot in item_history with version = 1 (or max + 1)
 - Records op = 'insert'
 
 **`item_update_history`** - Fires AFTER UPDATE on item
+
 - Creates snapshot in item_history with version = previous max + 1
 - Records op = 'update'
 
@@ -279,6 +294,7 @@ Four supported types (enforced by CHECK constraint):
 ## Three-Stage Workflow
 
 ### Stage 1: Import/Map
+
 - Parse CSV/JSON files
 - Auto-detect column mappings (with manual override)
 - Three ID strategies: generate UUIDs, use column as ID, or match by key (project + title)
@@ -286,11 +302,13 @@ Four supported types (enforced by CHECK constraint):
 - Save mapping profiles for reuse
 
 ### Stage 2: Update/Append
+
 - Re-import using saved profiles
 - Two modes: upsert (update matches, append new) or update-only (ignore new rows)
 - Automatically uses existing mapping profiles
 
 ### Stage 3: View Timeline
+
 - Canvas-based Gantt chart rendering
 - Swim lanes groupable by lane/project/owner/type
 - Zoom levels: day/week/month/quarter/year
@@ -302,6 +320,7 @@ Four supported types (enforced by CHECK constraint):
 ## Branch System (Git-like)
 
 Branches enable scenario planning and what-if analysis:
+
 - Create unlimited branches from any existing branch
 - Each branch has isolated data (composite key: id + branch_id)
 - Compare any two branches to see added/removed/changed items
@@ -309,6 +328,7 @@ Branches enable scenario planning and what-if analysis:
 
 **Comparison Logic:**
 Uses FULL OUTER JOIN to detect:
+
 - **Added:** Items in branch B but not in branch A
 - **Removed:** Items in branch A but not in branch B
 - **Changed:** Items in both with different field values
@@ -321,6 +341,7 @@ Uses FULL OUTER JOIN to detect:
 ### Date Normalization
 
 The app auto-normalizes these formats to ISO (YYYY-MM-DD):
+
 - `YYYY-MM-DD` (already ISO)
 - `M/D/YYYY` (e.g., 1/15/2025)
 - `M-D-YYYY` (e.g., 1-15-2025)
@@ -330,6 +351,7 @@ Implement in `src/utils/date.utils.ts` (TODO: Issue #10)
 ### Canvas Rendering
 
 Timeline visualization will use react-konva (TODO: Issue #19):
+
 - Declarative React components (Stage, Layer, Rect, Line, Text)
 - Items render as bars (tasks/releases/meetings) or diamonds (milestones)
 - Visual encoding: Tasks=blue, Milestones=green, Releases=orange, Meetings=purple
@@ -339,11 +361,13 @@ Timeline visualization will use react-konva (TODO: Issue #19):
 ### Performance Targets
 
 The app should handle:
+
 - **< 1000 items:** Instant rendering
 - **1000-5000 items:** Good performance with filtering
 - **> 5000 items:** Use virtualization or split into branches
 
 Optimize by:
+
 - React.memo for expensive components
 - useMemo for calculations
 - Konva layer caching
@@ -362,6 +386,7 @@ Detailed documentation in `ref/` folder:
 - **`ref/decisions-summary.md`** - Tech stack decisions, alternatives considered, rationale
 
 **Original Specifications:**
+
 - `ref/claude_description.md` - Original implementation notes from Claude
 - `ref/chatgpt_description.md` - Original detailed specification document
 
@@ -378,6 +403,7 @@ The original working prototype is preserved in `legacy/` folder:
 - **`legacy/README-original.md`** - Original detailed README
 
 **Reference the prototype when implementing features:**
+
 - Database initialization: around line 675
 - CSV parsing: around line 809
 - Column mapping: around line 845
@@ -388,6 +414,7 @@ The original working prototype is preserved in `legacy/` folder:
 - History search: around line 1521
 
 **Key differences:**
+
 - **Prototype:** Single HTML file, vanilla JavaScript, inline styles
 - **New app:** React components, TypeScript, Tailwind CSS, modular architecture
 - **Database logic:** Being migrated from inline code to `src/services/` and `src/db/`
@@ -413,9 +440,11 @@ The original working prototype is preserved in `legacy/` folder:
 **Current Phase:** Phase 1 - Foundation & Architecture (Issues #1-14)
 
 **Completed:**
+
 - ✅ Issue #1: Initialize Vite + React + TypeScript project
 
 **Up Next:**
+
 - Issue #2: Configure Tailwind CSS
 - Issue #3: Install and configure shadcn/ui
 - Issue #4: Set up ESLint and Prettier
