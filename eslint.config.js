@@ -22,4 +22,25 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  // Test files configuration
+  {
+    files: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}', 'src/test/**/*.{ts,tsx}'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        describe: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+        vi: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+      },
+    },
+    rules: {
+      // Disable react-refresh for test files
+      'react-refresh/only-export-components': 'off',
+    },
+  },
 ]);
