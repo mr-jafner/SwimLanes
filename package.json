@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "build:single": "tsc -b && vite build --config vite.single.config.ts",
+    "typecheck": "tsc -b",
     "test": "vitest",
     "test:run": "vitest run",
     "test:ui": "vitest --ui",
