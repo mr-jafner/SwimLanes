@@ -17,6 +17,9 @@ export default defineConfig({
     // Use global test APIs (describe, it, expect) without imports
     globals: true,
 
+    // Exclude E2E tests (handled by Playwright)
+    exclude: ['**/e2e/**', '**/node_modules/**', '**/dist/**'],
+
     // Setup files to run before tests
     setupFiles: ['./src/test/setup.ts'],
 
