@@ -33,6 +33,11 @@ Thumbs.db
 # Testing
 coverage
 
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
 # Environment variables
 .env
 .env.local
