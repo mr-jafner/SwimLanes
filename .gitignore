@@ -42,3 +42,6 @@ playwright/.cache/
 .env
 .env.local
 .env.*.local
+
+# Secrets
+swimlanes-deploy-key*
