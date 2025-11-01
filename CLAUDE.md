@@ -486,23 +486,14 @@ When the user indicates they're wrapping up (e.g., "doing one last thing", "head
 
 ## Next Steps
 
-**Current Phase:** Phase 1 - Foundation & Architecture (Issues #1-14)
+**Current Phase:** Phase 1 - Foundation & Architecture (Due: Feb 8, 2025)
 
-**Completed:**
+See GitHub Issues for complete task list and current status:
+- **Issues:** https://github.com/mr-jafner/SwimLanes/issues
+- **Project Board:** https://github.com/mr-jafner/SwimLanes/projects
+- **View Phase 1 Tasks:** `gh issue list --milestone "Phase 1"`
 
-- ✅ Issue #1: Initialize Vite + React + TypeScript project
-
-**Up Next:**
-
-- Issue #2: Configure Tailwind CSS
-- Issue #3: Install and configure shadcn/ui
-- Issue #4: Set up ESLint and Prettier
-- Issue #5-6: Build configurations (hosted + single-file)
-- Issue #7: Vitest testing framework
-- Issue #8-9: GitHub Actions (test + deploy workflows)
-- Issue #10-14: Database layer migration
-
-See GitHub Issues for complete task list and current status.
+GitHub Issues is the authoritative source for task status, dependencies, and progress tracking.
 
 ---
 
