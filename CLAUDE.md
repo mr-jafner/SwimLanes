@@ -435,6 +435,55 @@ The original working prototype is preserved in `legacy/` folder:
 
 ---
 
+## End of Session Checklist
+
+When the user indicates they're wrapping up (e.g., "doing one last thing", "heading to bed", "about to sign off"), proactively suggest the following:
+
+**Cleanup:**
+
+1. **Stop running processes:**
+   - Kill dev servers, test runners, or background processes
+   - Clean up temporary files or test data
+
+2. **Remove debug artifacts:**
+   - Remove console.logs, debugger statements, or commented-out code
+   - Clean up any experimental or WIP code that shouldn't be committed
+
+**Documentation & State:**
+
+3. **Update todo list:**
+   - Mark all completed items as done
+   - Remove obsolete items
+   - Add discovered follow-up tasks or blockers
+   - Ensure no tasks left in "in_progress" state
+
+4. **Log session summary:**
+   - Briefly summarize what was accomplished
+   - Note any important discoveries, gotchas, or breaking changes
+   - Document architectural decisions made
+   - Highlight any TODOs or technical debt introduced
+
+5. **Update project documentation:**
+   - Update CLAUDE.md if workflows or conventions changed
+   - Update relevant docs in `ref/` if architecture changed
+   - Update "Next Steps" section with current status
+
+**Planning & Handoff:**
+
+6. **Suggest next priorities:**
+   - Based on current phase/milestone and GitHub issues
+   - Note dependencies or blockers
+   - Recommend logical next task for continuity
+
+7. **Verify version control:**
+   - Remind to check git status for uncommitted changes
+   - Suggest creating commits if work is at a good stopping point
+   - Remind to push if commits were made
+
+**Important:** Only suggest these items - don't execute them automatically unless explicitly requested.
+
+---
+
 ## Next Steps
 
 **Current Phase:** Phase 1 - Foundation & Architecture (Issues #1-14)
@@ -457,5 +506,5 @@ See GitHub Issues for complete task list and current status.
 
 ---
 
-**Last Updated:** 2025-01-26
+**Last Updated:** 2025-10-31
 **Document Version:** 2.0 (React Architecture)
