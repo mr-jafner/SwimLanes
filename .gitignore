@@ -42,6 +42,7 @@ playwright/.cache/
 .env
 .env.local
 .env.*.local
+claude.md
 
 # Secrets
 swimlanes-deploy-key*
