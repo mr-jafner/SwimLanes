@@ -18,6 +18,12 @@
 
 import initSqlJs, { type Database, type SqlJsStatic } from 'sql.js';
 import { SCHEMA_STATEMENTS, QUERY_SCHEMA_VERSION, CURRENT_SCHEMA_VERSION } from '@/db/schema';
+import {
+  saveToIndexedDB as persistSave,
+  loadFromIndexedDB as persistLoad,
+  clearIndexedDB as persistClear,
+  PersistenceError,
+} from './persistence.service';
 
 /**
  * Custom error class for database-related errors.
@@ -45,18 +51,8 @@ export class SchemaError extends Error {
   }
 }
 
-/**
- * Custom error class for persistence-related errors.
- */
-export class PersistenceError extends Error {
-  public readonly cause?: unknown;
-
-  constructor(message: string, cause?: unknown) {
-    super(message);
-    this.name = 'PersistenceError';
-    this.cause = cause;
-  }
-}
+// PersistenceError is now imported from persistence.service
+export { PersistenceError };
 
 /**
  * Database connection state values.
@@ -358,6 +354,8 @@ export class DatabaseService {
   /**
    * Save the current database state to IndexedDB.
    *
+   * Uses the persistence service to save the database export to IndexedDB.
+   *
    * @throws {PersistenceError} If save fails
    */
   public async saveToIndexedDB(): Promise<void> {
@@ -365,34 +363,12 @@ export class DatabaseService {
 
     try {
       const data = this.db!.export();
-
-      await new Promise<void>((resolve, reject) => {
-        const request = indexedDB.open(this.config.indexedDbName, 1);
-
-        request.onerror = () =>
-          reject(new PersistenceError('Failed to open IndexedDB', request.error));
-
-        request.onsuccess = () => {
-          const db = request.result;
-          const transaction = db.transaction([this.config.indexedDbStoreName], 'readwrite');
-          const store = transaction.objectStore(this.config.indexedDbStoreName);
-
-          const putRequest = store.put(data, 'database');
-
-          putRequest.onerror = () =>
-            reject(new PersistenceError('Failed to save to IndexedDB', putRequest.error));
-
-          putRequest.onsuccess = () => resolve();
-        };
-
-        request.onupgradeneeded = () => {
-          const db = request.result;
-          if (!db.objectStoreNames.contains(this.config.indexedDbStoreName)) {
-            db.createObjectStore(this.config.indexedDbStoreName);
-          }
-        };
-      });
-
+      await persistSave(
+        this.config.indexedDbName,
+        this.config.indexedDbStoreName,
+        'database',
+        data
+      );
       console.log('Database saved to IndexedDB');
     } catch (error) {
       throw new PersistenceError('Failed to save database to IndexedDB', error);
@@ -402,45 +378,18 @@ export class DatabaseService {
   /**
    * Load database state from IndexedDB.
    *
+   * Uses the persistence service to load the database from IndexedDB.
+   *
    * @returns Uint8Array of database data, or null if not found
    * @throws {PersistenceError} If load fails
    */
   private async loadFromIndexedDB(): Promise<Uint8Array | null> {
     try {
-      return await new Promise<Uint8Array | null>((resolve, reject) => {
-        const request = indexedDB.open(this.config.indexedDbName, 1);
-
-        request.onerror = () =>
-          reject(new PersistenceError('Failed to open IndexedDB', request.error));
-
-        request.onsuccess = () => {
-          const db = request.result;
-
-          if (!db.objectStoreNames.contains(this.config.indexedDbStoreName)) {
-            resolve(null);
-            return;
-          }
-
-          const transaction = db.transaction([this.config.indexedDbStoreName], 'readonly');
-          const store = transaction.objectStore(this.config.indexedDbStoreName);
-          const getRequest = store.get('database');
-
-          getRequest.onerror = () =>
-            reject(new PersistenceError('Failed to load from IndexedDB', getRequest.error));
-
-          getRequest.onsuccess = () => {
-            const result = getRequest.result as Uint8Array | undefined;
-            resolve(result || null);
-          };
-        };
-
-        request.onupgradeneeded = () => {
-          const db = request.result;
-          if (!db.objectStoreNames.contains(this.config.indexedDbStoreName)) {
-            db.createObjectStore(this.config.indexedDbStoreName);
-          }
-        };
-      });
+      return await persistLoad<Uint8Array>(
+        this.config.indexedDbName,
+        this.config.indexedDbStoreName,
+        'database'
+      );
     } catch (error) {
       throw new PersistenceError('Failed to load database from IndexedDB', error);
     }
@@ -579,6 +528,36 @@ export class DatabaseService {
       console.log('Database closed successfully');
     } catch (error) {
       throw new DatabaseError('Failed to close database', error);
+    }
+  }
+
+  /**
+   * Clear all persisted data from IndexedDB.
+   *
+   * This deletes the entire IndexedDB database used for persistence.
+   * Useful for "reset app data" functionality. The current in-memory
+   * database remains open and unchanged.
+   *
+   * Warning: This permanently deletes all persisted data and cannot be undone.
+   *
+   * @throws {PersistenceError} If clear operation fails
+   *
+   * @example
+   * ```typescript
+   * // Clear persisted data (but keep in-memory database)
+   * await databaseService.clearPersistedData();
+   *
+   * // Or reset everything
+   * await databaseService.clearPersistedData();
+   * await databaseService.reset(); // Also reset in-memory database
+   * ```
+   */
+  public async clearPersistedData(): Promise<void> {
+    try {
+      await persistClear(this.config.indexedDbName);
+      console.log('Persisted data cleared from IndexedDB');
+    } catch (error) {
+      throw new PersistenceError('Failed to clear persisted data', error);
     }
   }
 
