@@ -28,7 +28,7 @@ function setupMockIndexedDB() {
   const databases = new Map<string, Map<string, Map<string, unknown>>>();
 
   const mockIndexedDB = {
-    open: vi.fn((dbName: string, version: number) => {
+    open: vi.fn((dbName: string, _version: number) => {
       const request = {
         result: null as unknown,
         error: null as unknown,
@@ -53,8 +53,8 @@ function setupMockIndexedDB() {
                 databases.get(dbName)?.set(storeName, new Map());
               },
               close: vi.fn(),
-              transaction: (storeNames: string[], mode: string) => {
-                const storeName = storeNames[0];
+              transaction: (storeNames: string[], _mode: string) => {
+                const storeName = storeNames[0]!;
                 const store = databases.get(dbName)?.get(storeName) ?? new Map();
 
                 return {
@@ -115,8 +115,8 @@ function setupMockIndexedDB() {
             databases.get(dbName)?.set(storeName, new Map());
           },
           close: vi.fn(),
-          transaction: (storeNames: string[], mode: string) => {
-            const storeName = storeNames[0];
+          transaction: (storeNames: string[], _mode: string) => {
+            const storeName = storeNames[0]!;
             const store = databases.get(dbName)?.get(storeName);
 
             if (!store) {
