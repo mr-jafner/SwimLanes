@@ -39,7 +39,7 @@ npm run preview       # Preview production build
 ```bash
 npm run lint          # Run ESLint
 npm run typecheck     # TypeScript type checking
-npm test              # Run Vitest tests (TODO: configure in Issue #7)
+npm test              # Run Vitest tests (92 tests across 6 test files)
 ```
 
 ### Legacy Prototype
@@ -497,5 +497,5 @@ GitHub Issues is the authoritative source for task status, dependencies, and pro
 
 ---
 
-**Last Updated:** 2025-10-31
+**Last Updated:** 2025-11-03
 **Document Version:** 2.0 (React Architecture)
