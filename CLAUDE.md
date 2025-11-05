@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Current Status:** Actively migrating from single-file HTML prototype to modern React + TypeScript application.
 
-**Architecture:** React 18 + TypeScript + Vite, with sql.js (SQLite WASM) for local-first data storage, deploying to swimlanes.jafner.com.
+**Architecture:** React 19 + TypeScript + Vite, with sql.js (SQLite WASM) for local-first data storage, deploying to swimlanes.jafner.com.
 
 **Repository:** https://github.com/mr-jafner/SwimLanes
 
@@ -52,29 +52,29 @@ To test the original working prototype: open `legacy/timeline-app.html` in a bro
 
 **Core:**
 
-- React 18 + TypeScript 5.x (strict mode)
-- Vite 5.x (build tool, dev server)
-- Tailwind CSS (TODO: Issue #2)
+- React 19.1.1 + TypeScript 5.9.3 (strict mode)
+- Vite 7.1.7 (build tool, dev server)
+- Tailwind CSS 4.1.16 ✅
 
 **State & Data:**
 
 - Zustand (state management) (TODO: Issue #15)
-- sql.js (SQLite WASM for local database)
-- IndexedDB (auto-save persistence) (TODO: Issue #13)
+- sql.js 1.13.0 (SQLite WASM for local database)
+- IndexedDB (auto-save persistence) ✅
 
 **UI & Canvas:**
 
-- shadcn/ui (component library) (TODO: Issue #3)
+- shadcn/ui (component library) ✅
 - react-konva (timeline canvas rendering) (TODO: Issue #19)
 
 **Testing:**
 
-- Vitest + React Testing Library (TODO: Issue #7)
-- Playwright for E2E (future)
+- Vitest 4.0.4 + React Testing Library ✅
+- Playwright 1.56.1 (E2E) ✅
 
 **Deployment:**
 
-- Self-hosted OpenBSD (Vultr) via GitHub Actions (TODO: Issue #9, #41)
+- Self-hosted OpenBSD (Vultr) via GitHub Actions ✅
 - Domain: swimlanes.jafner.com
 
 See `ref/architecture.md` for complete technical details.
@@ -497,5 +497,5 @@ GitHub Issues is the authoritative source for task status, dependencies, and pro
 
 ---
 
-**Last Updated:** 2025-11-03
+**Last Updated:** 2025-11-05
 **Document Version:** 2.0 (React Architecture)
