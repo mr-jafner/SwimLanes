@@ -7,7 +7,7 @@
  * @module db/queries/branches.queries
  */
 
-import type { Database, QueryExecResult } from 'sql.js';
+import type { Database, QueryExecResult, SqlValue } from 'sql.js';
 import type { Branch } from '@/types/database.types';
 
 /**
@@ -51,7 +51,7 @@ export function getBranchById(db: Database, branchId: string): Branch | null {
   const result = db.exec(sql, [branchId]);
 
   const branches = parseBranchesResult(result);
-  return branches.length > 0 ? branches[0] : null;
+  return branches.length > 0 ? (branches[0] ?? null) : null;
 }
 
 /**
@@ -183,7 +183,7 @@ export function updateBranch(
   updates: { label?: string; note?: string }
 ): number {
   const setClauses: string[] = [];
-  const params: unknown[] = [];
+  const params: SqlValue[] = [];
 
   if (updates.label !== undefined) {
     setClauses.push('label = ?');
@@ -257,6 +257,6 @@ function parseBranchesResult(result: QueryExecResult[]): Branch[] {
       branch[col] = row[i];
     });
 
-    return branch as Branch;
+    return branch as unknown as Branch;
   });
 }

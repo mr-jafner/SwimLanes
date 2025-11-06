@@ -113,7 +113,7 @@ export function getItemVersion(
   const result = db.exec(sql, [id, branchId, version]);
 
   const history = parseHistoryResult(result);
-  return history.length > 0 ? history[0] : null;
+  return history.length > 0 ? (history[0] ?? null) : null;
 }
 
 /**
@@ -300,7 +300,7 @@ function parseHistoryResult(result: QueryExecResult[]): ItemHistory[] {
       history[col] = row[i];
     });
 
-    return history as ItemHistory;
+    return history as unknown as ItemHistory;
   });
 }
 

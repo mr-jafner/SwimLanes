@@ -7,7 +7,7 @@
  * @module db/queries/items.queries
  */
 
-import type { Database, QueryExecResult } from 'sql.js';
+import type { Database, QueryExecResult, SqlValue } from 'sql.js';
 import type { Item, ItemType } from '@/types/database.types';
 
 /**
@@ -77,7 +77,7 @@ export interface ItemsQueryResult {
  */
 export function getItems(db: Database, branchId: string, filters?: ItemFilters): Item[] {
   let sql = 'SELECT * FROM item WHERE branch_id = ?';
-  const params: unknown[] = [branchId];
+  const params: SqlValue[] = [branchId];
 
   // Add type filter
   if (filters?.type) {
@@ -146,7 +146,7 @@ export function getItemById(db: Database, id: string, branchId: string): Item | 
   const result = db.exec(sql, [id, branchId]);
 
   const items = parseItemsResult(result);
-  return items.length > 0 ? items[0] : null;
+  return items.length > 0 ? (items[0] ?? null) : null;
 }
 
 /**
@@ -232,7 +232,7 @@ export function updateItem(
   updates: ItemUpdate
 ): number {
   const setClauses: string[] = [];
-  const params: unknown[] = [];
+  const params: SqlValue[] = [];
 
   // Build SET clause dynamically based on provided updates
   const allowedFields = [
@@ -318,7 +318,7 @@ export function deleteItem(db: Database, id: string, branchId: string): number {
  */
 export function countItems(db: Database, branchId: string, filters?: ItemFilters): number {
   let sql = 'SELECT COUNT(*) as count FROM item WHERE branch_id = ?';
-  const params: unknown[] = [branchId];
+  const params: SqlValue[] = [branchId];
 
   // Add type filter
   if (filters?.type) {
@@ -388,6 +388,6 @@ function parseItemsResult(result: QueryExecResult[]): Item[] {
       item[col] = row[i];
     });
 
-    return item as Item;
+    return item as unknown as Item;
   });
 }
