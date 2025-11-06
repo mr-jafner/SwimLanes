@@ -1,0 +1,16 @@
+Issue Key,Summary,Issue Type,Status,Priority,Assignee,Reporter,Created,Due Date,Labels,Sprint,Story Points,Components,Description
+TURBO-101,Implement new compressor map calculation,Story,In Progress,High,Sarah Chen,Product Owner,2025-06-15,2025-07-15,"performance,algorithm",Sprint 12,8,Analytics,Need more accurate map extrapolation at low flow
+TURBO-102,Fix temperature sensor calibration drift,Bug,Open,Critical,Jake Morrison,Lab Team,2025-06-20,2025-07-01,"bug,sensors,testing",Sprint 12,5,Hardware,Sensors reading 15C high after 500 hours
+TURBO-103,Add boost pressure safety limits,Task,In Progress,High,Software Team,Sarah Chen,2025-06-18,2025-07-10,"safety,software",Sprint 12,3,Control System,Prevent overboost conditions
+TURBO-104,Design compressor housing for GT3071,Story,To Do,Medium,Mike Torres,Product Owner,2025-06-22,2025-08-01,"design,cad",Sprint 13,13,Mechanical,New housing for larger frame size
+TURBO-105,Upgrade data acquisition system,Epic,In Progress,High,Jake Morrison,Management,2025-05-01,2025-09-01,"infrastructure,testing",,40,Test Lab,Move from 8 to 64 channel DAQ
+TURBO-106,Write API documentation for turbo models,Task,To Do,Low,Tech Writer,Software Team,2025-06-25,2025-07-30,"documentation,api",Sprint 13,2,Documentation,Document REST API endpoints
+TURBO-107,Compressor surge detection algorithm,Story,In Review,High,Dr. Kim Park,Product Owner,2025-06-10,2025-07-05,"algorithm,safety",Sprint 12,8,Analytics,Real-time surge detection and mitigation
+TURBO-108,Oil consumption exceeds spec,Bug,Open,Critical,Lab Team,Quality,2025-06-28,2025-07-15,"bug,quality,testing",Sprint 13,8,Testing,GT2860 using 50ml/hr vs 20ml/hr spec
+TURBO-109,Create turbine wheel stress analysis,Task,To Do,Medium,Dr. Kim Park,Sarah Chen,2025-06-30,2025-07-20,"analysis,fea",Sprint 13,5,Engineering,FEA at max speed with thermal loads
+TURBO-110,Sprint 12 retrospective,Sub-task,To Do,Medium,Scrum Master,Scrum Master,2025-07-12,2025-07-12,"meeting,agile",Sprint 12,0,Process,Review what went well and improvements
+TURBO-111,Integrate wastegate position sensor,Story,To Do,High,Jake Morrison,Product Owner,2025-07-01,2025-08-01,"hardware,sensors",Sprint 14,13,Control System,Add closed-loop wastegate control
+TURBO-112,Performance regression in build 2.3.1,Bug,Open,High,Software Team,QA,2025-07-02,2025-07-10,"bug,performance,software",Sprint 13,5,Software,Map calculation 40% slower than 2.3.0
+TURBO-113,Test plan for high-altitude operation,Task,To Do,Medium,Sarah Chen,Product Owner,2025-07-03,2025-08-15,"testing,planning",Sprint 14,3,Test Lab,Validate performance up to 14000 ft
+TURBO-114,Bearing wear after 200 hours,Bug,In Progress,Critical,Mike Torres,Lab Team,2025-06-29,2025-07-08,"bug,hardware,quality",Sprint 13,8,Mechanical,Excessive bearing wear in durability test
+TURBO-115,Quarterly turbine efficiency report,Task,In Progress,Low,Dr. Kim Park,Management,2025-06-20,2025-07-31,"documentation,analysis",Sprint 12,2,Analytics,Summarize Q2 efficiency test results

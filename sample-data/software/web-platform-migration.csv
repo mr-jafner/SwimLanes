@@ -1,0 +1,21 @@
+title,type,start_date,end_date,owner,lane,project,tags
+Platform Assessment,task,2025-07-01,2025-07-15,Alice,Engineering,Migration,backend,planning
+Database Schema Review,task,2025-07-08,2025-07-20,Bob,Engineering,Migration,database,architecture
+API Endpoint Audit,task,2025-07-10,2025-07-22,Alice,Engineering,Migration,backend,api
+Frontend Component Inventory,task,2025-07-12,2025-07-25,Carol,Engineering,Migration,frontend,ui
+Migration Strategy Finalized,milestone,2025-07-28,,,Management,Migration,planning
+Setup Staging Environment,task,2025-07-29,2025-08-05,David,DevOps,Migration,infrastructure,cloud
+Database Migration Scripts,task,2025-08-01,2025-08-20,Bob,Engineering,Migration,database,migration
+API Gateway Configuration,task,2025-08-10,2025-08-25,Alice,Engineering,Migration,backend,infrastructure
+User Authentication Migration,task,2025-08-15,2025-08-30,Alice,Engineering,Migration,backend,security
+Frontend Build Pipeline,task,2025-08-18,2025-09-01,David,DevOps,Migration,ci-cd,automation
+Component Library Migration,task,2025-08-22,2025-09-15,Carol,Engineering,Migration,frontend,ui
+Integration Testing,task,2025-09-05,2025-09-20,QA Team,Testing,Migration,testing,integration
+Staging Deployment,milestone,2025-09-22,,,DevOps,Migration,deployment
+Load Testing,task,2025-09-23,2025-09-30,David,DevOps,Migration,testing,performance
+Security Audit,task,2025-09-25,2025-10-05,Security,Security,Migration,security,audit
+User Acceptance Testing,task,2025-10-01,2025-10-15,Product,Testing,Migration,testing,uat
+Production Cutover Plan,task,2025-10-08,2025-10-18,Management,Planning,Migration,planning,deployment
+Go/No-Go Meeting,meeting,2025-10-20,2025-10-20,Management,Management,Migration,decision
+Production Migration,release,2025-10-25,,,Management,Migration,deployment
+Post-Migration Monitoring,task,2025-10-26,2025-11-10,David,DevOps,Migration,monitoring,support

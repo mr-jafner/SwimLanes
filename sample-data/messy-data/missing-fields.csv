@@ -1,0 +1,9 @@
+title,type,start_date,end_date,owner,lane,project,tags
+Complete task record,task,2025-06-01,2025-06-10,Alice,Engineering,Project A,tag1,tag2
+Missing end date,task,2025-06-05,,,Bob,Engineering,Project A,tag1
+Missing owner,task,2025-06-10,2025-06-15,,,Engineering,Project A,
+Missing type,,,2025-06-15,2025-06-20,Carol,Engineering,Project A,tag3
+Missing title,,task,2025-06-20,2025-06-25,Dave,Engineering,Project A,
+Missing start date,task,,2025-06-30,Eve,Engineering,Project A,tag1
+All optional fields missing,task,2025-07-01,2025-07-05,Frank,,,
+Just title and type,Another task,task,,,,,

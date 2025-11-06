@@ -1,0 +1,32 @@
+ID,Task Name,Duration,Start,Finish,% Complete,Resource Names,Predecessors,Priority,Notes
+1,VGT Actuator Development,120,6/1/2025,11/15/2025,15,,,500,Variable geometry turbo actuator project
+2,Concept Design Phase,30,6/1/2025,7/10/2025,45,,,800,
+3,Mechanism Kinematic Study,15,6/1/2025,6/20/2025,80,Sarah Chen;Mike Torres,,800,Linkage geometry optimization
+4,Motor Selection Analysis,10,6/5/2025,6/18/2025,75,Mike Torres,,700,Evaluate brushless DC options
+5,Position Sensor Selection,8,6/10/2025,6/20/2025,60,Jake Morrison,4,700,Hall effect vs optical encoders
+6,Concept Design Review,0,6/25/2025,6/25/2025,0,Sarah Chen;Management,3;4;5,1000,Gate review for funding approval
+7,Detailed Design Phase,35,6/26/2025,8/15/2025,30,,,800,
+8,Housing Design - Cast Aluminum,20,6/26/2025,7/22/2025,50,Sarah Chen,6,800,Thermal analysis required
+9,Gear Train Design,18,6/28/2025,7/24/2025,45,Mike Torres,6,900,Need backlash analysis
+10,Control Electronics PCB,25,7/1/2025,8/5/2025,35,Jake Morrison,5;6,800,EMI compliance required
+11,Position Feedback Algorithm,15,7/10/2025,7/30/2025,40,Dr. Kim Park,5,700,PID tuning parameters
+12,Thermal Management Design,12,7/15/2025,7/31/2025,25,Sarah Chen,8,700,Must survive 200C exhaust temps
+13,Design Review - Detailed,0,8/15/2025,8/15/2025,0,Sarah Chen;Management,8;9;10,1000,Final design approval gate
+14,Prototype Build,25,8/18/2025,9/22/2025,10,,,900,
+15,Order Long-Lead Components,20,8/18/2025,9/15/2025,15,Procurement,13,900,Motors have 8 week lead time
+16,PCB Fabrication,15,8/20/2025,9/10/2025,10,External PCB Fab,13,800,4-layer board
+17,Housing Casting,30,8/22/2025,10/2/2025,5,Acme Casting,13,900,First article inspection required
+18,CNC Machining - Housing,8,10/3/2025,10/14/2025,0,Machine Shop,17,800,
+19,Gear Manufacture,12,9/5/2025,9/22/2025,0,Gear Supplier,13,900,Hobbed gears - case hardened
+20,PCB Assembly & Test,5,9/12/2025,9/18/2025,0,Electronics Lab,16,800,Functional test after assembly
+21,Prototype Assembly,6,10/15/2025,10/22/2025,0,Mike Torres;Assembly,18;19;20,1000,
+22,Initial Function Test,0,10/23/2025,10/23/2025,0,Mike Torres,21,1000,Verify basic operation
+23,Test & Validation,30,10/24/2025,12/5/2025,0,,,900,
+24,Position Accuracy Test,5,10/24/2025,10/30/2025,0,Lab Team,22,800,+/- 1 degree accuracy target
+25,Response Time Test,4,10/31/2025,11/5/2025,0,Lab Team,24,800,Must respond within 200ms
+26,Temperature Cycling,10,11/6/2025,11/19/2025,0,Lab Team,25,900,-40C to 200C cycling
+27,Durability Test - 100k cycles,15,11/10/2025,11/28/2025,0,Lab Team,22,1000,Life target validation
+28,Vibration Testing,5,11/20/2025,11/26/2025,0,Lab Team,22,800,ISO 16750-3 automotive standard
+29,EMI Compliance Test,4,11/25/2025,11/30/2025,0,EMI Lab,20,900,CISPR 25 automotive EMI
+30,Test Report Complete,0,12/5/2025,12/5/2025,0,Engineering,24;25;26;27;28;29,1000,Summarize all test results
+31,Production Release,0,12/10/2025,12/10/2025,0,Management,30,1000,Release to manufacturing

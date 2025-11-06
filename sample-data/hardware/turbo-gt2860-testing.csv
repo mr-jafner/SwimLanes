@@ -1,0 +1,24 @@
+Test Name,Type,Start Date,End Date,Assigned To,Status,Rig,Notes
+Cold Flow Test - Compressor,task,2025-10-16,2025-10-18,Lab Team,Scheduled,Cold Rig A,Measure compressor map at ambient
+Hot Gas Stand - Initial,task,2025-10-20,2025-10-22,Lab Team,Scheduled,Hot Rig B,First hot test - baseline data
+Compressor Map Validation,task,2025-10-23,2025-10-25,Sarah Chen,Scheduled,Cold Rig A,Verify design targets achieved
+Turbine Efficiency Test,task,2025-10-26,2025-10-28,Lab Team,Scheduled,Hot Rig B,Measure turbine efficiency
+Full Turbo Performance,task,2025-10-30,2025-11-01,Sarah Chen,Scheduled,Hot Rig C,Complete performance characterization
+Results Review Meeting,meeting,2025-11-05,2025-11-05,Sarah Chen;Management,Scheduled,,Review test data vs targets
+Durability Test - 100hr,task,2025-11-08,2025-11-12,Lab Team,Scheduled,Durability Cell,Continuous operation at rated speed
+Thermal Cycling Test,task,2025-11-10,2025-11-15,Lab Team,Scheduled,Thermal Chamber,20 cycles: -40C to 950C
+Overspeed Safety Test,task,2025-11-16,2025-11-17,Lab Team,Scheduled,Containment Rig,Test to 150% design speed
+Burst Test - Compressor Wheel,task,2025-11-18,2025-11-18,Lab Team,Scheduled,Spin Rig,Verify safety margin
+Durability Test - 500hr,task,2025-11-20,2025-12-05,Lab Team,Scheduled,Durability Cell,Extended durability validation
+Oil Consumption Test,task,2025-12-06,2025-12-08,Lab Team,Scheduled,Hot Rig B,Measure oil consumption rates
+Seal Leakage Test,task,2025-12-09,2025-12-10,Lab Team,Scheduled,Leak Test Stand,Check all seal interfaces
+HALT Testing,task,2025-12-12,2025-12-15,Lab Team,Scheduled,HALT Chamber,Highly accelerated life test
+Engine Dyno - First Install,milestone,2025-12-18,,,Scheduled,Engine Dyno 1,First on-engine test
+Engine Performance Mapping,task,2025-12-18,2025-12-22,Sarah Chen;Engine Team,Scheduled,Engine Dyno 1,Full load sweep tests
+Transient Response Testing,task,2026-01-05,2026-01-08,Engine Team,Scheduled,Engine Dyno 1,Step response and acceleration
+Cold Start Testing,task,2026-01-09,2026-01-10,Engine Team,Scheduled,Cold Chamber,Test at -20C ambient
+Emissions Compliance,task,2026-01-12,2026-01-15,Engine Team,Scheduled,Emissions Lab,EPA Tier 3 validation
+Field Test Units Built,milestone,2026-01-20,,,Planned,,Ship 5 units for field testing
+Vehicle Installation,task,2026-01-22,2026-01-25,Field Test Team,Planned,,Install in customer vehicles
+Field Testing - 10k miles,task,2026-01-26,2026-04-15,Field Test Team,Planned,,Monitor performance in real-world
+Certification Complete,milestone,2026-04-30,,,Planned,,All testing approved for production

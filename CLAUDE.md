@@ -47,6 +47,16 @@ npm test              # Run Vitest tests (92 tests across 6 test files)
 
 To test the original working prototype: open `legacy/timeline-app.html` in a browser with `sample-data.csv`.
 
+### Sample Data
+
+**New React App:** Comprehensive sample datasets in `sample-data/` directory (see `sample-data/README.md` for details):
+- `hardware/` - Turbocharger development projects (R&D, testing, manufacturing)
+- `software/` - Software development projects
+- `from-pm-tools/` - Real exports from MS Project, Planner, Jira
+- `messy-data/` - Edge cases for testing validation
+
+**Legacy Prototype:** Original `sample-data.csv` remains at root for backward compatibility with `legacy/timeline-app.html`.
+
 ---
 
 ## Tech Stack

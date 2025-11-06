@@ -1,0 +1,9 @@
+title,type,start_date,end_date,owner,project
+Task with ISO date,task,2025-06-01,2025-06-05,Alice,Test Project
+Task with US slashes,task,6/10/2025,6/15/2025,Bob,Test Project
+Task with dashes,task,6-20-2025,6-25-2025,Carol,Test Project
+Task with leading zeros,task,06/01/2025,06/10/2025,Alice,Test Project
+Milestone ISO,milestone,2025-07-01,,Dave,Test Project
+Milestone US format,milestone,7/15/2025,,Eve,Test Project
+Task mixed formats,task,2025-08-01,8/15/2025,Frank,Test Project
+Another mixed,task,9-1-2025,2025-09-15,Grace,Test Project

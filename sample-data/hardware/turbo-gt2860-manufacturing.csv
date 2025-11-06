@@ -1,0 +1,27 @@
+Activity,Type,Start,Finish,Owner,Phase,Supplier,Status,Priority
+Casting Tooling RFQ,task,9/1/2025,9/15/2025,Procurement,Tooling,Multiple,Planning,High
+Select Casting Supplier,milestone,9/20/2025,,Procurement,Tooling,,Planning,High
+Compressor Housing Tool Design,task,9/22/2025,10/10/2025,Tooling Eng,Tooling,Acme Tooling,Planning,High
+Turbine Housing Tool Design,task,9/22/2025,10/10/2025,Tooling Eng,Tooling,Acme Tooling,Planning,High
+CHRA Machining Fixtures,task,9/25/2025,10/15/2025,Mfg Eng,Tooling,Internal,Planning,High
+Tool Fabrication - Comp Housing,task,10/15/2025,12/20/2025,Acme Tooling,Tooling,Acme Tooling,Planning,High
+Tool Fabrication - Turb Housing,task,10/15/2025,12/20/2025,Acme Tooling,Tooling,Acme Tooling,Planning,High
+First Casting Samples,milestone,1/5/2026,,Acme Tooling,Tooling,Acme Tooling,Planning,High
+Casting Dimensional Check,task,1/6/2026,1/10/2026,Quality,Validation,Acme Tooling,Planning,High
+Casting Material Cert,task,1/6/2026,1/8/2026,Quality,Validation,Acme Tooling,Planning,High
+CNC Program Development,task,11/1/2025,12/15/2025,Mfg Eng,Process,Internal,Planning,High
+CNC First Article - Compressor,task,1/12/2026,1/17/2026,Machining,Production,Internal,Planning,High
+CNC First Article - Turbine,task,1/12/2026,1/17/2026,Machining,Production,Internal,Planning,High
+Balancing Process Validation,task,1/20/2026,1/24/2026,Mfg Eng,Process,Internal,Planning,High
+Assembly Work Instructions,task,12/1/2025,12/20/2025,Mfg Eng,Process,Internal,Planning,Medium
+Assembly Tooling Fabrication,task,12/15/2025,1/30/2026,Tooling,Tooling,Internal,Planning,Medium
+Bearing Supplier Qualification,task,11/1/2025,1/15/2026,Quality,Supply Chain,SKF Bearings,Planning,High
+Oil Seal Qualification,task,11/1/2025,12/30/2025,Quality,Supply Chain,Federal Mogul,Planning,High
+Gasket Material Testing,task,11/15/2025,1/10/2026,Quality,Supply Chain,Victor Reinz,Planning,Medium
+Production Trial - 10 Units,task,2/1/2026,2/10/2026,Production,Pilot,Internal,Planning,High
+Pilot Run Review,meeting,2/12/2026,2/12/2026,Management,Pilot,,Planning,High
+Process FMEA Complete,milestone,2/15/2026,,Quality,Validation,,Planning,High
+Production Ramp - 50 units,task,2/16/2026,3/5/2026,Production,Ramp Up,Internal,Planning,High
+Full Rate Production Ready,milestone,3/15/2026,,Production,Production,,Planning,Critical
+Quality System Audit,task,3/1/2026,3/10/2026,Quality,Validation,External Auditor,Planning,High
+Customer First Article,milestone,3/20/2026,,Quality,Production,,Planning,Critical

@@ -1,0 +1,12 @@
+title,type,start_date,end_date,owner,project,tags,notes
+"Task with ""quotes"" in title",task,2025-06-01,2025-06-05,O'Brien,Test,"tag1,tag2",Simple notes
+Task with commas in title: Design, Build, Test,task,2025-06-10,2025-06-15,José García,Test,complex,"Notes with, embedded, commas"
+Symbols: < > & @ # $,task,2025-06-20,2025-06-25,Müller,Test,special!@#,Testing & validation
+Unicode: 测试任务 🚀,task,2025-07-01,2025-07-05,François,Test,unicode,Emoji support ✓
+Line break in notes,task,2025-07-10,2025-07-15,Smith,"Project
+Name",tag,"First line
+Second line
+Third line"
+Apostrophes everywhere,task,2025-07-20,2025-07-25,O'Neal,It's a test,don't,Can't stop won't stop
+HTML-like: <script>alert('test')</script>,task,2025-08-01,2025-08-05,Anderson,Security,xss-test,Testing XSS prevention
+Pipes and slashes: A/B|C\D,task,2025-08-10,2025-08-15,Wilson,Path/Test,odd|chars,Windows\Unix/paths
