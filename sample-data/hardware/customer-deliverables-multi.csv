@@ -1,0 +1,22 @@
+Deliverable,Type,Due Date,Customer,Status,Owner,Document Type,Notes
+Design Review Presentation,task,2025-06-18,Acme Motors,In Progress,Sarah Chen,Presentation,Preliminary design options
+Interface Control Document,task,2025-07-20,Acme Motors,Planned,Sarah Chen,Technical Doc,ICD-AM-GT2860-001
+Manufacturing Drawings,task,2025-08-05,Acme Motors,Planned,Engineering,CAD Drawings,Full drawing package
+First Article Inspection Report,task,2025-10-05,Acme Motors,Planned,Quality,FAI Report,AS9102 format required
+Test Plan Document,task,2025-10-10,Acme Motors,Planned,Lab Team,Test Plan,Customer-approved test matrix
+Cold Flow Test Report,task,2025-10-20,Acme Motors,Planned,Lab Team,Test Report,Compressor map data
+Hot Gas Test Report,task,2025-10-30,Acme Motors,Planned,Lab Team,Test Report,Turbine efficiency data
+Durability Test Report,task,2025-11-25,Acme Motors,Planned,Lab Team,Test Report,500-hour test summary
+Final Validation Report,task,2026-01-05,Acme Motors,Planned,Engineering,Validation,Complete test data package
+Dyno Test Results,task,2025-07-28,Apex Performance,Planned,Dyno Team,Test Data,Power and torque curves
+Performance Specification Sheet,task,2025-08-08,Apex Performance,Planned,Product Mgmt,Datasheet,Marketing-ready spec sheet
+Installation Instructions,task,2025-09-01,Apex Performance,Planned,Tech Writer,Manual,Step-by-step install guide
+Tuning Guide,task,2025-09-10,Apex Performance,Planned,Tech Writer,Manual,Boost and fuel tuning guidance
+Bill of Materials,task,2025-08-20,Apex Performance,Planned,Manufacturing,BOM,Complete parts list
+Marine Environmental Test Plan,task,2025-08-20,BlueSea Marine,Planned,Lab Team,Test Plan,Salt spray and humidity tests
+Corrosion Protection Report,task,2025-10-01,BlueSea Marine,Planned,Quality,Test Report,Coating qualification results
+Marine Design Review Package,milestone,2025-10-05,BlueSea Marine,Planned,Engineering,Design Package,Complete design documentation
+On-Water Test Report,task,2026-02-28,BlueSea Marine,Planned,Field Team,Test Report,500-hour marine exposure
+Final Marine Validation,task,2026-03-10,BlueSea Marine,Planned,Engineering,Validation,Marine certification package
+Monthly Status Reports,task,2025-06-30,All Customers,Recurring,Project Mgmt,Status Report,Sent last Friday of each month
+Quarterly Business Reviews,meeting,2025-09-30,All Customers,Recurring,Management,Meeting,Review program status and roadmap

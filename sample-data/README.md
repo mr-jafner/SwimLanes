@@ -110,6 +110,159 @@ Realistic turbocharger development project timelines demonstrating hardware engi
 
 ---
 
+## Customer-Specific Projects
+
+Real-world customer project timelines demonstrating how different customer requirements and applications drive unique turbocharger development programs.
+
+### `hardware/customer-acme-diesel.csv`
+
+**Custom Development Project** - Acme Motors Heavy Duty Diesel Turbo
+
+- **Customer:** Acme Motors
+- **Application:** 6.7L Heavy Duty Diesel Truck
+- **Timeline:** May 2025 - April 2026 (12 months)
+- **Item Count:** 25 tasks and milestones
+- **Demonstrates:**
+  - Customer-specific requirements (flow targets, EPA compliance)
+  - Custom mounting and interface design
+  - Customer approval gates and witnessed tests
+  - Interface Control Document (ICD) workflow
+  - First Article Inspection (FAI) process
+  - On-site customer testing at Acme facility
+  - Long-term field testing with customer vehicles
+
+**Key Columns:**
+- `Task Name` - Activity description
+- `Start Date`, `Finish Date` - Timeline
+- `Resource Names` - Team assignments
+- `Type` - task or milestone
+- `Priority` - Critical/High/Medium
+- `Customer` - Acme Motors
+- `Application` - Heavy Duty Truck
+- `Notes` - Technical requirements and details
+
+**Use Case:** Demonstrates customer-driven development with formal approval gates and specifications.
+
+---
+
+### `hardware/customer-apex-performance.csv`
+
+**Performance Aftermarket Project** - Apex Performance Turbo Upgrade
+
+- **Customer:** Apex Performance
+- **Application:** 2.5L 4-Cylinder Performance Upgrade (300 HP → 450 HP)
+- **Timeline:** June 2025 - January 2026 (8 months)
+- **Item Count:** 20 tasks and milestones
+- **Demonstrates:**
+  - Performance upgrade project workflow
+  - Power target definition and validation
+  - Billet compressor and upgraded bearing system
+  - Engine dyno testing and optimization
+  - Small batch production (25 units)
+  - Field feedback collection and warranty tracking
+
+**Key Columns:**
+- `Activity` - Task description
+- `Type` - task/meeting/milestone
+- `Start`, `End` - US date format (M/D/YYYY)
+- `Owner` - Team/individual assignment
+- `Customer` - Apex Performance
+- `Application` - 2.5L 4-Cyl Turbo Upgrade
+- `Status` - Complete/In Progress/Planned
+- `Deliverable` - Expected output or result
+
+**Use Case:** Aftermarket performance project with dyno validation and customer feedback loop.
+
+---
+
+### `hardware/customer-marine-systems.csv`
+
+**Marine Application Project** - BlueSea Marine Diesel Turbo
+
+- **Customer:** BlueSea Marine
+- **Application:** 6.0L Marine Diesel Engine
+- **Timeline:** July 2025 - March 2026 (9 months)
+- **Item Count:** 18 tasks and milestones
+- **Demonstrates:**
+  - Marine-specific environmental requirements
+  - Corrosion protection and salt spray testing
+  - Seawater cooling integration
+  - Marine vibration and humidity testing
+  - On-water testing in real marine environment
+  - 500-hour salt water exposure validation
+
+**Key Columns:**
+- `Item` - Task description
+- `Type` - task or milestone
+- `Start Date`, `Due Date` - Timeline
+- `Assignee` - Responsible individual/team
+- `Customer` - BlueSea Marine
+- `Application` - 6.0L Marine Diesel
+- `Phase` - Requirements/Design/Validation/Field Test/Release
+- `Notes` - Technical details and special requirements
+
+**Use Case:** Specialized marine application with environmental testing and customer on-site validation.
+
+---
+
+### `hardware/customer-deliverables-multi.csv`
+
+**Cross-Customer Deliverables Schedule** - Multi-Customer Document Delivery
+
+- **Customers:** Acme Motors, Apex Performance, BlueSea Marine
+- **Timeline:** June 2025 - March 2026 (10 months)
+- **Item Count:** 21 deliverables across 3 customers
+- **Demonstrates:**
+  - Technical documentation deliverables
+  - Test reports and validation packages
+  - Customer-specific documentation requirements
+  - Recurring deliverables (monthly status, quarterly reviews)
+  - Different document types across customers
+
+**Key Columns:**
+- `Deliverable` - Document/report name
+- `Type` - task/meeting/milestone
+- `Due Date` - Delivery deadline
+- `Customer` - Acme Motors/Apex Performance/BlueSea Marine/All Customers
+- `Status` - In Progress/Planned/Recurring
+- `Owner` - Responsible team/individual
+- `Document Type` - Presentation/Technical Doc/Test Report/Manual/etc.
+- `Notes` - Document details and specifications
+
+**Use Case:** Managing deliverables across multiple concurrent customer programs.
+
+---
+
+### `hardware/field-test-results.csv`
+
+**Field Testing Program** - Multi-Customer Field Test Tracking
+
+- **Customers:** Acme Motors (3 trucks), Apex Performance (3 cars), BlueSea Marine (2 vessels)
+- **Timeline:** September 2025 - March 2026 (7 months)
+- **Item Count:** 21 test activities across 8 vehicles/vessels
+- **Demonstrates:**
+  - Real-world field testing across different applications
+  - Test ID tracking system (FT-AM-001, FT-AP-001, FT-BS-001)
+  - Vehicle/asset tracking
+  - Issues found and resolution tracking
+  - Different test environments (highway, track, ocean)
+  - Recurring check-ins and data uploads
+
+**Key Columns:**
+- `Test ID` - Unique test identifier (FT-[CUSTOMER]-[#])
+- `Activity` - Test task description
+- `Type` - task/meeting/milestone
+- `Start Date`, `End Date` - Test timeline
+- `Customer` - Acme Motors/Apex Performance/BlueSea Marine
+- `Vehicle/Asset` - Specific truck/car/vessel identification
+- `Test Site` - Location of testing
+- `Status` - Complete/In Progress/Planned
+- `Issues Found` - Problems discovered during testing
+
+**Use Case:** Field test program management with issue tracking across multiple customers and platforms.
+
+---
+
 ## Software Projects
 
 Two software development datasets for comparison.
@@ -416,6 +569,49 @@ Datasets designed to test data quality handling, validation, and normalization.
 4. Group swim lanes by project to separate software and hardware
 
 **Result:** Cross-functional view of concurrent software and hardware work.
+
+---
+
+### Example 4: Multi-Customer Program Management
+
+**Goal:** Track multiple concurrent customer projects with shared deliverables and field testing.
+
+**Steps:**
+1. Import `hardware/customer-acme-diesel.csv`
+   - Map columns: Task Name → title, Start Date → start_date, Finish Date → end_date
+   - Set project name from Customer column: "Acme Motors"
+   - Import to branch: `main`
+
+2. Import `hardware/customer-apex-performance.csv`
+   - Map columns: Activity → title, Start → start_date, End → end_date
+   - Set project name: "Apex Performance"
+   - Append to branch: `main`
+
+3. Import `hardware/customer-marine-systems.csv`
+   - Map columns: Item → title, Start Date → start_date, Due Date → end_date
+   - Set project name: "BlueSea Marine"
+   - Append to branch: `main`
+
+4. Import `hardware/customer-deliverables-multi.csv`
+   - Append deliverables to existing customer projects
+   - Set lane from Document Type column
+
+5. Import `hardware/field-test-results.csv`
+   - Track field testing across all customers
+   - Use Test ID for unique identification
+
+**Result:** Unified view showing:
+- All customer projects on one timeline
+- Shared deliverable deadlines across customers
+- Field testing activities by customer
+- Group by project (Customer) to see each program separately
+- Filter by Type to show only milestones (customer approval gates)
+- Color code by Phase to show requirements → design → validation → field test
+
+**Advanced Usage:**
+- Create branch `acme-schedule-slip` to model impact of Acme delays on other customers
+- Filter to show only deliverables Due in Q4 2025
+- Export filtered view for executive summary
 
 ---
 
