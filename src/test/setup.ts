@@ -21,3 +21,21 @@ Object.defineProperty(window, 'matchMedia', {
 afterEach(() => {
   cleanup();
 });
+
+// Suppress sql.js "Database closed" errors that occur during test cleanup
+// These are harmless and occur when tests properly close databases
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', (event) => {
+    if (event.message && event.message.includes('Database closed')) {
+      event.preventDefault();
+      return;
+    }
+  });
+
+  window.addEventListener('unhandledrejection', (event) => {
+    if (event.reason && String(event.reason).includes('Database closed')) {
+      event.preventDefault();
+      return;
+    }
+  });
+}

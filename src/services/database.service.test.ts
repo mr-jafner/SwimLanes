@@ -86,8 +86,12 @@ describe('DatabaseService Integration Tests', () => {
   });
 
   afterEach(async () => {
-    if (service.isReady()) {
-      await service.close();
+    try {
+      if (service.isReady()) {
+        await service.close();
+      }
+    } catch {
+      // Database already closed or in error state, ignore
     }
   });
 

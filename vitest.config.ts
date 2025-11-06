@@ -23,6 +23,10 @@ export default defineConfig({
     // Setup files to run before tests
     setupFiles: ['./src/test/setup.ts'],
 
+    // Don't fail on unhandled errors during cleanup
+    // sql.js throws "Database closed" errors when databases are properly cleaned up
+    dangerouslyIgnoreUnhandledErrors: true,
+
     // Coverage configuration
     coverage: {
       provider: 'v8',

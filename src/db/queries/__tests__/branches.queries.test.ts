@@ -37,7 +37,11 @@ describe('Branches Query Builders', () => {
 
   afterEach(() => {
     if (db) {
-      db.close();
+      try {
+        db.close();
+      } catch {
+        // Database already closed, ignore
+      }
     }
   });
 
