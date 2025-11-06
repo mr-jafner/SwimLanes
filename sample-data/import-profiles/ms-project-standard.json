@@ -1,0 +1,42 @@
+{
+  "name": "Microsoft Project - Standard Export",
+  "description": "Standard MS Project CSV export format with task dependencies",
+  "created": "2025-11-06",
+  "columnMappings": {
+    "title": "Task Name",
+    "type": null,
+    "start_date": "Start",
+    "end_date": "Finish",
+    "owner": "Resource Names",
+    "project": null,
+    "lane": null,
+    "tags": null
+  },
+  "typeInference": {
+    "enabled": true,
+    "rules": {
+      "milestone": "Duration == 0 or Finish is empty",
+      "task": "Duration > 0 and Finish is not empty",
+      "meeting": "Task Name contains 'meeting' or 'review' or 'sync'",
+      "release": "Task Name contains 'release' or 'launch' or 'deploy'"
+    }
+  },
+  "dateFormat": "auto",
+  "projectName": {
+    "source": "constant",
+    "value": "Project Name"
+  },
+  "laneStrategy": {
+    "source": "owner",
+    "fallback": "Engineering"
+  },
+  "idStrategy": {
+    "type": "uuid",
+    "prefix": ""
+  },
+  "ownerSeparator": ";",
+  "tagSeparator": ",",
+  "skipEmptyRows": true,
+  "trimWhitespace": true,
+  "notes": "Use this profile for standard MS Project exports. Type will be inferred from Duration column. Resource Names may contain multiple semicolon-separated values."
+}

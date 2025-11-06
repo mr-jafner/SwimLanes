@@ -1,0 +1,42 @@
+{
+  "name": "Microsoft Planner - Standard Export",
+  "description": "Microsoft Planner Excel export format saved as CSV",
+  "created": "2025-11-06",
+  "columnMappings": {
+    "title": "Task Name",
+    "type": null,
+    "start_date": "Start Date",
+    "end_date": "Due Date",
+    "owner": "Assigned To",
+    "project": null,
+    "lane": "Bucket Name",
+    "tags": "Labels"
+  },
+  "typeInference": {
+    "enabled": true,
+    "rules": {
+      "milestone": "Progress == 'Completed' and Due Date is empty",
+      "task": "Progress != 'Recurring'",
+      "meeting": "Task Name contains 'meeting' or 'standup' or 'sync' or Progress == 'Recurring'",
+      "release": "Task Name contains 'release' or 'launch' or 'deploy'"
+    }
+  },
+  "dateFormat": "auto",
+  "projectName": {
+    "source": "constant",
+    "value": "Planner Project"
+  },
+  "laneStrategy": {
+    "source": "Bucket Name",
+    "fallback": "Backlog"
+  },
+  "idStrategy": {
+    "type": "column",
+    "column": "Task ID"
+  },
+  "ownerSeparator": ";",
+  "tagSeparator": ";",
+  "skipEmptyRows": true,
+  "trimWhitespace": true,
+  "notes": "Microsoft Planner uses Bucket Names for organization (map to lane). Labels are semicolon-separated. Task IDs are unique identifiers."
+}

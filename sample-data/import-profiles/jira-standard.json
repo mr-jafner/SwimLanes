@@ -1,0 +1,51 @@
+{
+  "name": "Jira - Standard Export (All Fields)",
+  "description": "Jira CSV export with all fields including agile sprint data",
+  "created": "2025-11-06",
+  "columnMappings": {
+    "title": "Summary",
+    "type": "Issue Type",
+    "start_date": "Created",
+    "end_date": "Due Date",
+    "owner": "Assignee",
+    "project": "Components",
+    "lane": "Sprint",
+    "tags": "Labels"
+  },
+  "typeMapping": {
+    "Story": "task",
+    "Task": "task",
+    "Sub-task": "task",
+    "Bug": "task",
+    "Epic": "milestone",
+    "Milestone": "milestone"
+  },
+  "typeInference": {
+    "enabled": false,
+    "fallback": "task"
+  },
+  "dateFormat": "iso8601",
+  "projectName": {
+    "source": "column",
+    "column": "Components",
+    "fallback": "Jira Project"
+  },
+  "laneStrategy": {
+    "source": "Sprint",
+    "fallback": "Backlog"
+  },
+  "idStrategy": {
+    "type": "column",
+    "column": "Issue Key"
+  },
+  "ownerSeparator": ",",
+  "tagSeparator": ",",
+  "customFields": {
+    "story_points": "Story Points",
+    "status": "Status",
+    "priority": "Priority"
+  },
+  "skipEmptyRows": true,
+  "trimWhitespace": true,
+  "notes": "Jira exports include rich metadata. Issue Type maps to SwimLanes type. Use Sprint for swim lane grouping. Story Points and Status can be imported as tags or custom fields."
+}

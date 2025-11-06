@@ -18,5 +18,5 @@ FT-BS-001,Initial Sea Trials,task,1/16/2026,1/20/2026,BlueSea Marine,Vessel #BS-
 FT-BS-001,Extended Ocean Testing,task,1/21/2026,2/28/2026,BlueSea Marine,Vessel #BS-701,Pacific Coast,Planned,
 FT-BS-002,Install Marine Turbo,task,1/25/2026,1/28/2026,BlueSea Marine,Vessel #BS-702,BlueSea Shipyard,Planned,
 FT-BS-002,Tropical Climate Testing,task,2/01/2026,3/15/2026,BlueSea Marine,Vessel #BS-702,Caribbean Sea,Planned,
-Weekly Check-In Call,meeting,10/21/2025,10/21/2025,All Customers,All Vehicles,Remote,Recurring,Discuss ongoing field tests
-Monthly Data Upload,milestone,10/31/2025,,All Customers,All Vehicles,Remote,Recurring,Upload all field test data
+FT-ALL-001,Weekly Check-In Call,meeting,10/21/2025,10/21/2025,All Customers,All Vehicles,Remote,Recurring,Discuss ongoing field tests
+FT-ALL-002,Monthly Data Upload,milestone,10/31/2025,,All Customers,All Vehicles,Remote,Recurring,Upload all field test data

@@ -1,0 +1,38 @@
+{
+  "name": "SwimLanes - Standard Format",
+  "description": "Native SwimLanes CSV format with all standard columns",
+  "created": "2025-11-06",
+  "columnMappings": {
+    "title": "title",
+    "type": "type",
+    "start_date": "start_date",
+    "end_date": "end_date",
+    "owner": "owner",
+    "project": "project",
+    "lane": "lane",
+    "tags": "tags"
+  },
+  "typeMapping": null,
+  "typeInference": {
+    "enabled": false
+  },
+  "dateFormat": "iso8601",
+  "projectName": {
+    "source": "column",
+    "column": "project",
+    "fallback": "Default Project"
+  },
+  "laneStrategy": {
+    "source": "lane",
+    "fallback": "owner"
+  },
+  "idStrategy": {
+    "type": "uuid",
+    "prefix": ""
+  },
+  "ownerSeparator": ",",
+  "tagSeparator": ",",
+  "skipEmptyRows": true,
+  "trimWhitespace": true,
+  "notes": "This is the native SwimLanes format. Use this profile when exporting from SwimLanes and re-importing, or as a template for custom CSV formats."
+}

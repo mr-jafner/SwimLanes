@@ -10,8 +10,11 @@ This directory contains diverse sample datasets designed to demonstrate SwimLane
 sample-data/
 ├── hardware/              # Hardware engineering projects (turbochargers)
 ├── software/              # Software development projects
-├── from-pm-tools/         # Real-world PM tool export formats
-└── messy-data/            # Test data for edge cases and validation
+├── from-pm-tools/         # Real-world PM tool export formats (CSV + XLSX)
+├── messy-data/            # Test data for edge cases and validation
+├── import-profiles/       # Example import profile configurations (JSON)
+├── validate-samples.py    # Validation script for all sample data
+└── convert-to-xlsx.py     # Utility to convert CSV to Excel format
 ```
 
 ---
@@ -263,6 +266,42 @@ Real-world customer project timelines demonstrating how different customer requi
 
 ---
 
+### `hardware/multi-year-program-large.csv`
+
+**Large Dataset for Performance Testing** - 3-Year Multi-Product Development Program
+
+- **Timeline:** January 2025 - January 2027 (3 years)
+- **Item Count:** 145 tasks, milestones, meetings, and releases
+- **Projects:**
+  - GT2560, GT2860, GT3071 turbocharger development (concept → production)
+  - VGT actuator system development
+  - Manufacturing tooling and production ramp
+  - 3 customer projects (OEM, performance, marine)
+  - Quality system certification (ISO 9001, IATF 16949)
+  - Test lab expansion and infrastructure
+  - Program management and reviews
+- **Demonstrates:**
+  - Large-scale timeline rendering performance
+  - Multi-project program management
+  - Concurrent development streams
+  - Long-term planning and phasing
+  - Complex resource allocation
+  - Realistic spacing and dependencies
+
+**Key Columns:**
+- `Task Name` - Activity description
+- `Start Date`, `Finish Date` - Timeline
+- `Resource Names` - Team assignments
+- `Type` - task/milestone/meeting/release
+- `Priority` - Critical/High/Medium
+- `Project` - Project/product name
+- `Phase` - Development phase
+- `Notes` - Additional details
+
+**Use Case:** Performance testing with 100+ items. Tests rendering, filtering, and zoom performance. Demonstrates managing a complex multi-year program with overlapping projects.
+
+---
+
 ## Software Projects
 
 Two software development datasets for comparison.
@@ -329,6 +368,8 @@ Real-world export formats from popular project management tools.
 - `Notes` - Detailed task notes
 
 **Use Case:** Demonstrates importing MS Project exports with dependencies and priorities.
+
+**Note:** Also available as `ms-project-export.xlsx` in Excel format for testing XLSX import functionality.
 
 ---
 
@@ -662,6 +703,140 @@ If `type` column is missing, SwimLanes infers type:
 - **task:** Has both start_date and end_date
 - **meeting:** Keywords like "meeting", "sync", "standup" in title
 - **release:** Keywords like "release", "launch", "deploy" in title
+
+---
+
+## Import Profiles
+
+Example import profile configurations in JSON format. These can be saved and reused for consistent column mapping across multiple imports.
+
+### Available Profiles
+
+**`import-profiles/ms-project-standard.json`**
+- MS Project CSV export format
+- Maps Task Name → title, Start → start_date, Finish → end_date
+- Infers type from Duration column (0 = milestone)
+- Semicolon-separated Resource Names
+
+**`import-profiles/ms-planner-standard.json`**
+- Microsoft Planner export format
+- Maps Bucket Name → lane (swim lane grouping)
+- Uses Task ID column for unique identification
+- Semicolon-separated Labels
+
+**`import-profiles/jira-standard.json`**
+- Jira all-fields export format
+- Maps Issue Type → type (Story/Bug → task, Epic → milestone)
+- Maps Sprint → lane for agile organization
+- Includes Story Points and Status as custom fields
+
+**`import-profiles/swimlanes-standard.json`**
+- Native SwimLanes format
+- Direct column mapping (no inference needed)
+- Use as template for custom CSV formats
+
+**`import-profiles/customer-project.json`**
+- Customer-specific project format
+- Maps Customer → project, Phase → lane
+- Supports custom fields (Application, Notes, Priority)
+- Match strategy uses Customer + Task Name for ID
+
+### Profile Structure
+
+```json
+{
+  "name": "Profile Name",
+  "description": "Use case description",
+  "columnMappings": {
+    "title": "Source Column Name",
+    "type": "Type Column",
+    "start_date": "Start Date Column",
+    "end_date": "End Date Column",
+    "owner": "Owner Column",
+    "project": "Project Column",
+    "lane": "Lane Column",
+    "tags": "Tags Column"
+  },
+  "idStrategy": {
+    "type": "uuid|column|match",
+    "column": "ID Column Name (for column strategy)",
+    "matchFields": ["field1", "field2"]
+  },
+  "typeInference": {
+    "enabled": true,
+    "rules": { ... }
+  },
+  "customFields": {
+    "field_name": "Source Column"
+  }
+}
+```
+
+See `import-profiles/README.json` for complete schema documentation.
+
+---
+
+## Utility Scripts
+
+### `validate-samples.py`
+
+Python script to validate all CSV sample data files.
+
+**Features:**
+- Checks all CSV files for syntax errors
+- Validates date formats (ISO, US slash, US dash)
+- Verifies item types (task/milestone/release/meeting)
+- Reports errors and warnings with line numbers
+- Summary statistics (files, rows, errors)
+
+**Usage:**
+```bash
+cd sample-data
+python3 validate-samples.py
+```
+
+**Output:**
+```
+✅ hardware/turbo-gt2860-rd.csv          ( 20 rows)
+✅ from-pm-tools/ms-project-export.csv   ( 31 rows)
+
+📄 messy-data/inconsistent-data-types.csv
+   Rows: 9
+   ❌ Errors (1):
+      - Row 5: Invalid type 'invalid_type'
+
+📊 Summary:
+   Files validated:  20
+   Total data rows:  453
+   Total errors:     7 (all in messy-data/)
+   Total warnings:   0
+```
+
+**Note:** Errors in `messy-data/` files are intentional for testing error handling.
+
+---
+
+### `convert-to-xlsx.py`
+
+Python script to convert MS Project CSV to Excel (XLSX) format.
+
+**Features:**
+- Reads CSV and creates Excel workbook
+- Formats header row (bold, colored, centered)
+- Auto-adjusts column widths
+- Preserves all data and formatting
+
+**Usage:**
+```bash
+cd sample-data
+python3 convert-to-xlsx.py
+```
+
+**Requirements:**
+- openpyxl library (`pip install openpyxl`)
+
+**Output:**
+- Creates `from-pm-tools/ms-project-export.xlsx`
 
 ---
 
