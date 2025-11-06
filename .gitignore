@@ -46,3 +46,6 @@ claude.md
 
 # Secrets
 swimlanes-deploy-key*
+
+# Temporary files
+PR_DESCRIPTION.md

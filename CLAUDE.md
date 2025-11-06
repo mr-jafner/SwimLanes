@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Current Status:** Actively migrating from single-file HTML prototype to modern React + TypeScript application.
 
-**Architecture:** React 18 + TypeScript + Vite, with sql.js (SQLite WASM) for local-first data storage, deploying to swimlanes.jafner.com.
+**Architecture:** React 19 + TypeScript + Vite, with sql.js (SQLite WASM) for local-first data storage, deploying to swimlanes.jafner.com.
 
 **Repository:** https://github.com/mr-jafner/SwimLanes
 
@@ -21,7 +21,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Development Server
 
 ```bash
-cd /c/Users/jeffr/OneDrive/Documents/GitHub/SwimLanes
+# Navigate to project directory (adjust path as needed for your system)
+cd /path/to/SwimLanes
 npm install  # First time only
 npm run dev  # Starts on http://localhost:5173
 ```
@@ -52,29 +53,37 @@ To test the original working prototype: open `legacy/timeline-app.html` in a bro
 
 **Core:**
 
-- React 18 + TypeScript 5.x (strict mode)
-- Vite 5.x (build tool, dev server)
-- Tailwind CSS (TODO: Issue #2)
+- React 19.1.1 + TypeScript 5.9.3 (strict mode)
+- Vite 7.1.7 (build tool, dev server)
+- Tailwind CSS 4.1.16 ✅
 
 **State & Data:**
 
 - Zustand (state management) (TODO: Issue #15)
-- sql.js (SQLite WASM for local database)
-- IndexedDB (auto-save persistence) (TODO: Issue #13)
+- sql.js 1.13.0 (SQLite WASM for local database)
+- IndexedDB (auto-save persistence) ✅
 
 **UI & Canvas:**
 
-- shadcn/ui (component library) (TODO: Issue #3)
+- shadcn/ui (component library) ✅
+- next-themes 0.4.6 (dark mode) ✅
+- sonner 2.0.7 (toast notifications) ✅
 - react-konva (timeline canvas rendering) (TODO: Issue #19)
 
 **Testing:**
 
-- Vitest + React Testing Library (TODO: Issue #7)
-- Playwright for E2E (future)
+- Vitest 4.0.4 + React Testing Library ✅
+- Playwright 1.56.1 (E2E) ✅
+
+**Tooling:**
+
+- ESLint 9.36.0 + Prettier 3.6.2 ✅
+- Husky 9.1.7 (Git hooks) ✅
+- lint-staged 16.2.6 (pre-commit formatting) ✅
 
 **Deployment:**
 
-- Self-hosted OpenBSD (Vultr) via GitHub Actions (TODO: Issue #9, #41)
+- Self-hosted OpenBSD (Vultr) via GitHub Actions ✅
 - Domain: swimlanes.jafner.com
 
 See `ref/architecture.md` for complete technical details.
@@ -83,76 +92,84 @@ See `ref/architecture.md` for complete technical details.
 
 ## Project Structure
 
+### Current Structure (Implemented)
+
 ```
 SwimLanes/
 ├── src/
 │   ├── components/          # React components
-│   │   ├── ui/             # shadcn/ui components (copy-paste)
-│   │   ├── timeline/       # Timeline visualization (Canvas)
-│   │   ├── import/         # Import/map workflow
-│   │   ├── branches/       # Branch management
-│   │   ├── history/        # Version history
-│   │   ├── export/         # Export features
-│   │   ├── layout/         # App layout (header, nav, footer)
-│   │   └── common/         # Shared components
-│   ├── services/           # Business logic
-│   │   ├── database.service.ts      # sql.js wrapper
-│   │   ├── import.service.ts        # Import/dry-run logic
-│   │   ├── timeline.service.ts      # Timeline calculations
-│   │   ├── branch.service.ts        # Branch operations
-│   │   ├── history.service.ts       # Version history
-│   │   ├── export.service.ts        # Export functions
-│   │   ├── persistence.service.ts   # IndexedDB
-│   │   └── csv-parser.service.ts    # CSV parsing
-│   ├── db/                 # Database layer
-│   │   ├── schema.ts       # Table definitions, triggers
-│   │   ├── migrations.ts   # Schema migrations (future)
-│   │   └── queries/        # SQL query builders
-│   │       ├── items.queries.ts
-│   │       ├── branches.queries.ts
-│   │       ├── history.queries.ts
-│   │       └── import.queries.ts
-│   ├── stores/             # Zustand state stores
-│   │   ├── app.store.ts           # Global app state
-│   │   ├── timeline.store.ts      # Timeline view state
-│   │   ├── import.store.ts        # Import workflow
-│   │   ├── branch.store.ts        # Branch state
-│   │   ├── undo.store.ts          # Undo/redo stack
-│   │   └── preferences.store.ts   # User preferences
-│   ├── types/              # TypeScript type definitions
+│   │   └── ui/             # ✅ shadcn/ui components (button, dialog, select, sonner)
+│   ├── services/           # ✅ Business logic
+│   │   ├── database.service.ts      # ✅ sql.js wrapper
+│   │   └── persistence.service.ts   # ✅ IndexedDB persistence
+│   ├── db/                 # ✅ Database layer
+│   │   └── schema.ts       # ✅ Table definitions, triggers, indexes
+│   ├── types/              # ✅ TypeScript type definitions
 │   │   ├── database.types.ts
 │   │   ├── import.types.ts
+│   │   ├── branch.types.ts
 │   │   ├── timeline.types.ts
 │   │   └── index.ts        # Barrel export
-│   ├── utils/              # Utility functions
-│   │   ├── date.utils.ts
-│   │   ├── csv.utils.ts
-│   │   ├── validation.utils.ts
-│   │   └── format.utils.ts
-│   ├── hooks/              # Custom React hooks
-│   │   ├── useDatabase.ts
-│   │   ├── useTimeline.ts
-│   │   ├── usePersistence.ts
-│   │   └── useKeyboardShortcuts.ts
-│   ├── constants/          # App constants
-│   │   ├── schema.constants.ts
-│   │   ├── colors.constants.ts
-│   │   └── config.constants.ts
-│   ├── App.tsx             # Root component
-│   └── main.tsx            # Entry point
-├── ref/                    # Planning documentation
-│   ├── roadmap.md          # 5-phase development plan
-│   ├── architecture.md     # Technical architecture
-│   ├── deployment.md       # GitHub Actions + OpenBSD
-│   ├── github-issues.md    # All 40 issue templates
-│   └── decisions-summary.md
-├── legacy/                 # Original prototypes
-│   ├── timeline-app.html
-│   └── timeline-swimlane-app.html
-├── public/                 # Static assets
-├── package.json
-├── vite.config.ts
-└── tsconfig.app.json
+│   ├── lib/                # ✅ Utility functions
+│   │   └── utils.ts        # Tailwind cn() utility
+│   ├── test/               # ✅ Test setup
+│   │   └── setup.ts
+│   ├── App.tsx             # ✅ Root component
+│   └── main.tsx            # ✅ Entry point
+├── e2e/                    # ✅ Playwright E2E tests
+├── ref/                    # ✅ Planning documentation
+├── legacy/                 # ✅ Original prototypes
+├── public/                 # ✅ Static assets
+└── [config files]          # ✅ vite, tsconfig, playwright, vitest, etc.
+```
+
+### Planned Structure (To Be Implemented)
+
+```
+src/
+├── components/
+│   ├── timeline/           # TODO: Timeline visualization (Canvas)
+│   ├── import/             # TODO: Import/map workflow
+│   ├── branches/           # TODO: Branch management
+│   ├── history/            # TODO: Version history
+│   ├── export/             # TODO: Export features
+│   ├── layout/             # TODO: App layout (header, nav, footer)
+│   └── common/             # TODO: Shared components
+├── services/
+│   ├── import.service.ts        # TODO: Import/dry-run logic
+│   ├── timeline.service.ts      # TODO: Timeline calculations
+│   ├── branch.service.ts        # TODO: Branch operations
+│   ├── history.service.ts       # TODO: Version history
+│   ├── export.service.ts        # TODO: Export functions
+│   └── csv-parser.service.ts    # TODO: CSV parsing
+├── db/
+│   ├── migrations.ts       # TODO: Schema migrations
+│   └── queries/            # TODO: SQL query builders
+│       ├── items.queries.ts
+│       ├── branches.queries.ts
+│       ├── history.queries.ts
+│       └── import.queries.ts
+├── stores/                 # TODO: Zustand state stores
+│   ├── app.store.ts
+│   ├── timeline.store.ts
+│   ├── import.store.ts
+│   ├── branch.store.ts
+│   ├── undo.store.ts
+│   └── preferences.store.ts
+├── utils/                  # TODO: Utility functions
+│   ├── date.utils.ts
+│   ├── csv.utils.ts
+│   ├── validation.utils.ts
+│   └── format.utils.ts
+├── hooks/                  # TODO: Custom React hooks
+│   ├── useDatabase.ts
+│   ├── useTimeline.ts
+│   ├── usePersistence.ts
+│   └── useKeyboardShortcuts.ts
+└── constants/              # TODO: App constants
+    ├── schema.constants.ts
+    ├── colors.constants.ts
+    └── config.constants.ts
 ```
 
 ### Path Aliases
@@ -497,5 +514,5 @@ GitHub Issues is the authoritative source for task status, dependencies, and pro
 
 ---
 
-**Last Updated:** 2025-11-03
+**Last Updated:** 2025-11-05
 **Document Version:** 2.0 (React Architecture)
