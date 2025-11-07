@@ -1,0 +1,5 @@
+title,type,start_date,end_date,owner,project,extra_col_1,extra_col_2,extra_col_3,random_data,legacy_id
+Standard task,task,2025-06-01,2025-06-05,Alice,Test,Extra data 1,More data,Even more,Random,LEG-001
+Another task,task,2025-06-10,2025-06-15,Bob,Test,Some value,Another value,Yet another,Data here,LEG-002
+Minimal data,task,2025-06-20,2025-06-25,Carol,Test,,,,,
+With extra columns,milestone,2025-07-01,,Dave,Test,Column A,Column B,Column C,Column D,LEG-003

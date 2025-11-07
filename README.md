@@ -198,9 +198,22 @@ See [CLAUDE.md - Database Schema](./CLAUDE.md#database-schema) for complete deta
 
 ---
 
+## Sample Data
+
+Comprehensive sample datasets are available in the `sample-data/` directory:
+
+- **`hardware/`** - Turbocharger development projects (R&D, testing, manufacturing)
+- **`software/`** - Software development projects
+- **`from-pm-tools/`** - Real-world exports from MS Project, Planner, Jira
+- **`messy-data/`** - Edge case testing (date formats, missing fields, special characters)
+
+See **[sample-data/README.md](./sample-data/README.md)** for complete documentation and import workflow examples.
+
+---
+
 ## Legacy Prototype
 
-The original working prototype is preserved in `legacy/timeline-app.html` (1685 lines, 60KB single file). Open it in a browser with `sample-data.csv` to see the fully functional implementation that we're migrating from.
+The original working prototype is preserved in `legacy/timeline-app.html` (1685 lines, 60KB single file). Open it in a browser with `sample-data.csv` (legacy format at root) to see the fully functional implementation that we're migrating from.
 
 ---
 

@@ -1,0 +1,7 @@
+id,title,type,start_date,end_date,owner,project
+TASK-001,First occurrence,task,2025-06-01,2025-06-05,Alice,Conflict Test
+TASK-002,Unique task,task,2025-06-03,2025-06-08,Bob,Conflict Test
+TASK-001,Duplicate ID different data,task,2025-06-10,2025-06-15,Carol,Conflict Test
+TASK-003,Another unique,milestone,2025-06-20,,Dave,Conflict Test
+TASK-002,Another duplicate,task,2025-06-22,2025-06-25,Eve,Conflict Test
+TASK-004,Final unique task,task,2025-06-25,2025-06-30,Frank,Conflict Test

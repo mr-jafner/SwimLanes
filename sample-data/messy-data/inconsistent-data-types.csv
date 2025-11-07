@@ -1,0 +1,10 @@
+title,type,start_date,end_date,priority,estimated_hours,owner,project
+Normal task,task,2025-06-01,2025-06-05,High,40,Alice,Test Project
+Priority as number,task,2025-06-10,2025-06-15,1,35,Bob,Test Project
+Hours as text,task,2025-06-20,2025-06-25,Medium,forty,Carol,Test Project
+Invalid type,invalid_type,2025-07-01,2025-07-05,Low,20,Dave,Test Project
+Boolean in priority,milestone,2025-07-10,,true,0,Eve,Test Project
+Negative hours,task,2025-07-15,2025-07-20,High,-10,Frank,Test Project
+Decimal hours,task,2025-07-25,2025-07-30,Medium,37.5,Grace,Test Project
+Empty strings everywhere,task,,,,,,,
+Numbers as owners,task,2025-08-01,2025-08-05,2,100,12345,67890

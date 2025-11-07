@@ -1,0 +1,20 @@
+Activity,Type,Start,End,Owner,Customer,Application,Status,Deliverable
+Initial Consultation,meeting,6/1/2025,6/1/2025,Sarah Chen,Apex Performance,2.5L 4-Cyl Turbo Upgrade,Complete,
+Power Target Definition,task,6/2/2025,6/5/2025,Sarah Chen,Apex Performance,2.5L 4-Cyl Turbo Upgrade,Complete,Target: 450 HP from 300 HP stock
+Compressor Wheel Selection,task,6/8/2025,6/15/2025,Sarah Chen,Apex Performance,2.5L 4-Cyl Turbo Upgrade,In Progress,62mm billet compressor
+Turbine Wheel Selection,task,6/8/2025,6/15/2025,Sarah Chen,Apex Performance,2.5L 4-Cyl Turbo Upgrade,In Progress,Larger 58mm turbine
+Bearing System Upgrade,task,6/16/2025,6/25/2025,Mike Torres,Apex Performance,2.5L 4-Cyl Turbo Upgrade,Planned,Ball bearing for response
+Housing Modifications,task,6/18/2025,7/5/2025,Jake Morrison,Apex Performance,2.5L 4-Cyl Turbo Upgrade,Planned,Ported compressor housing
+Prototype Assembly,task,7/8/2025,7/15/2025,Assembly,Apex Performance,2.5L 4-Cyl Turbo Upgrade,Planned,Build 2 test units
+Flow Bench Testing,task,7/16/2025,7/18/2025,Lab Team,Apex Performance,2.5L 4-Cyl Turbo Upgrade,Planned,Verify flow improvements
+Engine Dyno - Baseline,task,7/20/2025,7/22/2025,Dyno Team,Apex Performance,2.5L 4-Cyl Turbo Upgrade,Planned,Test on customer's engine
+Engine Dyno - Prototype,task,7/23/2025,7/25/2025,Dyno Team,Apex Performance,2.5L 4-Cyl Turbo Upgrade,Planned,Target 450 HP at 28 PSI
+Results Review Meeting,meeting,7/28/2025,7/28/2025,Sarah Chen,Apex Performance,2.5L 4-Cyl Turbo Upgrade,Planned,Present dyno results
+Design Adjustments,task,7/29/2025,8/5/2025,Sarah Chen,Apex Performance,2.5L 4-Cyl Turbo Upgrade,Planned,If needed based on results
+Final Design Approval,milestone,8/8/2025,,Customer,Apex Performance,2.5L 4-Cyl Turbo Upgrade,Planned,Customer sign-off
+Production Drawings,task,8/10/2025,8/20/2025,Engineering,Apex Performance,2.5L 4-Cyl Turbo Upgrade,Planned,Manufacturing documentation
+Small Batch Production,task,8/25/2025,9/15/2025,Manufacturing,Apex Performance,2.5L 4-Cyl Turbo Upgrade,Planned,Initial run of 25 units
+QC Testing - Sample Units,task,9/16/2025,9/20/2025,Quality,Apex Performance,2.5L 4-Cyl Turbo Upgrade,Planned,Test 3 units from batch
+Delivery to Customer,milestone,9/25/2025,,Shipping,Apex Performance,2.5L 4-Cyl Turbo Upgrade,Planned,Ship 25 units to Apex
+Field Feedback Collection,task,10/1/2025,12/31/2025,Product Mgmt,Apex Performance,2.5L 4-Cyl Turbo Upgrade,Planned,Monitor customer installs
+Warranty Data Review,task,1/15/2026,1/30/2026,Quality,Apex Performance,2.5L 4-Cyl Turbo Upgrade,Planned,Analyze first 3 months

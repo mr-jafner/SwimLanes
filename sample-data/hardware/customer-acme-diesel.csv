@@ -1,0 +1,26 @@
+Task Name,Start Date,Finish Date,Resource Names,Type,Priority,Customer,Application,Notes
+Project Kickoff - Acme 6.7L Diesel,2025-05-15,2025-05-15,Sarah Chen;Customer,milestone,Critical,Acme Motors,Heavy Duty Truck,Initial requirements review
+Customer Requirements Review,2025-05-16,2025-05-20,Sarah Chen;Product Mgmt,task,High,Acme Motors,Heavy Duty Truck,Flow target: 75 lb/min at 3.2 PR
+Compressor Selection Study,2025-05-21,2025-06-05,Sarah Chen,task,High,Acme Motors,Heavy Duty Truck,Evaluate 3 compressor options
+Turbine A/R Optimization,2025-05-28,2025-06-15,Sarah Chen,task,High,Acme Motors,Heavy Duty Truck,Balance transient vs peak power
+Wastegate Sizing,2025-06-02,2025-06-12,Mike Torres,task,High,Acme Motors,Heavy Duty Truck,Must meet EPA emissions transient
+Preliminary Design Review,2025-06-18,2025-06-18,Sarah Chen;Customer,milestone,High,Acme Motors,Heavy Duty Truck,Present 3 configuration options
+Customer Design Approval,2025-06-25,2025-06-25,Customer,milestone,Critical,Acme Motors,Heavy Duty Truck,Configuration 2 selected
+Detailed CAD - Customer Mounting,2025-06-26,2025-07-15,Jake Morrison,task,High,Acme Motors,Heavy Duty Truck,Custom V-band and oil feed locations
+Interface Control Document,2025-07-01,2025-07-20,Sarah Chen,task,High,Acme Motors,Heavy Duty Truck,Dimensions and connection specs
+Casting Drawings - Custom Housing,2025-07-16,2025-08-05,Jake Morrison,task,High,Acme Motors,Heavy Duty Truck,Acme-specific exhaust flange
+Customer Drawing Review,2025-08-06,2025-08-15,Customer,task,High,Acme Motors,Heavy Duty Truck,2 week review period per contract
+Drawing Approval,2025-08-15,2025-08-15,Customer,milestone,Critical,Acme Motors,Heavy Duty Truck,Release to manufacturing
+Prototype Build,2025-08-18,2025-09-30,Manufacturing,task,High,Acme Motors,Heavy Duty Truck,Build 5 prototype units
+First Article Inspection,2025-10-01,2025-10-05,Quality,task,Critical,Acme Motors,Heavy Duty Truck,Submit to customer for approval
+Customer FAI Approval,2025-10-10,2025-10-10,Customer,milestone,Critical,Acme Motors,Heavy Duty Truck,Required before testing
+Cold Flow Testing,2025-10-12,2025-10-18,Lab Team,task,High,Acme Motors,Heavy Duty Truck,Validate compressor map
+Hot Gas Testing,2025-10-20,2025-10-28,Lab Team,task,High,Acme Motors,Heavy Duty Truck,Turbine efficiency validation
+Customer Witnessed Test,2025-10-30,2025-10-30,Lab Team;Customer,milestone,Critical,Acme Motors,Heavy Duty Truck,Customer engineer on-site
+Durability Test - 500 hours,2025-11-01,2025-11-22,Lab Team,task,Critical,Acme Motors,Heavy Duty Truck,Rated speed and temperature
+Test Report Delivery,2025-11-25,2025-11-25,Engineering,milestone,High,Acme Motors,Heavy Duty Truck,Complete test data package
+Engine Dyno at Acme Facility,2025-12-01,2025-12-15,Field Team,task,Critical,Acme Motors,Heavy Duty Truck,Testing at customer site
+Transient Response Tuning,2025-12-08,2025-12-20,Field Team,task,High,Acme Motors,Heavy Duty Truck,Optimize for Acme drive cycle
+Customer Performance Approval,2026-01-05,2026-01-05,Customer,milestone,Critical,Acme Motors,Heavy Duty Truck,Sign-off on performance
+Field Test - 3 Vehicles,2026-01-10,2026-04-10,Field Team,task,High,Acme Motors,Heavy Duty Truck,100k miles across 3 trucks
+Production Release,2026-04-15,2026-04-15,Management,milestone,Critical,Acme Motors,Heavy Duty Truck,Release to full production

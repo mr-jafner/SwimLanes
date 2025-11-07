@@ -1,0 +1,12 @@
+title,type,start_date,end_date,owner,lane,project,tags
+Sprint 24 Planning,meeting,2025-08-01,2025-08-01,Scrum Master,Planning,Mobile App,sprint,planning
+User Profile Screen,task,2025-08-02,2025-08-08,Emma,Development,Mobile App,frontend,feature
+Settings Page Redesign,task,2025-08-02,2025-08-09,Frank,Development,Mobile App,frontend,ui
+Push Notification Service,task,2025-08-05,2025-08-12,Grace,Development,Mobile App,backend,feature
+Offline Data Sync,task,2025-08-06,2025-08-15,Henry,Development,Mobile App,backend,sync
+Unit Tests - Profile,task,2025-08-09,2025-08-11,Emma,Testing,Mobile App,testing,unit
+Unit Tests - Settings,task,2025-08-10,2025-08-12,Frank,Testing,Mobile App,testing,unit
+Code Review Sessions,meeting,2025-08-13,2025-08-13,Tech Lead,Development,Mobile App,review,meeting
+Integration Testing,task,2025-08-14,2025-08-16,QA Team,Testing,Mobile App,testing,integration
+Sprint 24 Demo,meeting,2025-08-16,2025-08-16,Scrum Master,Demo,Mobile App,sprint,demo
+Sprint 24 Retrospective,meeting,2025-08-17,2025-08-17,Scrum Master,Planning,Mobile App,sprint,retro

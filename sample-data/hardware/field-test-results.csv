@@ -1,0 +1,22 @@
+Test ID,Activity,Type,Start Date,End Date,Customer,Vehicle/Asset,Test Site,Status,Issues Found
+FT-AM-001,Install Prototype Unit 1,task,10/15/2025,10/17/2025,Acme Motors,Truck #4521,Acme Test Track,Complete,None
+FT-AM-001,Initial Shakedown - 100 miles,task,10/18/2025,10/20/2025,Acme Motors,Truck #4521,Acme Test Track,Complete,Minor oil leak - fixed
+FT-AM-001,Highway Mileage - 5000 mi,task,10/21/2025,11/15/2025,Acme Motors,Truck #4521,I-80 Route,In Progress,None reported
+FT-AM-002,Install Prototype Unit 2,task,10/22/2025,10/24/2025,Acme Motors,Truck #4522,Acme Test Track,Complete,None
+FT-AM-002,Heavy Load Testing,task,10/25/2025,11/10/2025,Acme Motors,Truck #4522,Acme Test Track,In Progress,Elevated EGT at max load
+FT-AM-003,Install Prototype Unit 3,task,10/29/2025,10/31/2025,Acme Motors,Truck #4523,Customer Fleet,Planned,
+FT-AM-003,Real-World Fleet Testing,task,11/01/2025,1/31/2026,Acme Motors,Truck #4523,Customer Fleet,Planned,
+FT-AP-001,Install Performance Turbo,task,9/28/2025,9/29/2025,Apex Performance,BMW M3 - Car 1,Apex Dyno,Complete,None
+FT-AP-001,Dyno Verification Test,task,9/30/2025,9/30/2025,Apex Performance,BMW M3 - Car 1,Apex Dyno,Complete,Met 450 HP target
+FT-AP-001,Track Testing - 500 miles,task,10/01/2025,10/15/2025,Apex Performance,BMW M3 - Car 1,Laguna Seca,Complete,Excellent performance
+FT-AP-002,Install Performance Turbo,task,10/05/2025,10/06/2025,Apex Performance,Subaru WRX - Car 2,Apex Shop,Complete,None
+FT-AP-002,Street Testing - 2000 miles,task,10/07/2025,11/07/2025,Apex Performance,Subaru WRX - Car 2,Public Roads,In Progress,Great drivability
+FT-AP-003,Install Performance Turbo,task,10/12/2025,10/13/2025,Apex Performance,Nissan 350Z - Car 3,Apex Shop,Complete,None
+FT-AP-003,Drag Strip Testing,task,10/14/2025,10/30/2025,Apex Performance,Nissan 350Z - Car 3,Pomona Dragway,In Progress,Consistent 11.2 quarter mile
+FT-BS-001,Install Marine Turbo,task,1/10/2026,1/15/2026,BlueSea Marine,Vessel #BS-701,BlueSea Shipyard,Planned,
+FT-BS-001,Initial Sea Trials,task,1/16/2026,1/20/2026,BlueSea Marine,Vessel #BS-701,San Francisco Bay,Planned,
+FT-BS-001,Extended Ocean Testing,task,1/21/2026,2/28/2026,BlueSea Marine,Vessel #BS-701,Pacific Coast,Planned,
+FT-BS-002,Install Marine Turbo,task,1/25/2026,1/28/2026,BlueSea Marine,Vessel #BS-702,BlueSea Shipyard,Planned,
+FT-BS-002,Tropical Climate Testing,task,2/01/2026,3/15/2026,BlueSea Marine,Vessel #BS-702,Caribbean Sea,Planned,
+FT-ALL-001,Weekly Check-In Call,meeting,10/21/2025,10/21/2025,All Customers,All Vehicles,Remote,Recurring,Discuss ongoing field tests
+FT-ALL-002,Monthly Data Upload,milestone,10/31/2025,,All Customers,All Vehicles,Remote,Recurring,Upload all field test data

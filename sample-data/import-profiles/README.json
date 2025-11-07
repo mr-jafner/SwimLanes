@@ -1,0 +1,138 @@
+{
+  "title": "Import Profile Documentation",
+  "description": "Import profiles save column mapping configurations for reuse across multiple imports",
+  "version": "1.0",
+  "updated": "2025-11-06",
+  "schema": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "description": "Human-readable profile name"
+    },
+    "description": {
+      "type": "string",
+      "required": false,
+      "description": "Profile description and use case"
+    },
+    "columnMappings": {
+      "type": "object",
+      "required": true,
+      "description": "Maps SwimLanes fields to source CSV columns",
+      "fields": {
+        "title": "Required - Task/item title",
+        "type": "Required - task/milestone/release/meeting (null for inference)",
+        "start_date": "Required - Start date",
+        "end_date": "Optional - End date (null for milestones)",
+        "owner": "Optional - Assigned person/team",
+        "project": "Optional - Project name",
+        "lane": "Optional - Swim lane grouping",
+        "tags": "Optional - Comma/semicolon separated tags"
+      }
+    },
+    "typeMapping": {
+      "type": "object",
+      "required": false,
+      "description": "Maps source type values to SwimLanes types",
+      "example": {
+        "Story": "task",
+        "Bug": "task",
+        "Epic": "milestone"
+      }
+    },
+    "typeInference": {
+      "type": "object",
+      "required": false,
+      "description": "Rules for inferring type when not provided",
+      "fields": {
+        "enabled": "Boolean - Enable type inference",
+        "rules": "Object - Inference rules",
+        "fallback": "String - Default type if inference fails"
+      }
+    },
+    "dateFormat": {
+      "type": "string",
+      "required": false,
+      "description": "Expected date format: 'auto', 'iso8601', 'us', or custom format",
+      "default": "auto"
+    },
+    "projectName": {
+      "type": "object",
+      "required": false,
+      "description": "How to determine project name",
+      "options": {
+        "constant": "Use fixed value",
+        "column": "Read from CSV column",
+        "filename": "Extract from filename"
+      }
+    },
+    "laneStrategy": {
+      "type": "object",
+      "required": false,
+      "description": "How to assign swim lanes",
+      "fields": {
+        "source": "Column to use for lane",
+        "fallback": "Default lane if source is empty"
+      }
+    },
+    "idStrategy": {
+      "type": "object",
+      "required": true,
+      "description": "How to handle item IDs",
+      "options": {
+        "uuid": "Generate new UUIDs for all items",
+        "column": "Use existing ID column",
+        "match": "Match by key fields (project + title)"
+      }
+    },
+    "ownerSeparator": {
+      "type": "string",
+      "required": false,
+      "description": "Separator for multiple owners (e.g., ';' or ',')",
+      "default": ","
+    },
+    "tagSeparator": {
+      "type": "string",
+      "required": false,
+      "description": "Separator for multiple tags",
+      "default": ","
+    },
+    "customFields": {
+      "type": "object",
+      "required": false,
+      "description": "Additional columns to import as metadata"
+    },
+    "skipEmptyRows": {
+      "type": "boolean",
+      "required": false,
+      "description": "Skip rows with all empty values",
+      "default": true
+    },
+    "trimWhitespace": {
+      "type": "boolean",
+      "required": false,
+      "description": "Trim leading/trailing whitespace from all values",
+      "default": true
+    }
+  },
+  "usage": {
+    "create": "Create new profile during import by selecting 'Save as profile' after column mapping",
+    "load": "Load saved profile from Import Profiles menu",
+    "edit": "Modify existing profile via Settings > Import Profiles",
+    "delete": "Remove unused profiles via Settings > Import Profiles"
+  },
+  "bestPractices": [
+    "Create separate profiles for each data source (MS Project, Jira, etc.)",
+    "Use descriptive profile names that indicate the source and format",
+    "Test profiles with dry-run imports before committing data",
+    "Document special handling in the 'notes' field",
+    "Update profiles when source formats change",
+    "Share profiles across team members for consistency"
+  ],
+  "examples": {
+    "ms-project-standard.json": "Standard MS Project CSV export",
+    "ms-planner-standard.json": "Microsoft Planner task export",
+    "jira-standard.json": "Jira issue export with all fields",
+    "swimlanes-standard.json": "Native SwimLanes format",
+    "customer-project.json": "Custom customer project format"
+  }
+}

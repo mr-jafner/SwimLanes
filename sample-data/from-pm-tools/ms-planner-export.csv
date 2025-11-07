@@ -1,0 +1,16 @@
+Task ID,Task Name,Bucket Name,Progress,Priority,Start Date,Due Date,Assigned To,Created By,Labels,Description
+task_001,Update dyno controller firmware,Testing Infrastructure,In Progress,Important,7/1/2025,7/10/2025,Jake Morrison,Sarah Chen,Software;Testing,Upgrade to support new data logging features
+task_002,Calibrate load cell sensors,Testing Infrastructure,Not Started,Important,7/5/2025,7/12/2025,Lab Tech,Mike Torres,Hardware;Calibration,Annual calibration due for all 4 load cells
+task_003,Install new thermocouple array,Testing Infrastructure,Not Started,Medium,7/8/2025,7/15/2025,Lab Tech,Sarah Chen,Hardware;Installation,16-channel array for turbine housing temps
+task_004,Design wastegate test fixture,Tooling & Fixtures,In Progress,Urgent,6/28/2025,7/10/2025,Mike Torres,Sarah Chen,Design;Tooling,Need to test multiple wastegate sizes
+task_005,Machine adapter plates,Tooling & Fixtures,Not Started,Important,7/11/2025,7/18/2025,Machine Shop,Mike Torres,Manufacturing;Tooling,5 different bolt patterns required
+task_006,Weekly team standup,Team Coordination,Recurring,Medium,7/1/2025,7/1/2025,All Team,Scrum Master,Meeting,Every Monday 9am
+task_007,Run GT2860 baseline test,Active Testing,Not Started,Urgent,7/15/2025,7/17/2025,Lab Team,Sarah Chen,Testing;Turbo,Establish performance baseline before mods
+task_008,Analyze compressor surge data,Data Analysis,Not Started,Important,7/18/2025,7/22/2025,Dr. Kim Park,Sarah Chen,Analysis;Software,Process data from last week's tests
+task_009,Write test report - Q2 summary,Documentation,Not Started,Medium,7/20/2025,7/31/2025,Sarah Chen,Management,Documentation;Reports,Quarterly test summary for management
+task_010,Order replacement sensors,Procurement,In Progress,Urgent,6/25/2025,7/5/2025,Procurement,Lab Tech,Hardware;Purchasing,3x pressure sensors failed last month
+task_011,Compressor wheel inspection,Quality,Completed,Important,6/15/2025,6/20/2025,Quality Team,Mike Torres,Quality;Inspection,Post-test inspection for cracks
+task_012,Update test procedures,Documentation,In Progress,Medium,7/1/2025,7/25/2025,Sarah Chen,Management,Documentation;Process,Incorporate lessons learned from May
+task_013,CAD model - test adapter,Design,Completed,Important,6/18/2025,6/28/2025,Jake Morrison,Mike Torres,CAD;Design,Completed and released to manufacturing
+task_014,Safety equipment inspection,Facilities,Not Started,Urgent,7/10/2025,7/12/2025,Safety Officer,Management,Safety;Compliance,Annual inspection of blast shields
+task_015,Plan turbine efficiency study,Test Planning,In Progress,Important,7/5/2025,7/15/2025,Sarah Chen,Management,Planning;Analysis,Design test matrix for efficiency mapping

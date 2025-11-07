@@ -1,0 +1,19 @@
+Item,Type,Start Date,Due Date,Assignee,Customer,Application,Phase,Notes
+Marine Environment Assessment,task,2025-07-01,2025-07-15,Dr. Kim Park,BlueSea Marine,6.0L Marine Diesel,Requirements,Salt spray and high humidity conditions
+Corrosion Protection Strategy,task,2025-07-08,2025-07-22,Mike Torres,BlueSea Marine,6.0L Marine Diesel,Requirements,Special coating requirements
+Custom Seawater Cooling Design,task,2025-07-16,2025-08-10,Sarah Chen,BlueSea Marine,6.0L Marine Diesel,Design,Integrate with seawater heat exchanger
+Compressor Selection - Marine,task,2025-07-20,2025-08-05,Sarah Chen,BlueSea Marine,6.0L Marine Diesel,Design,High humidity tolerance required
+Turbine Design - Low Back Pressure,task,2025-07-25,2025-08-15,Sarah Chen,BlueSea Marine,6.0L Marine Diesel,Design,Optimize for marine exhaust system
+Salt Spray Testing,task,2025-09-01,2025-09-15,Lab Team,BlueSea Marine,6.0L Marine Diesel,Validation,1000 hour salt spray per ASTM B117
+Vibration Testing - Marine,task,2025-09-10,2025-09-20,Lab Team,BlueSea Marine,6.0L Marine Diesel,Validation,Marine engine vibration profile
+Coating Qualification,task,2025-09-15,2025-10-01,Quality,BlueSea Marine,6.0L Marine Diesel,Validation,Validate anti-corrosion coating
+Customer Design Review,milestone,2025-10-05,,Customer,BlueSea Marine,6.0L Marine Diesel,Design,On-site at BlueSea facility
+Prototype Build - Marine Spec,task,2025-10-08,2025-11-05,Manufacturing,BlueSea Marine,6.0L Marine Diesel,Prototype,Special coating and seals
+First Article to Customer,milestone,2025-11-10,,Shipping,BlueSea Marine,6.0L Marine Diesel,Prototype,Ship to BlueSea for inspection
+Customer Engine Test,task,2025-11-15,2025-12-10,Field Team,BlueSea Marine,6.0L Marine Diesel,Validation,Testing at BlueSea engine lab
+Performance Data Review,meeting,2025-12-12,2025-12-12,Engineering,BlueSea Marine,6.0L Marine Diesel,Validation,Review test results with customer
+On-Water Testing,task,2026-01-05,2026-02-28,Field Team,BlueSea Marine,6.0L Marine Diesel,Field Test,Install in customer's test vessel
+Salt Water Exposure - 500 Hours,task,2026-01-10,2026-02-20,Field Team,BlueSea Marine,6.0L Marine Diesel,Field Test,Operating in marine environment
+Post-Test Inspection,task,2026-02-25,2026-03-05,Quality,BlueSea Marine,6.0L Marine Diesel,Field Test,Teardown analysis for corrosion
+Test Report to Customer,milestone,2026-03-10,,Engineering,BlueSea Marine,6.0L Marine Diesel,Validation,Complete validation report
+Production Approval,milestone,2026-03-20,,Customer,BlueSea Marine,6.0L Marine Diesel,Release,Customer signs off for production

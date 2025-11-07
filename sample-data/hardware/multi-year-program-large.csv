@@ -1,0 +1,146 @@
+Task Name,Start Date,Finish Date,Resource Names,Type,Priority,Project,Phase,Notes
+Program Kickoff,2025-01-02,2025-01-02,Management,milestone,Critical,Multi-Year Program,Planning,Launch of 3-year development program
+GT2560 Concept Phase,2025-01-05,2025-02-28,Sarah Chen,task,High,GT2560,Concept,Small frame turbo for 2.0L engines
+GT2560 Market Research,2025-01-05,2025-01-20,Product Team,task,High,GT2560,Concept,Target market analysis
+GT2560 Requirements Doc,2025-01-22,2025-02-05,Sarah Chen,task,High,GT2560,Concept,Define technical requirements
+GT2560 Concept Review,2025-02-10,2025-02-10,Management,milestone,High,GT2560,Concept,Gate 1 approval
+GT2560 Compressor Design,2025-02-12,2025-03-15,Sarah Chen,task,High,GT2560,Design,Aero design and CFD
+GT2560 Turbine Design,2025-02-20,2025-03-20,Sarah Chen,task,High,GT2560,Design,Turbine wheel optimization
+GT2560 Bearing Selection,2025-03-01,2025-03-25,Mike Torres,task,Medium,GT2560,Design,Journal vs ball bearing
+GT2560 Housing Design,2025-03-10,2025-04-15,Jake Morrison,task,High,GT2560,Design,Cast iron housings
+GT2560 Design Review,2025-04-18,2025-04-18,Engineering,milestone,High,GT2560,Design,Gate 2 approval
+GT2560 Prototype Build,2025-04-20,2025-06-15,Manufacturing,task,High,GT2560,Prototype,Build 5 prototypes
+GT2560 Cold Flow Test,2025-06-18,2025-06-25,Lab Team,task,High,GT2560,Testing,Compressor map validation
+GT2560 Hot Gas Test,2025-06-28,2025-07-10,Lab Team,task,High,GT2560,Testing,Performance characterization
+GT2560 Durability Test,2025-07-15,2025-08-30,Lab Team,task,Critical,GT2560,Testing,500 hour endurance
+GT2560 Engine Dyno,2025-09-01,2025-09-20,Dyno Team,task,High,GT2560,Validation,On-engine testing
+GT2560 Design Freeze,2025-09-25,2025-09-25,Engineering,milestone,Critical,GT2560,Design,Release to production
+GT2860 Concept Phase,2025-02-01,2025-03-31,Sarah Chen,task,High,GT2860,Concept,Mid-size turbo for 2.5L engines
+GT2860 Market Research,2025-02-01,2025-02-20,Product Team,task,High,GT2860,Concept,Competitive analysis
+GT2860 Requirements Doc,2025-02-22,2025-03-10,Sarah Chen,task,High,GT2860,Concept,Performance targets
+GT2860 Concept Review,2025-03-15,2025-03-15,Management,milestone,High,GT2860,Concept,Gate 1 approval
+GT2860 Compressor Design,2025-03-18,2025-04-30,Sarah Chen,task,High,GT2860,Design,62mm inducer design
+GT2860 Turbine Design,2025-03-25,2025-05-05,Sarah Chen,task,High,GT2860,Design,Dual entry turbine
+GT2860 CHRA Design,2025-04-10,2025-05-20,Mike Torres,task,High,GT2860,Design,Center housing rotating assembly
+GT2860 Wastegate Integration,2025-04-15,2025-05-25,Jake Morrison,task,Medium,GT2860,Design,Internal wastegate sizing
+GT2860 Oil System Design,2025-05-01,2025-05-30,Mike Torres,task,Medium,GT2860,Design,Feed and return passages
+GT2860 Design Review,2025-06-05,2025-06-05,Engineering,milestone,High,GT2860,Design,Gate 2 approval
+GT2860 Prototype Build,2025-06-08,2025-08-15,Manufacturing,task,High,GT2860,Prototype,Build 8 prototypes
+GT2860 First Article Inspection,2025-08-18,2025-08-22,Quality,task,High,GT2860,Quality,Dimensional check
+GT2860 Cold Flow Test,2025-08-25,2025-09-05,Lab Team,task,High,GT2860,Testing,Map full operating range
+GT2860 Hot Gas Test,2025-09-08,2025-09-25,Lab Team,task,High,GT2860,Testing,Efficiency validation
+GT2860 Thermal Test,2025-09-28,2025-10-10,Lab Team,task,High,GT2860,Testing,Thermal cycling
+GT2860 Overspeed Test,2025-10-12,2025-10-15,Lab Team,task,Critical,GT2860,Testing,Safety validation
+GT2860 Durability Test,2025-10-18,2025-12-15,Lab Team,task,Critical,GT2860,Testing,1000 hour test
+GT2860 Engine Dyno,2026-01-05,2026-01-30,Dyno Team,task,High,GT2860,Validation,Multiple engine platforms
+GT2860 Field Testing,2026-02-01,2026-05-31,Field Team,task,High,GT2860,Validation,Real-world validation
+GT2860 Design Freeze,2026-06-15,2026-06-15,Engineering,milestone,Critical,GT2860,Design,Production release
+GT3071 Concept Phase,2025-04-01,2025-05-31,Dr. Kim Park,task,High,GT3071,Concept,Large frame turbo for 3.0L engines
+GT3071 Market Research,2025-04-01,2025-04-20,Product Team,task,High,GT3071,Concept,High-performance segment
+GT3071 Requirements Doc,2025-04-22,2025-05-10,Dr. Kim Park,task,High,GT3071,Concept,Power and efficiency targets
+GT3071 Concept Review,2025-05-20,2025-05-20,Management,milestone,High,GT3071,Concept,Gate 1 approval
+GT3071 Compressor Design,2025-05-22,2025-07-15,Dr. Kim Park,task,High,GT3071,Design,Advanced aero design
+GT3071 CFD Analysis,2025-06-01,2025-07-25,Dr. Kim Park,task,High,GT3071,Design,Multi-stage optimization
+GT3071 Turbine Design,2025-06-10,2025-07-30,Dr. Kim Park,task,High,GT3071,Design,Mixed flow turbine
+GT3071 Bearing System,2025-07-01,2025-08-15,Mike Torres,task,High,GT3071,Design,Ball bearing CHRA
+GT3071 Housing Design,2025-07-15,2025-09-01,Jake Morrison,task,High,GT3071,Design,Ported housings
+GT3071 Design Review,2025-09-10,2025-09-10,Engineering,milestone,High,GT3071,Design,Gate 2 approval
+GT3071 Prototype Build,2025-09-12,2025-11-30,Manufacturing,task,High,GT3071,Prototype,Build 10 prototypes
+GT3071 Material Testing,2025-11-01,2025-11-20,Lab Team,task,Medium,GT3071,Testing,Material properties validation
+GT3071 Cold Flow Test,2025-12-02,2025-12-15,Lab Team,task,High,GT3071,Testing,Surge line mapping
+GT3071 Hot Gas Test,2025-12-18,2026-01-10,Lab Team,task,High,GT3071,Testing,High temperature validation
+GT3071 Acoustic Test,2026-01-12,2026-01-20,Lab Team,task,Medium,GT3071,Testing,Noise characterization
+GT3071 Durability Test,2026-01-25,2026-04-15,Lab Team,task,Critical,GT3071,Testing,2000 hour extended test
+GT3071 Engine Dyno,2026-04-20,2026-05-25,Dyno Team,task,High,GT3071,Validation,Performance mapping
+GT3071 Track Testing,2026-06-01,2026-07-15,Field Team,task,High,GT3071,Validation,Race track validation
+GT3071 Design Freeze,2026-08-01,2026-08-01,Engineering,milestone,Critical,GT3071,Design,Production release
+VGT Actuator Development,2025-03-01,2025-10-31,Mike Torres,task,High,VGT System,Development,Variable geometry actuator
+VGT Concept Study,2025-03-01,2025-03-25,Mike Torres,task,High,VGT System,Concept,Mechanism options
+VGT Requirements,2025-03-28,2025-04-15,Product Team,task,High,VGT System,Concept,Performance requirements
+VGT Concept Review,2025-04-20,2025-04-20,Management,milestone,High,VGT System,Concept,Gate 1 approval
+VGT Mechanism Design,2025-04-22,2025-06-10,Mike Torres,task,High,VGT System,Design,Linkage design
+VGT Motor Selection,2025-05-01,2025-05-30,Jake Morrison,task,High,VGT System,Design,Brushless DC motor
+VGT Position Sensor,2025-05-15,2025-06-15,Jake Morrison,task,High,VGT System,Design,Hall effect sensor
+VGT Control Electronics,2025-06-01,2025-07-20,Electronics Team,task,High,VGT System,Design,PCB design
+VGT Design Review,2025-07-25,2025-07-25,Engineering,milestone,High,VGT System,Design,Gate 2 approval
+VGT Prototype Build,2025-07-28,2025-09-15,Manufacturing,task,High,VGT System,Prototype,Build 12 units
+VGT Bench Testing,2025-09-18,2025-10-05,Lab Team,task,High,VGT System,Testing,Functional testing
+VGT Temperature Test,2025-10-08,2025-10-22,Lab Team,task,High,VGT System,Testing,Thermal validation
+VGT Durability Test,2025-10-25,2025-12-10,Lab Team,task,Critical,VGT System,Testing,100k cycle test
+VGT Engine Integration,2026-01-05,2026-02-15,Integration Team,task,High,VGT System,Integration,On-engine testing
+VGT Emissions Testing,2026-02-18,2026-03-10,Emissions Lab,task,Critical,VGT System,Validation,EPA compliance
+VGT Design Freeze,2026-03-20,2026-03-20,Engineering,milestone,Critical,VGT System,Design,Production release
+Manufacturing Tooling Phase,2025-10-01,2026-06-30,Mfg Engineering,task,High,Manufacturing,Tooling,All tooling development
+GT2560 Casting Tooling,2025-10-01,2025-12-20,Tooling Eng,task,High,Manufacturing,Tooling,Compressor and turbine housing tools
+GT2560 Machining Fixtures,2025-11-01,2026-01-15,Tooling Eng,task,High,Manufacturing,Tooling,CNC fixtures
+GT2560 Assembly Tooling,2025-12-01,2026-02-01,Tooling Eng,task,Medium,Manufacturing,Tooling,Assembly line tools
+GT2560 Production Trial,2026-02-15,2026-03-05,Production,task,High,Manufacturing,Production,25 unit pilot run
+GT2560 Production Ramp,2026-03-10,2026-04-30,Production,task,High,Manufacturing,Production,Ramp to 100 units/week
+GT2860 Casting Tooling,2026-01-05,2026-03-31,Tooling Eng,task,High,Manufacturing,Tooling,Larger frame tooling
+GT2860 Machining Fixtures,2026-02-01,2026-04-15,Tooling Eng,task,High,Manufacturing,Tooling,5-axis CNC fixtures
+GT2860 Balancing Equipment,2026-03-01,2026-04-20,Tooling Eng,task,Medium,Manufacturing,Tooling,High-speed balancer
+GT2860 Assembly Tooling,2026-03-15,2026-05-10,Tooling Eng,task,Medium,Manufacturing,Tooling,Automated assembly
+GT2860 Production Trial,2026-06-01,2026-06-25,Production,task,High,Manufacturing,Production,50 unit pilot run
+GT2860 Production Ramp,2026-07-01,2026-09-30,Production,task,High,Manufacturing,Production,Ramp to 200 units/week
+GT3071 Casting Tooling,2026-04-01,2026-07-15,Tooling Eng,task,High,Manufacturing,Tooling,Performance housing tools
+GT3071 Machining Fixtures,2026-05-01,2026-08-01,Tooling Eng,task,High,Manufacturing,Tooling,Precision machining
+GT3071 Assembly Tooling,2026-06-15,2026-09-01,Tooling Eng,task,Medium,Manufacturing,Tooling,Quality-focused assembly
+GT3071 Production Trial,2026-09-15,2026-10-10,Production,task,High,Manufacturing,Production,25 unit pilot run
+GT3071 Production Ramp,2026-10-15,2026-12-31,Production,task,High,Manufacturing,Production,Ramp to 50 units/week
+Customer A Heavy Duty Project,2025-06-01,2026-08-31,Customer Team,task,Critical,Customer A,Development,6.7L diesel application
+Customer A Requirements,2025-06-01,2025-06-20,Sarah Chen,task,Critical,Customer A,Requirements,Flow and efficiency targets
+Customer A Design Phase,2025-06-22,2025-09-15,Engineering,task,High,Customer A,Design,Custom mounting
+Customer A ICD Review,2025-09-20,2025-09-20,Customer,milestone,Critical,Customer A,Design,Interface control document
+Customer A Prototype,2025-09-25,2025-11-30,Manufacturing,task,High,Customer A,Prototype,Build 6 units
+Customer A Testing,2025-12-01,2026-02-28,Lab Team,task,Critical,Customer A,Testing,Full validation
+Customer A Engine Test,2026-03-01,2026-04-30,Field Team,task,Critical,Customer A,Validation,On-engine at customer site
+Customer A Field Test,2026-05-01,2026-08-31,Field Team,task,High,Customer A,Validation,Fleet testing
+Customer A Approval,2026-09-15,2026-09-15,Customer,milestone,Critical,Customer A,Release,Production approval
+Customer B Performance Project,2025-08-01,2026-06-30,Customer Team,task,High,Customer B,Development,Performance upgrade
+Customer B Power Targets,2025-08-01,2025-08-15,Product Team,task,High,Customer B,Requirements,450 HP target
+Customer B Design Phase,2025-08-18,2025-10-30,Engineering,task,High,Customer B,Design,Billet compressor
+Customer B Prototype,2025-11-01,2025-12-20,Manufacturing,task,High,Customer B,Prototype,Build 10 units
+Customer B Dyno Test,2026-01-05,2026-01-25,Dyno Team,task,High,Customer B,Testing,Power validation
+Customer B Track Test,2026-02-01,2026-03-15,Field Team,task,High,Customer B,Testing,Performance validation
+Customer B Production,2026-03-20,2026-06-30,Manufacturing,task,High,Customer B,Production,Small batch 100 units
+Customer B Delivery,2026-07-15,2026-07-15,Shipping,milestone,High,Customer B,Delivery,Ship to customer
+Customer C Marine Project,2025-09-01,2026-11-30,Customer Team,task,High,Customer C,Development,Marine diesel application
+Customer C Environmental Study,2025-09-01,2025-09-30,Engineering,task,High,Customer C,Requirements,Corrosion protection
+Customer C Design Phase,2025-10-01,2025-12-31,Engineering,task,High,Customer C,Design,Seawater cooling
+Customer C Prototype,2026-01-05,2026-03-15,Manufacturing,task,High,Customer C,Prototype,Marine-spec units
+Customer C Salt Spray Test,2026-03-18,2026-04-10,Lab Team,task,Critical,Customer C,Testing,ASTM B117 testing
+Customer C Vibration Test,2026-04-12,2026-04-30,Lab Team,task,High,Customer C,Testing,Marine vibration
+Customer C Sea Trials,2026-05-01,2026-08-31,Field Team,task,Critical,Customer C,Validation,On-water testing
+Customer C Approval,2026-09-15,2026-09-15,Customer,milestone,Critical,Customer C,Release,Marine certification
+Quality System Development,2025-01-15,2026-12-31,Quality,task,High,Quality System,Development,Quality management system
+ISO 9001 Certification,2025-01-15,2025-06-30,Quality,task,Critical,Quality System,Certification,ISO 9001 prep
+ISO 9001 Audit,2025-07-15,2025-07-20,External Auditor,task,Critical,Quality System,Certification,Certification audit
+ISO 9001 Certified,2025-08-01,2025-08-01,Quality,milestone,Critical,Quality System,Certification,ISO 9001 certificate
+IATF 16949 Preparation,2025-09-01,2026-06-30,Quality,task,High,Quality System,Certification,Automotive quality
+IATF 16949 Audit,2026-07-15,2026-07-25,External Auditor,task,Critical,Quality System,Certification,Automotive certification audit
+IATF 16949 Certified,2026-08-15,2026-08-15,Quality,milestone,Critical,Quality System,Certification,IATF certificate
+APQP Process Development,2025-06-01,2025-12-31,Quality,task,High,Quality System,Process,Advanced product quality planning
+PPAP Documentation,2026-01-01,2026-06-30,Quality,task,High,Quality System,Process,Production part approval process
+Supplier Quality Program,2025-03-01,2025-12-31,Quality,task,Medium,Quality System,Supply Chain,Supplier audits
+Test Lab Expansion,2025-02-01,2025-12-31,Facilities,task,High,Infrastructure,Facilities,Double test capacity
+Hot Gas Rig 2 Install,2025-02-01,2025-05-31,Facilities,task,High,Infrastructure,Equipment,Second hot gas test stand
+Durability Cell 2 Install,2025-06-01,2025-09-30,Facilities,task,High,Infrastructure,Equipment,Second durability cell
+Flow Bench Upgrade,2025-08-01,2025-10-31,Facilities,task,Medium,Infrastructure,Equipment,High-flow capacity
+Dyno Cell Renovation,2025-11-01,2026-03-31,Facilities,task,High,Infrastructure,Facilities,Upgraded engine dyno
+Data Acquisition Upgrade,2025-04-01,2025-08-31,IT,task,High,Infrastructure,IT,64-channel DAQ system
+PLM System Implementation,2025-05-01,2025-12-31,IT,task,High,Infrastructure,IT,Product lifecycle management
+ERP System Upgrade,2025-06-01,2026-03-31,IT,task,High,Infrastructure,IT,Enterprise resource planning
+Quarterly Reviews Q1 2025,2025-03-31,2025-03-31,Management,meeting,High,Program Management,Review,Q1 program review
+Quarterly Reviews Q2 2025,2025-06-30,2025-06-30,Management,meeting,High,Program Management,Review,Q2 program review
+Quarterly Reviews Q3 2025,2025-09-30,2025-09-30,Management,meeting,High,Program Management,Review,Q3 program review
+Quarterly Reviews Q4 2025,2025-12-31,2025-12-31,Management,meeting,High,Program Management,Review,Q4 program review
+Quarterly Reviews Q1 2026,2026-03-31,2026-03-31,Management,meeting,High,Program Management,Review,Q1 2026 program review
+Quarterly Reviews Q2 2026,2026-06-30,2026-06-30,Management,meeting,High,Program Management,Review,Q2 2026 program review
+Quarterly Reviews Q3 2026,2026-09-30,2026-09-30,Management,meeting,High,Program Management,Review,Q3 2026 program review
+Quarterly Reviews Q4 2026,2026-12-31,2026-12-31,Management,meeting,High,Program Management,Review,Q4 2026 program review
+Annual Planning 2025,2024-12-01,2024-12-20,Management,task,Critical,Program Management,Planning,2025 program planning
+Annual Planning 2026,2025-12-01,2025-12-20,Management,task,Critical,Program Management,Planning,2026 program planning
+Annual Planning 2027,2026-12-01,2026-12-20,Management,task,Critical,Program Management,Planning,2027 program planning
+Budget Review 2025,2025-01-15,2025-01-15,Management,meeting,High,Program Management,Finance,2025 budget approval
+Budget Review 2026,2026-01-15,2026-01-15,Management,meeting,High,Program Management,Finance,2026 budget approval
+Program Completion,2027-01-15,2027-01-15,Management,milestone,Critical,Program Management,Completion,3-year program complete

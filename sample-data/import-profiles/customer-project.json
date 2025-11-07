@@ -1,0 +1,43 @@
+{
+  "name": "Customer Project - Custom Format",
+  "description": "Customer-specific project format with application and phase tracking",
+  "created": "2025-11-06",
+  "columnMappings": {
+    "title": "Task Name",
+    "type": "Type",
+    "start_date": "Start Date",
+    "end_date": "Finish Date",
+    "owner": "Resource Names",
+    "project": "Customer",
+    "lane": "Phase",
+    "tags": null
+  },
+  "typeInference": {
+    "enabled": false
+  },
+  "dateFormat": "auto",
+  "projectName": {
+    "source": "column",
+    "column": "Customer",
+    "fallback": "Customer Project"
+  },
+  "laneStrategy": {
+    "source": "Phase",
+    "fallback": "Development"
+  },
+  "idStrategy": {
+    "type": "match",
+    "matchFields": ["Customer", "Task Name"]
+  },
+  "ownerSeparator": ";",
+  "tagSeparator": ",",
+  "customFields": {
+    "application": "Application",
+    "customer": "Customer",
+    "notes": "Notes",
+    "priority": "Priority"
+  },
+  "skipEmptyRows": true,
+  "trimWhitespace": true,
+  "notes": "Use this profile for customer-specific turbocharger projects. Customer name maps to project. Phase (Requirements/Design/Testing/Validation) maps to swim lane. Supports custom fields like Application and Notes."
+}
