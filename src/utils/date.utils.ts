@@ -146,9 +146,16 @@ export function formatDateForDisplay(
     return '';
   }
 
-  const date = new Date(isoDate);
+  // Parse ISO date manually to avoid timezone issues
+  const [year, month, day] = isoDate.split('-').map(Number);
+
+  if (!year || !month || !day) {
+    return '';
+  }
 
   if (format === 'long') {
+    // Create date in local timezone to avoid UTC conversion issues
+    const date = new Date(year, month - 1, day);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
@@ -157,9 +164,6 @@ export function formatDateForDisplay(
   }
 
   // Short format: M/D/YYYY
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  const year = date.getFullYear();
   return `${month}/${day}/${year}`;
 }
 
