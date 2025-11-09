@@ -101,6 +101,7 @@ export interface AutoDetectPatterns {
   lane: string[];
   project: string[];
   tags: string[];
+  id: string[];
 }
 
 /**

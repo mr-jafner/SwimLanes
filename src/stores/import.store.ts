@@ -31,7 +31,7 @@ interface ImportState {
 
   // Parsed data
   currentData: ParsedRow[] | null;
-  currentMapping: ColumnMapping | null;
+  currentMapping: Partial<ColumnMapping> | null;
   dryRunData: DryRunResult | null;
 
   // Import configuration
@@ -45,7 +45,7 @@ interface ImportState {
   // Actions
   setStage: (stage: ImportStage) => void;
   setCurrentData: (data: ParsedRow[] | null) => void;
-  setCurrentMapping: (mapping: ColumnMapping | null) => void;
+  setCurrentMapping: (mapping: Partial<ColumnMapping> | null) => void;
   setDryRunData: (data: DryRunResult | null) => void;
   setTargetBranch: (branchId: string) => void;
   setIdStrategy: (strategy: IDStrategy) => void;
