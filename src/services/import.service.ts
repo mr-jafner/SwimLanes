@@ -221,11 +221,24 @@ function getMatchKey(item: Item, strategy: IDStrategy): string {
  * Analyzes the data and returns a preview of what would be added, updated, or skipped.
  * Does not modify the database.
  *
+ * **Features:**
+ * - Validates all rows before processing
+ * - Detects conflicts (duplicate IDs/keys within import batch)
+ * - Identifies items that need updating (based on source_row_hash)
+ * - Skips unchanged items to avoid unnecessary writes
+ * - Supports 'upsert' and 'update-only' modes
+ *
+ * **Conflict Detection:**
+ * Detects duplicate IDs/keys within the import data itself. For example:
+ * - With 'column' strategy: Two rows with the same ID value
+ * - With 'match' strategy: Two rows with the same project+title combination
+ * Conflicts are reported separately and won't be imported.
+ *
  * @param data - Parsed CSV rows
  * @param mapping - Column mapping configuration
  * @param branchId - Target branch ID
  * @param mode - Import mode ('upsert' | 'update-only')
- * @returns Dry-run result with added/updated/skipped items
+ * @returns Dry-run result with added/updated/skipped/conflict items
  *
  * @example
  * ```typescript
@@ -233,6 +246,7 @@ function getMatchKey(item: Item, strategy: IDStrategy): string {
  * console.log(`Will add: ${result.added.length}`);
  * console.log(`Will update: ${result.updated.length}`);
  * console.log(`Will skip: ${result.skipped.length}`);
+ * console.log(`Conflicts: ${result.conflicts.length}`);
  * ```
  */
 export function performDryRun(
@@ -262,6 +276,9 @@ export function performDryRun(
     const key = getMatchKey(item, mapping.idStrategy);
     existingMap.set(key, item);
   });
+
+  // Track items we've seen in this import batch to detect duplicates
+  const importBatchMap = new Map<string, number>(); // key -> first row index
 
   // Process each row
   data.forEach((row, idx) => {
@@ -294,6 +311,22 @@ export function performDryRun(
 
     const { item, sourceRowHash } = mapped;
     const matchKey = getMatchKey(item, mapping.idStrategy);
+
+    // Check for duplicates within the import batch (conflicts)
+    if (importBatchMap.has(matchKey)) {
+      const firstOccurrenceIdx = importBatchMap.get(matchKey)!;
+      result.conflicts.push({
+        row,
+        rowIndex: idx,
+        reason: `Duplicate ${mapping.idStrategy === 'match' ? 'project+title' : 'ID'}: conflicts with row ${firstOccurrenceIdx + 1}`,
+        matchKey,
+      });
+      return;
+    }
+
+    // Track this item in the import batch
+    importBatchMap.set(matchKey, idx);
+
     const existing = existingMap.get(matchKey);
 
     if (existing) {

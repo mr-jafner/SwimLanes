@@ -1,0 +1,24 @@
+# Codecov configuration
+# https://docs.codecov.com/docs/codecov-yaml
+
+coverage:
+  status:
+    # Overall project coverage
+    project:
+      default:
+        target: auto
+        threshold: 1%  # Allow 1% drop in overall coverage
+
+    # Patch coverage (new code in PR)
+    # Currently informational only due to skipped integration tests
+    patch:
+      default:
+        informational: true  # Don't fail CI on patch coverage
+        target: 50%  # Aspirational target for new code
+        # Note: Integration tests are skipped in CI (WASM loading issues)
+        # This will be re-enabled when ImportForm gets proper tests
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: false  # Always comment, even if no coverage changes
