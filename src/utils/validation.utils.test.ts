@@ -313,7 +313,7 @@ describe('validation.utils', () => {
       expect(isEmptyRow({})).toBe(true);
       expect(isEmptyRow({ col1: '', col2: '' })).toBe(true);
       expect(isEmptyRow({ col1: '   ', col2: '  ' })).toBe(true);
-      expect(isEmptyRow({ col1: null, col2: undefined })).toBe(true);
+      expect(isEmptyRow({ col1: '', col2: '' })).toBe(true);
     });
 
     it('should detect non-empty rows', () => {

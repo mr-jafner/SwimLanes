@@ -167,8 +167,8 @@ export interface DryRunResult {
   /** Rows that will be skipped with reasons */
   skipped: SkippedRow[];
 
-  /** Potential conflicts detected (future feature) */
-  conflicts: unknown[];
+  /** Conflicts detected (duplicate IDs/keys in import data) */
+  conflicts: ConflictRow[];
 }
 
 /**
@@ -186,6 +186,26 @@ export interface SkippedRow {
 
   /** Source row index (0-based) */
   rowIndex?: number;
+}
+
+/**
+ * Conflict detected in dry-run preview.
+ *
+ * Represents a CSV row that conflicts with another row in the import batch
+ * (e.g., duplicate IDs, duplicate project+title combinations).
+ */
+export interface ConflictRow {
+  /** The raw CSV row that conflicts */
+  row: ParsedRow;
+
+  /** Row index in the import data */
+  rowIndex: number;
+
+  /** Reason for the conflict */
+  reason: string;
+
+  /** The match key that caused the conflict */
+  matchKey: string;
 }
 
 /**
