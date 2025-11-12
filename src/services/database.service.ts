@@ -108,7 +108,7 @@ export interface DatabaseConfig {
  * Default configuration values.
  */
 const DEFAULT_CONFIG: Required<DatabaseConfig> = {
-  sqlJsCdnUrl: 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/',
+  sqlJsCdnUrl: 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.13.0/',
   enableAutoSave: true,
   autoSaveInterval: 5000,
   indexedDbName: 'swimlanes-db',
