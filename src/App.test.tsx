@@ -108,4 +108,71 @@ describe('App', () => {
     expect(main).toBeInTheDocument();
     expect(main).toHaveClass('flex-1', 'overflow-auto');
   });
+
+  it('shows loading state while database initializes', () => {
+    useAppStore.setState({
+      activeTab: 'timeline',
+      isInitialized: false,
+      isInitializing: true,
+      initError: null,
+    });
+
+    render(<App />);
+
+    expect(screen.getByText(/initializing database/i)).toBeInTheDocument();
+    // Should show loading spinner
+    const spinner = document.querySelector('.animate-spin');
+    expect(spinner).toBeInTheDocument();
+  });
+
+  it('shows error state when database fails to initialize', () => {
+    useAppStore.setState({
+      activeTab: 'timeline',
+      isInitialized: false,
+      isInitializing: false,
+      initError: 'Failed to load WASM module',
+    });
+
+    render(<App />);
+
+    expect(screen.getByText(/database error/i)).toBeInTheDocument();
+    expect(screen.getByText(/failed to load wasm module/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
+  });
+
+  it('retry button reloads page on error', () => {
+    const reloadSpy = vi.fn();
+    Object.defineProperty(window, 'location', {
+      value: { reload: reloadSpy },
+      writable: true,
+    });
+
+    useAppStore.setState({
+      activeTab: 'timeline',
+      isInitialized: false,
+      isInitializing: false,
+      initError: 'Test error',
+    });
+
+    render(<App />);
+
+    const retryButton = screen.getByRole('button', { name: /retry/i });
+    retryButton.click();
+
+    expect(reloadSpy).toHaveBeenCalled();
+  });
+
+  it('renders export tab placeholder', () => {
+    // Set to export tab
+    useAppStore.setState({
+      activeTab: 'export',
+      isInitialized: true,
+      isInitializing: false,
+      initError: null,
+    });
+
+    render(<App />);
+
+    expect(screen.getByText(/export data/i)).toBeInTheDocument();
+  });
 });
