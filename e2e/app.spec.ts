@@ -1,17 +1,18 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * E2E Test Flow: Application Loading and Basic Rendering
+ * E2E Test: Application Initialization
  *
- * This test verifies that the application loads successfully and displays
- * the main UI elements. It's the most basic smoke test to ensure the app
- * doesn't crash on startup.
+ * Verifies that the app loads successfully, database initializes,
+ * and the main layout elements are visible.
  */
-test('should load the application and display main heading', async ({ page }) => {
-  // Navigate to the app
+test('should load the application successfully', async ({ page }) => {
   await page.goto('/');
 
-  // Wait for the app to be fully loaded by checking for the main heading
+  // Wait for database initialization to complete
+  await page.waitForSelector('header', { state: 'visible', timeout: 10000 });
+
+  // Verify the app title/branding is visible
   const heading = page.getByRole('heading', { level: 1, name: /swimlanes/i });
   await expect(heading).toBeVisible();
 
@@ -20,172 +21,171 @@ test('should load the application and display main heading', async ({ page }) =>
 });
 
 /**
- * E2E Test Flow: Button Component Interactions
+ * E2E Test: Tab Navigation
  *
- * This test verifies that the shadcn/ui Button components are rendered
- * correctly with different variants and that they respond to user clicks.
+ * Verifies that the tab navigation works correctly and switches
+ * between different views (Import, Timeline, Branches, History).
  */
-test('should display and interact with button variants', async ({ page }) => {
+test('should navigate between tabs', async ({ page }) => {
   await page.goto('/');
 
-  // Verify all button variants are visible
-  const defaultButton = page.getByRole('button', { name: /^default$/i });
-  const secondaryButton = page.getByRole('button', { name: /^secondary$/i });
-  const destructiveButton = page.getByRole('button', { name: /^destructive$/i });
-  const outlineButton = page.getByRole('button', { name: /^outline$/i });
-  const ghostButton = page.getByRole('button', { name: /^ghost$/i });
+  // Wait for app to load
+  await page.waitForSelector('header', { state: 'visible', timeout: 10000 });
 
-  await expect(defaultButton).toBeVisible();
-  await expect(secondaryButton).toBeVisible();
-  await expect(destructiveButton).toBeVisible();
-  await expect(outlineButton).toBeVisible();
-  await expect(ghostButton).toBeVisible();
+  // Find and click Timeline tab
+  const timelineTab = page.getByRole('button', { name: /timeline/i });
+  await expect(timelineTab).toBeVisible();
+  await timelineTab.click();
 
-  // Verify buttons are clickable (not disabled)
-  await expect(defaultButton).toBeEnabled();
-  await expect(secondaryButton).toBeEnabled();
+  // Verify Timeline canvas is visible
+  const timelineCanvas = page.locator('canvas');
+  await expect(timelineCanvas).toBeVisible();
+
+  // Find and click Import tab
+  const importTab = page.getByRole('button', { name: /import/i });
+  await expect(importTab).toBeVisible();
+  await importTab.click();
+
+  // Verify Import form is visible
+  const importHeading = page.getByRole('heading', { name: /import data/i });
+  await expect(importHeading).toBeVisible();
+
+  // Find and click Branches tab
+  const branchesTab = page.getByRole('button', { name: /branches/i });
+  await expect(branchesTab).toBeVisible();
+  await branchesTab.click();
+
+  // Verify placeholder panel for Branches
+  const branchesTitle = page.getByText('Branch Management');
+  await expect(branchesTitle).toBeVisible();
+
+  // Find and click History tab
+  const historyTab = page.getByRole('button', { name: /history/i });
+  await expect(historyTab).toBeVisible();
+  await historyTab.click();
+
+  // Verify placeholder panel for History
+  const historyTitle = page.getByText('Version History');
+  await expect(historyTitle).toBeVisible();
 });
 
 /**
- * E2E Test Flow: Dialog Component Open/Close Workflow
+ * E2E Test: Import Tab Content
  *
- * This test simulates a user opening a dialog modal and then closing it.
- * This is a common UI pattern that needs to work reliably.
- *
- * Flow:
- * 1. User clicks "Open Dialog" button
- * 2. Dialog appears with title and description
- * 3. User clicks "Close" button
- * 4. Dialog disappears
+ * Verifies that the Import tab displays the import form
+ * with all expected elements.
  */
-test('should open and close dialog component', async ({ page }) => {
+test('should display import form in Import tab', async ({ page }) => {
   await page.goto('/');
 
-  // Initially, dialog should not be visible
-  await expect(page.getByRole('dialog')).not.toBeVisible();
+  // Wait for app to load
+  await page.waitForSelector('header', { state: 'visible', timeout: 10000 });
 
-  // Click the "Open Dialog" button
-  const openDialogButton = page.getByRole('button', { name: /open dialog/i });
-  await openDialogButton.click();
+  // Navigate to Import tab
+  const importTab = page.getByRole('button', { name: /import/i });
+  await importTab.click();
 
-  // Dialog should now be visible with correct content
-  const dialog = page.getByRole('dialog');
-  await expect(dialog).toBeVisible();
-  await expect(dialog.getByText(/swimlanes dialog/i)).toBeVisible();
-  await expect(dialog.getByText(/this is a dialog component from shadcn\/ui/i)).toBeVisible();
+  // Verify Import form heading
+  const heading = page.getByRole('heading', { name: /import data/i });
+  await expect(heading).toBeVisible();
 
-  // Close the dialog by pressing Escape key (common pattern)
-  await page.keyboard.press('Escape');
-
-  // Dialog should be closed
-  await expect(dialog).not.toBeVisible();
+  // Verify file input is present
+  const fileInput = page.locator('input[type="file"]');
+  await expect(fileInput).toBeVisible();
 });
 
 /**
- * E2E Test Flow: Select Component Interaction
+ * E2E Test: Timeline Canvas Rendering
  *
- * This test verifies that dropdown select components work correctly.
- *
- * Flow:
- * 1. User clicks on select trigger
- * 2. Dropdown opens with options
- * 3. User selects an option
- * 4. Selected value is displayed
+ * Verifies that the Timeline tab displays the interactive canvas
+ * and it renders correctly.
  */
-test('should interact with select component', async ({ page }) => {
+test('should display timeline canvas in Timeline tab', async ({ page }) => {
   await page.goto('/');
 
-  // Find the select trigger button
-  const selectTrigger = page.getByRole('combobox').first();
-  await expect(selectTrigger).toBeVisible();
+  // Wait for app to load
+  await page.waitForSelector('header', { state: 'visible', timeout: 10000 });
 
-  // Click to open the dropdown
-  await selectTrigger.click();
+  // Navigate to Timeline tab
+  const timelineTab = page.getByRole('button', { name: /timeline/i });
+  await timelineTab.click();
 
-  // Select an option (e.g., "Milestone")
-  const milestoneOption = page.getByRole('option', { name: /milestone/i });
-  await expect(milestoneOption).toBeVisible();
-  await milestoneOption.click();
+  // Verify canvas element is rendered
+  const canvas = page.locator('canvas');
+  await expect(canvas).toBeVisible();
 
-  // Verify the selected value is now displayed in the trigger
-  await expect(selectTrigger).toHaveText(/milestone/i);
+  // Verify canvas has some dimensions (not 0x0)
+  const boundingBox = await canvas.boundingBox();
+  expect(boundingBox).not.toBeNull();
+  expect(boundingBox!.width).toBeGreaterThan(0);
+  expect(boundingBox!.height).toBeGreaterThan(0);
 });
 
 /**
- * E2E Test Flow: Toast Notification Display
+ * E2E Test: Theme Toggle
  *
- * This test verifies that toast notifications (temporary popup messages)
- * appear when triggered by user actions.
- *
- * Flow:
- * 1. User clicks "Show Toast" button
- * 2. Toast notification appears with message
- * 3. Toast includes description text
+ * Verifies that the theme toggle button is present in the header
+ * (actual theme switching tested in unit tests).
  */
-test('should display toast notifications', async ({ page }) => {
+test('should display theme toggle in header', async ({ page }) => {
   await page.goto('/');
 
-  // Click the "Default Toast" button
-  const defaultToastButton = page.getByRole('button', { name: /^default toast$/i });
-  await defaultToastButton.click();
+  // Wait for app to load
+  await page.waitForSelector('header', { state: 'visible', timeout: 10000 });
 
-  // Verify toast appears with correct content
-  const toastMessage = page.getByText(/this is a default toast/i);
-  await expect(toastMessage).toBeVisible();
-
-  // Test success toast
-  const successToastButton = page.getByRole('button', { name: /success toast/i });
-  await successToastButton.click();
-  const successMessage = page.getByText(/operation completed successfully/i);
-  await expect(successMessage).toBeVisible();
+  // Look for theme toggle button (sun/moon icon)
+  const themeToggle = page.locator('header button[aria-label*="theme" i], header button svg');
+  await expect(themeToggle.first()).toBeVisible();
 });
 
 /**
- * E2E Test Flow: Custom Theme Colors Display
+ * E2E Test: Responsive Layout on Mobile
  *
- * This test verifies that SwimLanes custom theme colors (for tasks,
- * milestones, releases, meetings) are properly applied and visible.
- *
- * This ensures the Tailwind v4 configuration is working correctly.
- */
-test('should display custom SwimLanes theme colors', async ({ page }) => {
-  await page.goto('/');
-
-  // Verify custom theme colors section is visible
-  const customColorsHeading = page.getByRole('heading', {
-    name: /swimlanes custom colors/i,
-  });
-  await expect(customColorsHeading).toBeVisible();
-
-  // Verify all color type headings are present
-  await expect(page.getByRole('heading', { name: /^task$/i })).toBeVisible();
-  await expect(page.getByRole('heading', { name: /^milestone$/i })).toBeVisible();
-  await expect(page.getByRole('heading', { name: /^release$/i })).toBeVisible();
-  await expect(page.getByRole('heading', { name: /^meeting$/i })).toBeVisible();
-
-  // Verify descriptions
-  await expect(page.getByText(/blue bars for work items/i)).toBeVisible();
-  await expect(page.getByText(/green diamonds for markers/i)).toBeVisible();
-  await expect(page.getByText(/orange bars for deployments/i)).toBeVisible();
-  await expect(page.getByText(/purple bars for events/i)).toBeVisible();
-});
-
-/**
- * E2E Test Flow: Mobile Responsiveness Check
- *
- * This test verifies that the app renders correctly on mobile viewports.
- * It's important for ensuring responsive design works.
+ * Verifies that the app renders correctly on mobile viewports.
  */
 test('should render correctly on mobile viewport', async ({ page }) => {
   // Set mobile viewport size
   await page.setViewportSize({ width: 375, height: 667 });
   await page.goto('/');
 
-  // Verify main heading is still visible on mobile
+  // Wait for app to load
+  await page.waitForSelector('header', { state: 'visible', timeout: 10000 });
+
+  // Verify header is still visible on mobile
   const heading = page.getByRole('heading', { level: 1, name: /swimlanes/i });
   await expect(heading).toBeVisible();
 
-  // Verify buttons are still accessible on mobile
-  const defaultButton = page.getByRole('button', { name: /^default$/i });
-  await expect(defaultButton).toBeVisible();
+  // Verify tab navigation is still accessible
+  const importTab = page.getByRole('button', { name: /import/i });
+  await expect(importTab).toBeVisible();
+});
+
+/**
+ * E2E Test: Tab State Persistence
+ *
+ * Verifies that the active tab is remembered when navigating away
+ * and returning (via localStorage).
+ */
+test('should persist active tab state', async ({ page }) => {
+  await page.goto('/');
+
+  // Wait for app to load
+  await page.waitForSelector('header', { state: 'visible', timeout: 10000 });
+
+  // Navigate to Timeline tab
+  const timelineTab = page.getByRole('button', { name: /timeline/i });
+  await timelineTab.click();
+
+  // Verify Timeline is active
+  const canvas = page.locator('canvas');
+  await expect(canvas).toBeVisible();
+
+  // Reload the page
+  await page.reload();
+
+  // Wait for app to load again
+  await page.waitForSelector('header', { state: 'visible', timeout: 10000 });
+
+  // Verify Timeline tab is still active (canvas visible)
+  await expect(canvas).toBeVisible();
 });
