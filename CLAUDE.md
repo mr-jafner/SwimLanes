@@ -462,6 +462,59 @@ The original working prototype is preserved in `legacy/` folder:
 
 ---
 
+## Communication & Explanation Principles
+
+When explaining technical concepts, especially those related to security, configuration, or complex decisions:
+
+### Structure for Technical Explanations
+
+1. **Validate the concern** - Acknowledge the user's caution or question is reasonable
+2. **Provide context** - Brief background on what the technology/concept is
+3. **Explain the specific need** - Why this particular thing is required for this project
+4. **Address the concern directly** - Answer "Is it safe/good/correct?" with a clear yes/no
+5. **Give concrete reasons** - Use numbered points with specific technical details
+6. **Compare relative risks** - Put the concern in context with actual risks
+7. **Discuss alternatives** - Mention other approaches and why they weren't chosen
+8. **Bottom line summary** - Tie it back to the specific use case and threat model
+9. **Offer next steps** - Give the user options or ask if they want to explore further
+
+### Example Pattern (Security Explanation)
+
+```
+User asks: "This has 'unsafe' in the name - is it safe?"
+
+Response structure:
+1. "You're right to be cautious about anything with 'unsafe' in the name."
+2. "Content Security Policy (CSP) is a security feature that..."
+3. "WebAssembly needs 'wasm-unsafe-eval' because..."
+4. "Short answer: Yes, it's safe for your use case."
+5. "Here's why: (1) You control the source, (2) Limited scope..."
+6. "The actually risky directive is X, not Y. But even X is acceptable because..."
+7. "You could use nonces instead, but that's complex because..."
+8. "For SwimLanes specifically, where you have [conditions], this is safe."
+9. "Would you like me to show you the alternative approach?"
+```
+
+### Key Principles
+
+- **Respect user caution** - Never dismiss security concerns, even minor ones
+- **Be specific to their context** - Generic security advice is less helpful than context-specific guidance
+- **Distinguish real from theoretical risks** - Help prioritize based on actual threat model
+- **Provide actionable information** - Always give clear next steps or decisions
+- **Use concrete examples** - Show actual config/code rather than just describing concepts
+- **Admit tradeoffs** - Be honest when there's no perfect solution
+
+### When NOT to Over-Explain
+
+- Simple syntax questions
+- Straightforward bug fixes
+- Routine refactoring
+- Questions with objective answers in documentation
+
+The goal is to **educate, not lecture**. Match explanation depth to user's question and context.
+
+---
+
 ## End of Session Checklist
 
 When the user indicates they're wrapping up (e.g., "doing one last thing", "heading to bed", "about to sign off"), proactively suggest the following:
