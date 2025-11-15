@@ -284,3 +284,70 @@ export interface TimelineInteraction {
   /** Native event (for preventDefault, etc.) */
   nativeEvent?: MouseEvent;
 }
+
+/**
+ * Shape to render for an item.
+ *
+ * - bar: Horizontal bar (for tasks, releases, meetings)
+ * - diamond: Diamond shape (for milestones)
+ */
+export type ItemShape = 'bar' | 'diamond';
+
+/**
+ * Timeline rendering configuration.
+ *
+ * Contains all settings needed for calculating timeline layout.
+ *
+ * @example
+ * ```typescript
+ * const config: TimelineConfig = {
+ *   canvasWidth: 1200,
+ *   canvasHeight: 600,
+ *   margin: { top: 40, right: 20, bottom: 20, left: 150 },
+ *   laneHeight: 40,
+ *   itemPadding: 4,
+ *   itemHeight: 32
+ * };
+ * ```
+ */
+export interface TimelineConfig {
+  /** Total canvas width in pixels (including margins) */
+  canvasWidth: number;
+
+  /** Total canvas height in pixels (including margins) */
+  canvasHeight: number;
+
+  /** Margins around the chart area */
+  margin: TimelineMargin;
+
+  /** Height of each swim lane in pixels */
+  laneHeight: number;
+
+  /** Vertical padding between items in the same lane */
+  itemPadding: number;
+
+  /** Height of rendered items in pixels */
+  itemHeight: number;
+
+  /** Pixels per millisecond at base zoom (calculated from zoom level) */
+  pixelsPerMs?: number;
+}
+
+/**
+ * Grouped lane with items and metadata.
+ *
+ * Represents a single swim lane with all its items.
+ */
+export interface LaneGroup {
+  /** Name of the lane */
+  laneName: string;
+
+  /** Items in this lane */
+  items: Item[];
+
+  /** Lane index (for vertical positioning) */
+  index: number;
+
+  /** Calculated height in pixels (may be greater than laneHeight if items overlap) */
+  height: number;
+}
