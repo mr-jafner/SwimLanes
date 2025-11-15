@@ -1,8 +1,27 @@
-import { useEffect, useRef, useState } from 'react';
-import { Stage, Layer, Rect, Line, Text } from 'react-konva';
+import React, { useEffect, useRef, useState } from 'react';
+import { Stage, Layer, Line, Text, Rect } from 'react-konva';
 import type Konva from 'konva';
+import type { Item } from '@/types/database.types';
+import type { LaneGroup, DateRange, TimeAxisTick, TimelineConfig } from '@/types/timeline.types';
+import { calculateItemPosition } from '@/services/timeline.service';
 
 interface TimelineCanvasProps {
+  /** Items to display on the timeline */
+  items?: Item[];
+
+  /** Lane groups with items */
+  laneGroups?: LaneGroup[];
+
+  /** Date range */
+  dateRange?: DateRange;
+
+  /** Time axis ticks */
+  timeAxisTicks?: TimeAxisTick[];
+
+  /** Timeline configuration */
+  config?: TimelineConfig;
+
+  /** Optional className for container */
   className?: string;
 }
 
@@ -28,9 +47,16 @@ const ZOOM_SPEED = 0.1;
  * - Full viewport sizing with resize handling
  * - Click-and-drag panning
  * - Mouse wheel zoom centered on cursor
- * - Visual grid and debug info
+ * - Item rendering (Phase 2: colored bars with time axis)
  */
-export function TimelineCanvas({ className }: TimelineCanvasProps) {
+export function TimelineCanvas({
+  items = [],
+  laneGroups = [],
+  dateRange,
+  timeAxisTicks = [],
+  config,
+  className,
+}: TimelineCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
 
@@ -95,27 +121,59 @@ export function TimelineCanvas({ className }: TimelineCanvasProps) {
     });
   };
 
-  // Render grid lines for visual feedback
-  const renderGrid = () => {
-    const gridLines = [];
-    const gridSize = 50;
-    const { width, height } = canvasSize;
+  // Render time axis with ticks and labels
+  const renderTimeAxis = () => {
+    if (!config) return null;
 
-    // Vertical lines
-    for (let x = 0; x <= width; x += gridSize) {
-      gridLines.push(
-        <Line key={`v-${x}`} points={[x, 0, x, height]} stroke="#e0e0e0" strokeWidth={1} />
-      );
-    }
+    return timeAxisTicks.map((tick, index) => (
+      <React.Fragment key={`tick-${index}`}>
+        {/* Tick line */}
+        <Line
+          points={[tick.x, config.margin.top - 10, tick.x, config.margin.top]}
+          stroke={tick.isMajor ? '#333' : '#999'}
+          strokeWidth={tick.isMajor ? 2 : 1}
+        />
+        {/* Tick label */}
+        <Text
+          x={tick.x}
+          y={config.margin.top - 35}
+          text={tick.label}
+          fontSize={12}
+          fill="#333"
+          align="center"
+          offsetX={30}
+        />
+      </React.Fragment>
+    ));
+  };
 
-    // Horizontal lines
-    for (let y = 0; y <= height; y += gridSize) {
-      gridLines.push(
-        <Line key={`h-${y}`} points={[0, y, width, y]} stroke="#e0e0e0" strokeWidth={1} />
-      );
-    }
+  // Render timeline items as colored bars
+  const renderItems = () => {
+    if (!dateRange || !config) return null;
 
-    return gridLines;
+    const renderedItems: React.ReactNode[] = [];
+
+    laneGroups.forEach((laneGroup) => {
+      laneGroup.items.forEach((item) => {
+        const itemPos = calculateItemPosition(item, dateRange, laneGroup.index, config);
+        if (!itemPos) return;
+
+        renderedItems.push(
+          <Rect
+            key={`item-${item.id}-${item.branch_id}`}
+            x={itemPos.x}
+            y={itemPos.y}
+            width={itemPos.width}
+            height={itemPos.height}
+            fill={itemPos.color}
+            cornerRadius={4}
+            opacity={0.8}
+          />
+        );
+      });
+    });
+
+    return renderedItems;
   };
 
   return (
@@ -137,24 +195,31 @@ export function TimelineCanvas({ className }: TimelineCanvasProps) {
         y={zoom.y}
       >
         <Layer>
-          {/* Grid lines */}
-          {renderGrid()}
+          {/* Time axis */}
+          {renderTimeAxis()}
 
-          {/* Center marker */}
-          <Rect
-            x={canvasSize.width / 2 - 25}
-            y={canvasSize.height / 2 - 25}
-            width={50}
-            height={50}
-            fill="#2196F3"
-            opacity={0.5}
-          />
+          {/* Horizontal axis line */}
+          {config && (
+            <Line
+              points={[
+                config.margin.left,
+                config.margin.top,
+                canvasSize.width - config.margin.right,
+                config.margin.top,
+              ]}
+              stroke="#333"
+              strokeWidth={2}
+            />
+          )}
 
-          {/* Debug info text */}
+          {/* Timeline items */}
+          {renderItems()}
+
+          {/* Debug info - zoom and pan state */}
           <Text
             x={10}
             y={10}
-            text={`Zoom: ${zoom.scale.toFixed(2)}x | Pan: (${Math.round(zoom.x)}, ${Math.round(zoom.y)})`}
+            text={`Zoom: ${zoom.scale.toFixed(2)}x | Pan: (${Math.round(zoom.x)}, ${Math.round(zoom.y)}) | Items: ${items.length}`}
             fontSize={14}
             fill="#333"
             padding={5}

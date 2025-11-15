@@ -1,0 +1,127 @@
+/**
+ * useTimelineData Hook
+ *
+ * Fetches timeline items from the database and calculates timeline layout.
+ * Phase 2: Now includes timeline service calculations for rendering.
+ */
+
+import { useState, useEffect, useMemo } from 'react';
+import { useAppStore } from '@/stores';
+import { databaseService } from '@/services/database.service';
+import { getItems } from '@/db/queries/items.queries';
+import {
+  groupItemsByLane,
+  calculateDateRange,
+  createLaneGroups,
+  calculateTimeAxisTicks,
+} from '@/services/timeline.service';
+import type { Item } from '@/types/database.types';
+import type { DateRange, LaneGroup, TimelineConfig, TimeAxisTick } from '@/types/timeline.types';
+
+interface UseTimelineDataResult {
+  /** Items from the database */
+  items: Item[];
+
+  /** Calculated date range */
+  dateRange: DateRange;
+
+  /** Lane groups with items */
+  laneGroups: LaneGroup[];
+
+  /** Time axis ticks */
+  timeAxisTicks: TimeAxisTick[];
+
+  /** Timeline configuration */
+  config: TimelineConfig;
+
+  /** Loading state */
+  loading: boolean;
+
+  /** Error message if fetch failed */
+  error: string | null;
+}
+
+/**
+ * Fetches timeline items and calculates layout data.
+ *
+ * @returns Object with items, calculated groups, config, loading state, and error
+ *
+ * @example
+ * ```typescript
+ * const { items, laneGroups, dateRange, config, loading } = useTimelineData();
+ *
+ * if (loading) return <div>Loading...</div>;
+ * return <TimelineCanvas data={{ items, laneGroups, dateRange, config }} />;
+ * ```
+ */
+export function useTimelineData(): UseTimelineDataResult {
+  const isInitialized = useAppStore((state) => state.isInitialized);
+  const [items, setItems] = useState<Item[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch items from database
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+
+    // Wait for database to be fully initialized
+    if (!isInitialized) {
+      setItems([]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const database = databaseService.getDatabase();
+      const fetchedItems = getItems(database, 'main');
+      setItems(fetchedItems);
+      setError(null);
+    } catch (err) {
+      console.error('Failed to fetch timeline items:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch items');
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [isInitialized]);
+
+  // Calculate timeline layout (memoized to avoid recalculating on every render)
+  const calculatedData = useMemo(() => {
+    // Default config for timeline rendering
+    const config: TimelineConfig = {
+      canvasWidth: 1200,
+      canvasHeight: 600,
+      margin: { top: 60, right: 20, bottom: 20, left: 150 },
+      laneHeight: 50,
+      itemPadding: 4,
+      itemHeight: 36,
+    };
+
+    // Calculate date range from all items
+    const dateRange = calculateDateRange(items);
+
+    // Group items by lane (hardcoded for Phase 2)
+    const laneData = groupItemsByLane(items, 'lane');
+
+    // Create lane groups with calculated heights
+    const laneGroups = createLaneGroups(laneData, config);
+
+    // Generate time axis ticks (using 'month' zoom for Phase 2)
+    const timeAxisTicks = calculateTimeAxisTicks(dateRange, 'month', config);
+
+    return {
+      dateRange,
+      laneGroups,
+      timeAxisTicks,
+      config,
+    };
+  }, [items]);
+
+  return {
+    items,
+    ...calculatedData,
+    loading,
+    error,
+  };
+}
