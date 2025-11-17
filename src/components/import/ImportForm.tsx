@@ -102,9 +102,12 @@ export function ImportForm() {
         trim: true,
       });
 
-      if (result.errors.length > 0) {
-        toast.error(`CSV parsing errors: ${result.errors.length} rows had errors`);
-        console.error('CSV errors:', result.errors);
+      // Filter out benign errors (TooManyFields from comma-separated values in fields)
+      const criticalErrors = result.errors.filter((error) => error.code !== 'TooManyFields');
+
+      if (criticalErrors.length > 0) {
+        toast.error(`CSV parsing errors: ${criticalErrors.length} rows had errors`);
+        console.error('CSV errors:', criticalErrors);
       }
 
       if (result.data.length === 0) {

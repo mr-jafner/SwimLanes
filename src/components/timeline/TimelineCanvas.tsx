@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Stage, Layer, Line, Text, Rect } from 'react-konva';
+import { Stage, Layer, Line, Text, Rect, Circle } from 'react-konva';
 import type Konva from 'konva';
 import type { Item } from '@/types/database.types';
 import type { LaneGroup, DateRange, TimeAxisTick, TimelineConfig } from '@/types/timeline.types';
-import { calculateItemPosition } from '@/services/timeline.service';
+import { calculateItemPosition, assignItemRows } from '@/services/timeline.service';
 
 interface TimelineCanvasProps {
   /** Items to display on the timeline */
@@ -121,6 +121,61 @@ export function TimelineCanvas({
     });
   };
 
+  // Render swim lane backgrounds (alternating gray/white)
+  const renderLaneBackgrounds = () => {
+    if (!config) return null;
+
+    let cumulativeY = config.margin.top;
+
+    return laneGroups.map((laneGroup, index) => {
+      const yPos = cumulativeY;
+      const isEven = index % 2 === 0;
+
+      const rect = (
+        <Rect
+          key={`lane-bg-${index}`}
+          x={config.margin.left}
+          y={yPos}
+          width={canvasSize.width - config.margin.left - config.margin.right}
+          height={laneGroup.height}
+          fill={isEven ? '#e5e7eb' : '#ffffff'}
+        />
+      );
+
+      cumulativeY += laneGroup.height;
+      return rect;
+    });
+  };
+
+  // Render lane labels on the left
+  const renderLaneLabels = () => {
+    if (!config) return null;
+
+    let cumulativeY = config.margin.top;
+
+    return laneGroups.map((laneGroup, index) => {
+      const yPos = cumulativeY + laneGroup.height / 2;
+
+      const label = (
+        <Text
+          key={`lane-label-${index}`}
+          x={10}
+          y={yPos}
+          text={laneGroup.laneName}
+          fontSize={14}
+          fill="#4b5563"
+          fontStyle="bold"
+          verticalAlign="middle"
+          width={config.margin.left - 20}
+          ellipsis={true}
+        />
+      );
+
+      cumulativeY += laneGroup.height;
+      return label;
+    });
+  };
+
   // Render time axis with ticks and labels
   const renderTimeAxis = () => {
     if (!config) return null;
@@ -147,30 +202,89 @@ export function TimelineCanvas({
     ));
   };
 
-  // Render timeline items as colored bars
+  // Render timeline items as colored bars or circles
   const renderItems = () => {
     if (!dateRange || !config) return null;
 
     const renderedItems: React.ReactNode[] = [];
+    let cumulativeY = config.margin.top;
 
     laneGroups.forEach((laneGroup) => {
+      // Assign row indices to handle overlapping items
+      const rowMap = assignItemRows(laneGroup.items);
+
       laneGroup.items.forEach((item) => {
-        const itemPos = calculateItemPosition(item, dateRange, laneGroup.index, config);
+        // Calculate horizontal position (X, width) based on dates
+        const itemPos = calculateItemPosition(item, dateRange, 0, config); // Pass 0 for laneIndex, we'll calculate Y ourselves
         if (!itemPos) return;
 
-        renderedItems.push(
-          <Rect
-            key={`item-${item.id}-${item.branch_id}`}
-            x={itemPos.x}
-            y={itemPos.y}
-            width={itemPos.width}
-            height={itemPos.height}
-            fill={itemPos.color}
-            cornerRadius={4}
-            opacity={0.8}
-          />
-        );
+        // Calculate Y position relative to this lane
+        const rowIndex = rowMap.get(item.id) ?? 0;
+        const yOffset = rowIndex * (config.itemHeight + config.itemPadding);
+        const itemY = cumulativeY + config.itemPadding + yOffset;
+
+        // Milestones render as circles
+        if (item.type === 'milestone') {
+          const centerX = itemPos.x + itemPos.width / 2;
+          const centerY = itemY + itemPos.height / 2;
+          const radius = itemPos.height / 2;
+
+          renderedItems.push(
+            <React.Fragment key={`item-${item.id}-${item.branch_id}`}>
+              <Circle
+                x={centerX}
+                y={centerY}
+                radius={radius}
+                fill={itemPos.color}
+                stroke={itemPos.color}
+                strokeWidth={2}
+                opacity={0.8}
+              />
+              {/* Milestone label to the right */}
+              <Text
+                x={centerX + radius + 8}
+                y={centerY}
+                text={item.title}
+                fontSize={11}
+                fill="#374151"
+                verticalAlign="middle"
+              />
+            </React.Fragment>
+          );
+        } else {
+          // Tasks, releases, meetings render as bars
+          renderedItems.push(
+            <React.Fragment key={`item-${item.id}-${item.branch_id}`}>
+              <Rect
+                x={itemPos.x}
+                y={itemY}
+                width={itemPos.width}
+                height={itemPos.height}
+                fill={itemPos.color}
+                cornerRadius={4}
+                opacity={0.9}
+              />
+              {/* Item label - only show if bar is wide enough */}
+              {itemPos.width > 50 && (
+                <Text
+                  x={itemPos.x + 6}
+                  y={itemY + itemPos.height / 2}
+                  text={item.title}
+                  fontSize={11}
+                  fill="#ffffff"
+                  fontStyle="bold"
+                  verticalAlign="middle"
+                  width={itemPos.width - 12}
+                  ellipsis={true}
+                />
+              )}
+            </React.Fragment>
+          );
+        }
       });
+
+      // Move to next lane
+      cumulativeY += laneGroup.height;
     });
 
     return renderedItems;
@@ -195,6 +309,12 @@ export function TimelineCanvas({
         y={zoom.y}
       >
         <Layer>
+          {/* Swim lane backgrounds (render first, behind everything) */}
+          {renderLaneBackgrounds()}
+
+          {/* Lane labels on the left */}
+          {renderLaneLabels()}
+
           {/* Time axis */}
           {renderTimeAxis()}
 

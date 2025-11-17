@@ -458,6 +458,64 @@ function itemsOverlap(item1: Item, item2: Item): boolean {
 }
 
 /**
+ * Assigns row indices to items based on overlap detection.
+ * Items that overlap in time get different row indices.
+ *
+ * @param items - Items to assign rows to
+ * @returns Map of item IDs to row indices (0-based)
+ *
+ * @example
+ * ```typescript
+ * const items = [item1, item2, item3];
+ * const rowMap = assignItemRows(items);
+ * // rowMap.get(item1.id) = 0
+ * // rowMap.get(item2.id) = 1 (if overlaps with item1)
+ * // rowMap.get(item3.id) = 0 (if doesn't overlap with item1)
+ * ```
+ */
+export function assignItemRows(items: Item[]): Map<string, number> {
+  const rowMap = new Map<string, number>();
+
+  // Sort items by start date
+  const sortedItems = [...items].sort((a, b) => {
+    const dateA = a.start_date || '';
+    const dateB = b.start_date || '';
+    return dateA.localeCompare(dateB);
+  });
+
+  // Track rows of items (each row contains non-overlapping items)
+  const rows: Item[][] = [];
+
+  for (const item of sortedItems) {
+    if (!item.start_date) continue;
+
+    // Try to fit the item in an existing row
+    let placed = false;
+    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+      const row = rows[rowIndex];
+      if (!row) continue;
+
+      // Check if this item overlaps with any item in this row
+      const overlaps = row.some((rowItem) => itemsOverlap(item, rowItem));
+      if (!overlaps) {
+        row.push(item);
+        rowMap.set(item.id, rowIndex);
+        placed = true;
+        break;
+      }
+    }
+
+    // If it didn't fit in any row, create a new row
+    if (!placed) {
+      rows.push([item]);
+      rowMap.set(item.id, rows.length - 1);
+    }
+  }
+
+  return rowMap;
+}
+
+/**
  * Creates LaneGroup objects from grouped lane data.
  *
  * @param laneData - Grouped items by lane name
