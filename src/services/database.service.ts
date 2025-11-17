@@ -257,10 +257,13 @@ export class DatabaseService {
    * @throws {DatabaseError} If query fails
    */
   public getSchemaVersion(): number | null {
-    this.ensureReady();
+    // During initialization, we may not be in READY state yet, so just check if db exists
+    if (!this.db) {
+      throw new DatabaseError('Database instance not available');
+    }
 
     try {
-      const result = this.db!.exec(QUERY_SCHEMA_VERSION);
+      const result = this.db.exec(QUERY_SCHEMA_VERSION);
 
       if (result.length === 0 || !result[0] || result[0].values.length === 0) {
         return null;
