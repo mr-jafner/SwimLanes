@@ -15,6 +15,7 @@ import {
   calculateDateRange,
   createLaneGroups,
   calculateTimeAxisTicks,
+  calculateChartWidth,
 } from '@/services/timeline.service';
 import type { Item } from '@/types/database.types';
 import type { DateRange, LaneGroup, TimelineConfig, TimeAxisTick } from '@/types/timeline.types';
@@ -90,18 +91,21 @@ export function useTimelineData(): UseTimelineDataResult {
 
   // Calculate timeline layout (memoized to avoid recalculating on every render)
   const calculatedData = useMemo(() => {
-    // Default config for timeline rendering
+    // Calculate date range from all items
+    const dateRange = calculateDateRange(items);
+
+    // Calculate chart width based on zoom level (dynamic based on time range and zoom)
+    const chartWidth = calculateChartWidth(dateRange, zoomLevel);
+
+    // Config for timeline rendering (canvasWidth now dynamic based on zoom)
     const config: TimelineConfig = {
-      canvasWidth: 1200,
+      canvasWidth: chartWidth,
       canvasHeight: 600,
       margin: { top: 60, right: 20, bottom: 20, left: 150 },
       laneHeight: 50,
       itemPadding: 4,
       itemHeight: 36,
     };
-
-    // Calculate date range from all items
-    const dateRange = calculateDateRange(items);
 
     // Group items by lane (hardcoded for Phase 2)
     const laneData = groupItemsByLane(items, 'lane');

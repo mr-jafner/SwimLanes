@@ -54,6 +54,57 @@ export const ZOOM_INTERVALS: Record<ZoomLevel, number> = {
 };
 
 /**
+ * Pixels per time unit for each zoom level.
+ *
+ * Controls visual zoom - higher values make timeline wider/more spread out.
+ * - day: 40px per day (very zoomed in, ~1200px per month)
+ * - week: 120px per week (~520px per month)
+ * - month: 100px per month (default, balanced view)
+ * - quarter: 200px per quarter (~67px per month)
+ * - year: 250px per year (~21px per month)
+ */
+export const PIXELS_PER_TIME_UNIT: Record<ZoomLevel, number> = {
+  day: 40, // pixels per day
+  week: 120, // pixels per week
+  month: 100, // pixels per month
+  quarter: 200, // pixels per quarter
+  year: 250, // pixels per year
+};
+
+/**
+ * Calculates the total chart width based on date range and zoom level.
+ *
+ * This determines how wide the timeline content should be rendered.
+ * Higher zoom levels (day) produce wider timelines, lower zoom levels (year) produce narrower ones.
+ *
+ * @param dateRange - The overall date range of the timeline
+ * @param zoomLevel - Current zoom level
+ * @returns Chart width in pixels
+ *
+ * @example
+ * ```typescript
+ * const width = calculateChartWidth(
+ *   { minDate: '2025-01-01', maxDate: '2025-12-31', timeRange: 31536000000 },
+ *   'month'
+ * );
+ * // Result: ~1200px (12 months × 100px per month)
+ * ```
+ */
+export function calculateChartWidth(dateRange: DateRange, zoomLevel: ZoomLevel): number {
+  const timeInterval = ZOOM_INTERVALS[zoomLevel];
+  const pixelsPerUnit = PIXELS_PER_TIME_UNIT[zoomLevel];
+
+  // Calculate how many time units fit in the date range
+  const numUnits = dateRange.timeRange / timeInterval;
+
+  // Total width = number of units × pixels per unit
+  const chartWidth = numUnits * pixelsPerUnit;
+
+  // Minimum width to ensure timeline is always visible
+  return Math.max(chartWidth, 800);
+}
+
+/**
  * Groups items into swim lanes based on the specified grouping strategy.
  *
  * @param items - Array of items to group
