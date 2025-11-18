@@ -4,6 +4,7 @@ import type Konva from 'konva';
 import type { Item } from '@/types/database.types';
 import type { LaneGroup, DateRange, TimeAxisTick, TimelineConfig } from '@/types/timeline.types';
 import { calculateItemPosition, assignItemRows } from '@/services/timeline.service';
+import { useTimelineStore } from '@/stores/timeline.store';
 
 interface TimelineCanvasProps {
   /** Items to display on the timeline */
@@ -30,24 +31,23 @@ interface CanvasSize {
   height: number;
 }
 
-interface ZoomState {
-  scale: number;
+interface PanState {
   x: number;
   y: number;
 }
 
-const MIN_ZOOM = 0.1;
-const MAX_ZOOM = 5;
-const ZOOM_SPEED = 0.1;
+const SCROLL_SPEED = 20; // Pixels per wheel tick for vertical scrolling
 
 /**
  * TimelineCanvas - Interactive canvas for timeline visualization
  *
  * Features:
  * - Full viewport sizing with resize handling
- * - Click-and-drag panning
- * - Mouse wheel zoom centered on cursor
- * - Item rendering (Phase 2: colored bars with time axis)
+ * - Click-and-drag panning (horizontal + vertical)
+ * - Mouse wheel vertical scrolling
+ * - Fixed lane labels on left (no horizontal pan/zoom)
+ * - Horizontal zoom via discrete zoom levels (from timeline store)
+ * - Item rendering (Phase 3: colored bars, circles, with overlap handling)
  */
 export function TimelineCanvas({
   items = [],
@@ -60,8 +60,20 @@ export function TimelineCanvas({
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
 
+  // Get zoom level from timeline store
+  const zoomLevel = useTimelineStore((state) => state.zoomLevel);
+
   const [canvasSize, setCanvasSize] = useState<CanvasSize>({ width: 800, height: 600 });
-  const [zoom, setZoom] = useState<ZoomState>({ scale: 1, x: 0, y: 0 });
+  const [pan, setPan] = useState<PanState>({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
+
+  // Calculate total content height for scroll limits
+  const totalContentHeight = React.useMemo(() => {
+    if (!config) return 0;
+    const totalLaneHeight = laneGroups.reduce((sum, group) => sum + group.height, 0);
+    return config.margin.top + totalLaneHeight;
+  }, [laneGroups, config]);
 
   // Handle window resize
   useEffect(() => {
@@ -78,54 +90,84 @@ export function TimelineCanvas({
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
-  // Handle mouse wheel zoom
+  // Handle mouse wheel for vertical scrolling
   const handleWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
     e.evt.preventDefault();
+
+    // Scroll vertically based on wheel delta
+    const scrollDelta = e.evt.deltaY > 0 ? -SCROLL_SPEED : SCROLL_SPEED;
+
+    setPan((prev) => {
+      const newY = prev.y + scrollDelta;
+
+      // Calculate scroll limits (allow 25% extra viewport height at bottom for breathing room)
+      const extraBottomSpace = canvasSize.height * 0.25;
+      const minPanY = Math.min(0, -(totalContentHeight - canvasSize.height) - extraBottomSpace);
+      const maxPanY = 0;
+
+      // Clamp between min and max
+      const clampedY = Math.max(minPanY, Math.min(maxPanY, newY));
+
+      return {
+        x: prev.x,
+        y: clampedY,
+      };
+    });
+  };
+
+  // Handle mouse down to start dragging
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleMouseDown = (_e: Konva.KonvaEventObject<MouseEvent>) => {
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    const pos = stage.getPointerPosition();
+    if (!pos) return;
+
+    setIsDragging(true);
+    setDragStart({ x: pos.x - pan.x, y: pos.y - pan.y });
+  };
+
+  // Handle mouse move to update pan during drag
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleMouseMove = (_e: Konva.KonvaEventObject<MouseEvent>) => {
+    if (!isDragging || !dragStart) return;
 
     const stage = stageRef.current;
     if (!stage) return;
 
-    const oldScale = stage.scaleX();
-    const pointer = stage.getPointerPosition();
-    if (!pointer) return;
+    const pos = stage.getPointerPosition();
+    if (!pos) return;
 
-    // Calculate zoom direction and new scale
-    const zoomDirection = e.evt.deltaY > 0 ? -1 : 1;
-    const newScale = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, oldScale + zoomDirection * ZOOM_SPEED));
+    const newY = pos.y - dragStart.y;
 
-    // Calculate new position to zoom towards cursor
-    const mousePointTo = {
-      x: (pointer.x - stage.x()) / oldScale,
-      y: (pointer.y - stage.y()) / oldScale,
-    };
+    // Calculate scroll limits (allow 25% extra viewport height at bottom for breathing room)
+    const extraBottomSpace = canvasSize.height * 0.25;
+    const minPanY = Math.min(0, -(totalContentHeight - canvasSize.height) - extraBottomSpace);
+    const maxPanY = 0;
 
-    const newPos = {
-      x: pointer.x - mousePointTo.x * newScale,
-      y: pointer.y - mousePointTo.y * newScale,
-    };
+    // Clamp between min and max
+    const clampedY = Math.max(minPanY, Math.min(maxPanY, newY));
 
-    setZoom({
-      scale: newScale,
-      x: newPos.x,
-      y: newPos.y,
+    setPan({
+      x: pos.x - dragStart.x,
+      y: clampedY,
     });
   };
 
-  // Handle drag end to update zoom state
-  const handleDragEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
-    const stage = e.target as Konva.Stage;
-    setZoom({
-      scale: stage.scaleX(),
-      x: stage.x(),
-      y: stage.y(),
-    });
+  // Handle mouse up to end dragging
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    setDragStart(null);
   };
 
-  // Render swim lane backgrounds (alternating gray/white)
+  // Render swim lane backgrounds (alternating gray/white, extended width for panning)
   const renderLaneBackgrounds = () => {
     if (!config) return null;
 
     let cumulativeY = config.margin.top;
+    // Make backgrounds very wide so they extend beyond viewport during panning
+    const extendedWidth = canvasSize.width * 10;
 
     return laneGroups.map((laneGroup, index) => {
       const yPos = cumulativeY;
@@ -134,9 +176,9 @@ export function TimelineCanvas({
       const rect = (
         <Rect
           key={`lane-bg-${index}`}
-          x={config.margin.left}
+          x={-extendedWidth / 2} // Start far to the left
           y={yPos}
-          width={canvasSize.width - config.margin.left - config.margin.right}
+          width={extendedWidth}
           height={laneGroup.height}
           fill={isEven ? '#e5e7eb' : '#ffffff'}
         />
@@ -147,7 +189,7 @@ export function TimelineCanvas({
     });
   };
 
-  // Render lane labels on the left
+  // Render lane labels on the left (fixed horizontal position with background)
   const renderLaneLabels = () => {
     if (!config) return null;
 
@@ -156,23 +198,34 @@ export function TimelineCanvas({
     return laneGroups.map((laneGroup, index) => {
       const yPos = cumulativeY + laneGroup.height / 2;
 
-      const label = (
-        <Text
-          key={`lane-label-${index}`}
-          x={10}
-          y={yPos}
-          text={laneGroup.laneName}
-          fontSize={14}
-          fill="#4b5563"
-          fontStyle="bold"
-          verticalAlign="middle"
-          width={config.margin.left - 20}
-          ellipsis={true}
-        />
+      const elements = (
+        <React.Fragment key={`lane-label-group-${index}`}>
+          {/* Background rectangle for label */}
+          <Rect
+            x={0}
+            y={cumulativeY}
+            width={config.margin.left}
+            height={laneGroup.height}
+            fill="#ffffff"
+            opacity={0.95}
+          />
+          {/* Label text */}
+          <Text
+            x={10}
+            y={yPos}
+            text={laneGroup.laneName}
+            fontSize={14}
+            fill="#4b5563"
+            fontStyle="bold"
+            verticalAlign="middle"
+            width={config.margin.left - 20}
+            ellipsis={true}
+          />
+        </React.Fragment>
       );
 
       cumulativeY += laneGroup.height;
-      return label;
+      return elements;
     });
   };
 
@@ -300,46 +353,63 @@ export function TimelineCanvas({
         ref={stageRef}
         width={canvasSize.width}
         height={canvasSize.height}
-        draggable
         onWheel={handleWheel}
-        onDragEnd={handleDragEnd}
-        scaleX={zoom.scale}
-        scaleY={zoom.scale}
-        x={zoom.x}
-        y={zoom.y}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
       >
-        <Layer>
-          {/* Swim lane backgrounds (render first, behind everything) */}
+        {/* Layer 1: Background (lane backgrounds) - pans horizontally and vertically */}
+        <Layer x={pan.x} y={pan.y}>
           {renderLaneBackgrounds()}
+        </Layer>
 
-          {/* Lane labels on the left */}
-          {renderLaneLabels()}
+        {/* Layer 2: Timeline items - pans horizontally and vertically */}
+        <Layer x={pan.x} y={pan.y}>
+          {renderItems()}
+        </Layer>
+
+        {/* Layer 3: Time axis - pans horizontally only (frozen at top) */}
+        <Layer x={pan.x}>
+          {/* Background for time axis area (extended width) */}
+          {config && (
+            <Rect
+              x={-canvasSize.width * 5}
+              y={0}
+              width={canvasSize.width * 10}
+              height={config.margin.top}
+              fill="#ffffff"
+              opacity={0.95}
+            />
+          )}
 
           {/* Time axis */}
           {renderTimeAxis()}
 
-          {/* Horizontal axis line */}
+          {/* Horizontal axis line (extended width) */}
           {config && (
             <Line
               points={[
-                config.margin.left,
+                -canvasSize.width * 5,
                 config.margin.top,
-                canvasSize.width - config.margin.right,
+                canvasSize.width * 5,
                 config.margin.top,
               ]}
               stroke="#333"
               strokeWidth={2}
             />
           )}
+        </Layer>
 
-          {/* Timeline items */}
-          {renderItems()}
+        {/* Layer 4: Lane labels - pans vertically only (frozen at left) */}
+        <Layer y={pan.y}>{renderLaneLabels()}</Layer>
 
-          {/* Debug info - zoom and pan state */}
+        {/* Layer 5: Debug overlay - fixed position (no pan) */}
+        <Layer>
           <Text
             x={10}
             y={10}
-            text={`Zoom: ${zoom.scale.toFixed(2)}x | Pan: (${Math.round(zoom.x)}, ${Math.round(zoom.y)}) | Items: ${items.length}`}
+            text={`Zoom: ${zoomLevel} | Pan: (${Math.round(pan.x)}, ${Math.round(pan.y)}) | Items: ${items.length}`}
             fontSize={14}
             fill="#333"
             padding={5}
@@ -362,10 +432,10 @@ export function TimelineCanvas({
         }}
       >
         <div style={{ marginBottom: '4px' }}>
-          🖱️ <strong>Drag</strong> to pan
+          🖱️ <strong>Drag</strong> to pan horizontally/vertically
         </div>
         <div>
-          🔍 <strong>Scroll</strong> to zoom
+          🔍 <strong>Scroll</strong> to scroll vertically
         </div>
       </div>
     </div>

@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useAppStore } from '@/stores';
+import { useTimelineStore } from '@/stores/timeline.store';
 import { databaseService } from '@/services/database.service';
 import { getItems } from '@/db/queries/items.queries';
 import {
@@ -56,6 +57,7 @@ interface UseTimelineDataResult {
  */
 export function useTimelineData(): UseTimelineDataResult {
   const isInitialized = useAppStore((state) => state.isInitialized);
+  const zoomLevel = useTimelineStore((state) => state.zoomLevel);
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -107,8 +109,8 @@ export function useTimelineData(): UseTimelineDataResult {
     // Create lane groups with calculated heights
     const laneGroups = createLaneGroups(laneData, config);
 
-    // Generate time axis ticks (using 'month' zoom for Phase 2)
-    const timeAxisTicks = calculateTimeAxisTicks(dateRange, 'month', config);
+    // Generate time axis ticks (using zoom level from timeline store)
+    const timeAxisTicks = calculateTimeAxisTicks(dateRange, zoomLevel, config);
 
     return {
       dateRange,
@@ -116,7 +118,7 @@ export function useTimelineData(): UseTimelineDataResult {
       timeAxisTicks,
       config,
     };
-  }, [items]);
+  }, [items, zoomLevel]);
 
   return {
     items,
