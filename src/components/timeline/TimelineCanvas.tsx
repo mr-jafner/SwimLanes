@@ -5,6 +5,7 @@ import type { Item } from '@/types/database.types';
 import type { LaneGroup, DateRange, TimeAxisTick, TimelineConfig } from '@/types/timeline.types';
 import { calculateItemPosition, assignItemRows } from '@/services/timeline.service';
 import { useTimelineStore } from '@/stores/timeline.store';
+import { formatDateForDisplay } from '@/utils/date.utils';
 
 interface TimelineCanvasProps {
   /** Items to display on the timeline */
@@ -67,6 +68,12 @@ export function TimelineCanvas({
   const [pan, setPan] = useState<PanState>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
+  const [tooltip, setTooltip] = useState<{
+    visible: boolean;
+    item: Item | null;
+    x: number;
+    y: number;
+  }>({ visible: false, item: null, x: 0, y: 0 });
 
   // Calculate total content height for scroll limits
   const totalContentHeight = React.useMemo(() => {
@@ -93,6 +100,9 @@ export function TimelineCanvas({
   // Handle mouse wheel for vertical scrolling
   const handleWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
     e.evt.preventDefault();
+
+    // Hide tooltip when scrolling
+    setTooltip({ visible: false, item: null, x: 0, y: 0 });
 
     // Scroll vertically based on wheel delta
     const scrollDelta = e.evt.deltaY > 0 ? -SCROLL_SPEED : SCROLL_SPEED;
@@ -123,6 +133,9 @@ export function TimelineCanvas({
 
     const pos = stage.getPointerPosition();
     if (!pos) return;
+
+    // Hide tooltip when starting to drag
+    setTooltip({ visible: false, item: null, x: 0, y: 0 });
 
     setIsDragging(true);
     setDragStart({ x: pos.x - pan.x, y: pos.y - pan.y });
@@ -159,6 +172,38 @@ export function TimelineCanvas({
   const handleMouseUp = () => {
     setIsDragging(false);
     setDragStart(null);
+  };
+
+  // Helper function to calculate duration in days
+  const calculateDuration = (startDate: string | null, endDate: string | null): number | null => {
+    if (!startDate || !endDate) return null;
+    const start = new Date(startDate).getTime();
+    const end = new Date(endDate).getTime();
+    return Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+  };
+
+  // Handle mouse enter on item to show tooltip
+  const handleItemMouseEnter = (e: Konva.KonvaEventObject<MouseEvent>, item: Item) => {
+    setTooltip({
+      visible: true,
+      item,
+      x: e.evt.clientX,
+      y: e.evt.clientY,
+    });
+  };
+
+  // Handle mouse move on item to update tooltip position
+  const handleItemMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    setTooltip((prev) => ({
+      ...prev,
+      x: e.evt.clientX,
+      y: e.evt.clientY,
+    }));
+  };
+
+  // Handle mouse leave on item to hide tooltip
+  const handleItemMouseLeave = () => {
+    setTooltip({ visible: false, item: null, x: 0, y: 0 });
   };
 
   // Render swim lane backgrounds (alternating gray/white, extended width for panning)
@@ -292,6 +337,9 @@ export function TimelineCanvas({
                 stroke={itemPos.color}
                 strokeWidth={2}
                 opacity={0.8}
+                onMouseEnter={(e) => handleItemMouseEnter(e, item)}
+                onMouseMove={handleItemMouseMove}
+                onMouseLeave={handleItemMouseLeave}
               />
               {/* Milestone label to the right */}
               <Text
@@ -316,6 +364,9 @@ export function TimelineCanvas({
                 fill={itemPos.color}
                 cornerRadius={4}
                 opacity={0.9}
+                onMouseEnter={(e) => handleItemMouseEnter(e, item)}
+                onMouseMove={handleItemMouseMove}
+                onMouseLeave={handleItemMouseLeave}
               />
               {/* Item label - only show if bar is wide enough */}
               {itemPos.width > 50 && (
@@ -416,6 +467,77 @@ export function TimelineCanvas({
           />
         </Layer>
       </Stage>
+
+      {/* Tooltip overlay */}
+      {tooltip.visible && tooltip.item && (
+        <div
+          style={{
+            position: 'fixed',
+            left: Math.min(tooltip.x + 15, window.innerWidth - 250),
+            top: Math.min(tooltip.y + 15, window.innerHeight - 200),
+            maxWidth: '250px',
+            background: '#1f2937',
+            color: '#ffffff',
+            padding: '12px',
+            borderRadius: '8px',
+            fontSize: '13px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            zIndex: 1000,
+            pointerEvents: 'none',
+          }}
+        >
+          {/* Title and type badge */}
+          <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>{tooltip.item.title}</div>
+          <div style={{ marginBottom: '8px' }}>
+            <span
+              style={{
+                display: 'inline-block',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                fontSize: '11px',
+                background: '#3b82f6',
+              }}
+            >
+              {tooltip.item.type}
+            </span>
+          </div>
+
+          {/* Dates */}
+          {tooltip.item.start_date && (
+            <div style={{ fontSize: '12px', marginBottom: '4px' }}>
+              Start: {formatDateForDisplay(tooltip.item.start_date, 'short')}
+            </div>
+          )}
+          {tooltip.item.end_date && tooltip.item.type !== 'milestone' && (
+            <>
+              <div style={{ fontSize: '12px', marginBottom: '4px' }}>
+                End: {formatDateForDisplay(tooltip.item.end_date, 'short')}
+              </div>
+              {calculateDuration(tooltip.item.start_date, tooltip.item.end_date) && (
+                <div style={{ fontSize: '12px', marginBottom: '8px', color: '#d1d5db' }}>
+                  Duration: {calculateDuration(tooltip.item.start_date, tooltip.item.end_date)} days
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Additional fields (conditionally shown) */}
+          {tooltip.item.project && (
+            <div style={{ fontSize: '12px', color: '#d1d5db', marginTop: '8px' }}>
+              Project: {tooltip.item.project}
+            </div>
+          )}
+          {tooltip.item.owner && (
+            <div style={{ fontSize: '12px', color: '#d1d5db' }}>Owner: {tooltip.item.owner}</div>
+          )}
+          {tooltip.item.lane && (
+            <div style={{ fontSize: '12px', color: '#d1d5db' }}>Lane: {tooltip.item.lane}</div>
+          )}
+          {tooltip.item.tags && (
+            <div style={{ fontSize: '12px', color: '#d1d5db' }}>Tags: {tooltip.item.tags}</div>
+          )}
+        </div>
+      )}
 
       {/* Instructions overlay */}
       <div
