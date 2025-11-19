@@ -32,11 +32,6 @@ interface CanvasSize {
   height: number;
 }
 
-interface PanState {
-  x: number;
-  y: number;
-}
-
 const SCROLL_SPEED = 20; // Pixels per wheel tick for vertical scrolling
 
 /**
@@ -65,9 +60,14 @@ export function TimelineCanvas({
   const zoomLevel = useTimelineStore((state) => state.zoomLevel);
 
   const [canvasSize, setCanvasSize] = useState<CanvasSize>({ width: 800, height: 600 });
-  const [pan, setPan] = useState<PanState>({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
+
+  // Pan and drag state - from store to persist across tab changes
+  const pan = useTimelineStore((state) => state.panOffset);
+  const setPan = useTimelineStore((state) => state.setPanOffset);
+  const isDragging = useTimelineStore((state) => state.isDragging);
+  const setIsDragging = useTimelineStore((state) => state.setIsDragging);
+  const dragStart = useTimelineStore((state) => state.dragStart);
+  const setDragStart = useTimelineStore((state) => state.setDragStart);
   const [tooltip, setTooltip] = useState<{
     visible: boolean;
     item: Item | null;
@@ -106,22 +106,19 @@ export function TimelineCanvas({
 
     // Scroll vertically based on wheel delta
     const scrollDelta = e.evt.deltaY > 0 ? -SCROLL_SPEED : SCROLL_SPEED;
+    const newY = pan.y + scrollDelta;
 
-    setPan((prev) => {
-      const newY = prev.y + scrollDelta;
+    // Calculate scroll limits (allow 25% extra viewport height at bottom for breathing room)
+    const extraBottomSpace = canvasSize.height * 0.25;
+    const minPanY = Math.min(0, -(totalContentHeight - canvasSize.height) - extraBottomSpace);
+    const maxPanY = 0;
 
-      // Calculate scroll limits (allow 25% extra viewport height at bottom for breathing room)
-      const extraBottomSpace = canvasSize.height * 0.25;
-      const minPanY = Math.min(0, -(totalContentHeight - canvasSize.height) - extraBottomSpace);
-      const maxPanY = 0;
+    // Clamp between min and max
+    const clampedY = Math.max(minPanY, Math.min(maxPanY, newY));
 
-      // Clamp between min and max
-      const clampedY = Math.max(minPanY, Math.min(maxPanY, newY));
-
-      return {
-        x: prev.x,
-        y: clampedY,
-      };
+    setPan({
+      x: pan.x,
+      y: clampedY,
     });
   };
 

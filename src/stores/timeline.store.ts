@@ -26,7 +26,7 @@ interface TimelineState {
   // Pan/drag state
   panOffset: PanOffset;
   isDragging: boolean;
-  dragStart: PanOffset;
+  dragStart: PanOffset | null;
 
   // Filters
   filterType: string; // '' = show all
@@ -43,7 +43,7 @@ interface TimelineState {
   setLaneGroupBy: (groupBy: LaneGroupBy) => void;
   setPanOffset: (offset: PanOffset) => void;
   setIsDragging: (dragging: boolean) => void;
-  setDragStart: (position: PanOffset) => void;
+  setDragStart: (position: PanOffset | null) => void;
   setFilterType: (type: string) => void;
   setFilterProject: (project: string) => void;
   resetPan: () => void;
@@ -74,7 +74,7 @@ export const useTimelineStore = create<TimelineState>()((set, get) => ({
   laneGroupBy: 'lane',
   panOffset: { x: 0, y: 0 },
   isDragging: false,
-  dragStart: { x: 0, y: 0 },
+  dragStart: null,
   filterType: '',
   filterProject: '',
   dateRange: { minDate: null, maxDate: null, timeRange: 0 },
