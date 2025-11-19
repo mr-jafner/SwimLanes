@@ -8,6 +8,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAppStore } from '@/stores';
 import { useTimelineStore } from '@/stores/timeline.store';
+import { useBranchStore } from '@/stores/branch.store';
 import { databaseService } from '@/services/database.service';
 import { getItems } from '@/db/queries/items.queries';
 import {
@@ -59,6 +60,10 @@ interface UseTimelineDataResult {
 export function useTimelineData(): UseTimelineDataResult {
   const isInitialized = useAppStore((state) => state.isInitialized);
   const zoomLevel = useTimelineStore((state) => state.zoomLevel);
+  const laneGroupBy = useTimelineStore((state) => state.laneGroupBy);
+  const filterType = useTimelineStore((state) => state.filterType);
+  const filterProject = useTimelineStore((state) => state.filterProject);
+  const viewBranch = useBranchStore((state) => state.viewBranch);
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,7 +82,7 @@ export function useTimelineData(): UseTimelineDataResult {
 
     try {
       const database = databaseService.getDatabase();
-      const fetchedItems = getItems(database, 'main');
+      const fetchedItems = getItems(database, viewBranch);
       setItems(fetchedItems);
       setError(null);
     } catch (err) {
@@ -87,12 +92,24 @@ export function useTimelineData(): UseTimelineDataResult {
     } finally {
       setLoading(false);
     }
-  }, [isInitialized]);
+  }, [isInitialized, viewBranch]);
 
   // Calculate timeline layout (memoized to avoid recalculating on every render)
   const calculatedData = useMemo(() => {
-    // Calculate date range from all items
-    const dateRange = calculateDateRange(items);
+    // Filter items by type and project
+    const filteredItems = items.filter((item) => {
+      // Filter by type (empty string means show all)
+      if (filterType && item.type !== filterType) return false;
+
+      // Filter by project (empty string means show all, partial match case-insensitive)
+      if (filterProject && !item.project?.toLowerCase().includes(filterProject.toLowerCase()))
+        return false;
+
+      return true;
+    });
+
+    // Calculate date range from filtered items
+    const dateRange = calculateDateRange(filteredItems);
 
     // Calculate chart width based on zoom level (dynamic based on time range and zoom)
     const chartWidth = calculateChartWidth(dateRange, zoomLevel);
@@ -107,8 +124,8 @@ export function useTimelineData(): UseTimelineDataResult {
       itemHeight: 36,
     };
 
-    // Group items by lane (hardcoded for Phase 2)
-    const laneData = groupItemsByLane(items, 'lane');
+    // Group items by selected grouping strategy (lane/project/owner/type)
+    const laneData = groupItemsByLane(filteredItems, laneGroupBy);
 
     // Create lane groups with calculated heights
     const laneGroups = createLaneGroups(laneData, config);
@@ -122,7 +139,7 @@ export function useTimelineData(): UseTimelineDataResult {
       timeAxisTicks,
       config,
     };
-  }, [items, zoomLevel]);
+  }, [items, zoomLevel, laneGroupBy, filterType, filterProject]);
 
   return {
     items,
