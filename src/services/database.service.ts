@@ -257,20 +257,13 @@ export class DatabaseService {
    * @throws {DatabaseError} If query fails
    */
   public getSchemaVersion(): number | null {
-    this.ensureReady();
-    return this.getSchemaVersionInternal();
-  }
+    // During initialization, we may not be in READY state yet, so just check if db exists
+    if (!this.db) {
+      throw new DatabaseError('Database instance not available');
+    }
 
-  /**
-   * Internal method to get schema version without ready check.
-   * Used during initialization when state is not yet 'ready'.
-   *
-   * @returns Schema version number, or null if no version is set
-   * @throws {DatabaseError} If query fails
-   */
-  private getSchemaVersionInternal(): number | null {
     try {
-      const result = this.db!.exec(QUERY_SCHEMA_VERSION);
+      const result = this.db.exec(QUERY_SCHEMA_VERSION);
 
       if (result.length === 0 || !result[0] || result[0].values.length === 0) {
         return null;
@@ -293,7 +286,7 @@ export class DatabaseService {
    * @throws {SchemaError} If version mismatch is detected
    */
   private async validateSchemaVersion(): Promise<void> {
-    const dbVersion = this.getSchemaVersionInternal();
+    const dbVersion = this.getSchemaVersion();
 
     if (dbVersion === null) {
       throw new SchemaError(
