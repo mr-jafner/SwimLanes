@@ -63,6 +63,8 @@ export function useTimelineData(): UseTimelineDataResult {
   const laneGroupBy = useTimelineStore((state) => state.laneGroupBy);
   const filterType = useTimelineStore((state) => state.filterType);
   const filterProject = useTimelineStore((state) => state.filterProject);
+  const filterStartDate = useTimelineStore((state) => state.filterStartDate);
+  const filterEndDate = useTimelineStore((state) => state.filterEndDate);
   const viewBranch = useBranchStore((state) => state.viewBranch);
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
@@ -96,7 +98,7 @@ export function useTimelineData(): UseTimelineDataResult {
 
   // Calculate timeline layout (memoized to avoid recalculating on every render)
   const calculatedData = useMemo(() => {
-    // Filter items by type and project
+    // Filter items by type, project, and date range
     const filteredItems = items.filter((item) => {
       // Filter by type (empty string means show all)
       if (filterType && item.type !== filterType) return false;
@@ -104,6 +106,12 @@ export function useTimelineData(): UseTimelineDataResult {
       // Filter by project (empty string means show all, partial match case-insensitive)
       if (filterProject && !item.project?.toLowerCase().includes(filterProject.toLowerCase()))
         return false;
+
+      // Filter by start date (show items that end on or after this date)
+      if (filterStartDate && item.end_date && item.end_date < filterStartDate) return false;
+
+      // Filter by end date (show items that start on or before this date)
+      if (filterEndDate && item.start_date && item.start_date > filterEndDate) return false;
 
       return true;
     });
@@ -139,7 +147,7 @@ export function useTimelineData(): UseTimelineDataResult {
       timeAxisTicks,
       config,
     };
-  }, [items, zoomLevel, laneGroupBy, filterType, filterProject]);
+  }, [items, zoomLevel, laneGroupBy, filterType, filterProject, filterStartDate, filterEndDate]);
 
   return {
     items,

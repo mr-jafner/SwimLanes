@@ -50,6 +50,10 @@ export function TabNavigation() {
     setFilterType,
     filterProject,
     setFilterProject,
+    filterStartDate,
+    setFilterStartDate,
+    filterEndDate,
+    setFilterEndDate,
   } = useTimelineStore();
   const { viewBranch, setViewBranch, branches, refreshBranches } = useBranchStore();
 
@@ -71,7 +75,11 @@ export function TabNavigation() {
   }, [refreshBranches]);
 
   // Count active filters for badge
-  const activeFilterCount = (filterType ? 1 : 0) + (filterProject ? 1 : 0);
+  const activeFilterCount =
+    (filterType ? 1 : 0) +
+    (filterProject ? 1 : 0) +
+    (filterStartDate ? 1 : 0) +
+    (filterEndDate ? 1 : 0);
 
   const zoomLevels: { value: ZoomLevel; label: string }[] = [
     { value: 'day', label: 'Day' },
@@ -224,6 +232,22 @@ export function TabNavigation() {
             value={projectInput}
             onChange={(e) => setProjectInput(e.target.value)}
             className="w-48"
+          />
+
+          <span className="text-sm font-medium text-muted-foreground">Start Date:</span>
+          <Input
+            type="date"
+            value={filterStartDate}
+            onChange={(e) => setFilterStartDate(e.target.value)}
+            className="w-40"
+          />
+
+          <span className="text-sm font-medium text-muted-foreground">End Date:</span>
+          <Input
+            type="date"
+            value={filterEndDate}
+            onChange={(e) => setFilterEndDate(e.target.value)}
+            className="w-40"
           />
         </div>
       )}
