@@ -27,6 +27,19 @@ export default defineConfig({
     // sql.js throws "Database closed" errors when databases are properly cleaned up
     dangerouslyIgnoreUnhandledErrors: true,
 
+    // Prevent test hangs in CI
+    testTimeout: 30000, // 30 seconds per test
+    teardownTimeout: 10000, // 10 seconds for cleanup
+    hookTimeout: 10000, // 10 seconds for hooks
+
+    // Use forks pool for better process isolation and cleanup
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        singleFork: false, // Use multiple processes
+      },
+    },
+
     // Coverage configuration
     coverage: {
       provider: 'v8',
