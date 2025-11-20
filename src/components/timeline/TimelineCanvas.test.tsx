@@ -75,8 +75,10 @@ describe('TimelineCanvas', () => {
 
   const mockLaneGroups: LaneGroup[] = [
     {
-      lane: 'Lane 1',
+      laneName: 'Lane 1',
       items: mockItems,
+      index: 0,
+      height: 40,
     },
   ];
 
@@ -87,16 +89,16 @@ describe('TimelineCanvas', () => {
   };
 
   const mockTimeAxisTicks: TimeAxisTick[] = [
-    { position: 0, label: 'Jan 1', date: '2025-01-01' },
-    { position: 100, label: 'Jan 10', date: '2025-01-10' },
+    { x: 0, label: 'Jan 1', date: '2025-01-01' },
+    { x: 100, label: 'Jan 10', date: '2025-01-10' },
   ];
 
   const mockConfig: TimelineConfig = {
-    chartWidth: 1000,
-    chartHeight: 400,
+    canvasWidth: 1024,
+    canvasHeight: 768,
     laneHeight: 40,
-    headerHeight: 60,
-    leftMargin: 150,
+    itemPadding: 4,
+    itemHeight: 32,
     margin: {
       top: 20,
       bottom: 20,
