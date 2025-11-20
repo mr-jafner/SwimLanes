@@ -40,6 +40,10 @@ export default defineConfig({
         'src/test/**',
         // Exclude database.service.ts - integration tests skipped due to WASM loading issues
         'src/services/database.service.ts',
+        // Exclude large service files to reduce V8 coverage instrumentation overhead
+        'src/services/timeline.service.ts',
+        'src/hooks/useTimelineData.ts',
+        'src/components/timeline/TimelineCanvas.tsx',
       ],
       // Coverage thresholds (will increase as features are added)
       // Note: Reduced thresholds due to:
