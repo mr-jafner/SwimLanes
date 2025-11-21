@@ -27,10 +27,20 @@ export default defineConfig({
     // sql.js throws "Database closed" errors when databases are properly cleaned up
     dangerouslyIgnoreUnhandledErrors: true,
 
-    // Prevent test hangs in CI
+    // Test timeouts
     testTimeout: 30000, // 30 seconds per test
     teardownTimeout: 10000, // 10 seconds for cleanup
     hookTimeout: 10000, // 10 seconds for hooks
+
+    // Use forks pool instead of threads to ensure Vitest exits after tests complete
+    // The useDebounce hook creates timers that prevent the threads pool from shutting down
+    // Forks pool isolates tests in separate processes that terminate cleanly (~45s total runtime)
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        singleFork: false,
+      },
+    },
 
     // Coverage configuration
     coverage: {

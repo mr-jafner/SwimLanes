@@ -31,17 +31,8 @@ jobs:
         run: npm run lint
 
       - name: Run tests
-        run: |
-          timeout 180 npm run test:run || {
-            EXIT_CODE=$?
-            if [ $EXIT_CODE -eq 124 ]; then
-              echo "Tests timed out after 3 minutes"
-              exit 1
-            else
-              exit $EXIT_CODE
-            fi
-          }
-        timeout-minutes: 5
+        run: npm run test:run
+        timeout-minutes: 15
 
       # TODO: Re-enable coverage in CI (see Issue #60)
       # Coverage collection currently disabled due to V8 instrumentation timeout

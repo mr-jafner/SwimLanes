@@ -9,7 +9,7 @@
     "build:single": "tsc -b && vite build --config vite.single.config.ts",
     "typecheck": "tsc -b",
     "test": "vitest",
-    "test:run": "vitest run --no-coverage --pool=threads",
+    "test:run": "vitest run --no-coverage",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",

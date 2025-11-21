@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, within, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TabNavigation } from '../TabNavigation';
@@ -240,11 +240,13 @@ describe('TabNavigation', () => {
       // Input should update immediately
       expect(projectInput).toHaveValue('Test Project');
 
-      // Wait for debounce (300ms)
-      await new Promise((resolve) => setTimeout(resolve, 350));
-
-      // Store should be updated after debounce
-      expect(useTimelineStore.getState().filterProject).toBe('Test Project');
+      // Store should be updated after debounce completes
+      await waitFor(
+        () => {
+          expect(useTimelineStore.getState().filterProject).toBe('Test Project');
+        },
+        { timeout: 1000 } // Wait up to 1 second for debounce (300ms delay)
+      );
     });
 
     it('should update start date filter', async () => {
