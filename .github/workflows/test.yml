@@ -31,8 +31,8 @@ jobs:
         run: npm run lint
 
       - name: Run tests
-        run: npm run test:run
-        timeout-minutes: 15
+        run: npm run test:run -- --reporter=verbose --bail=1
+        timeout-minutes: 5
 
       # TODO: Re-enable coverage in CI (see Issue #60)
       # Coverage collection currently disabled due to V8 instrumentation timeout
