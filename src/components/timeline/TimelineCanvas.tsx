@@ -396,6 +396,7 @@ export function TimelineCanvas({
       ref={containerRef}
       className={className}
       style={{ width: '100%', height: '100%', position: 'relative' }}
+      data-testid="timeline-canvas-container"
     >
       <Stage
         ref={stageRef}

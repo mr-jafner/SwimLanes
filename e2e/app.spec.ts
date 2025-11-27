@@ -37,9 +37,9 @@ test('should navigate between tabs', async ({ page }) => {
   await expect(timelineTab).toBeVisible();
   await timelineTab.click();
 
-  // Verify Timeline canvas is visible
-  const timelineCanvas = page.locator('canvas');
-  await expect(timelineCanvas).toBeVisible();
+  // Verify Timeline canvas container is visible
+  const timelineContainer = page.getByTestId('timeline-canvas-container');
+  await expect(timelineContainer).toBeVisible();
 
   // Find and click Import tab
   const importTab = page.getByRole('button', { name: /import/i });
@@ -110,12 +110,12 @@ test('should display timeline canvas in Timeline tab', async ({ page }) => {
   const timelineTab = page.getByRole('button', { name: /timeline/i });
   await timelineTab.click();
 
-  // Verify canvas element is rendered
-  const canvas = page.locator('canvas');
-  await expect(canvas).toBeVisible();
+  // Verify canvas container is rendered
+  const timelineContainer = page.getByTestId('timeline-canvas-container');
+  await expect(timelineContainer).toBeVisible();
 
-  // Verify canvas has some dimensions (not 0x0)
-  const boundingBox = await canvas.boundingBox();
+  // Verify container has some dimensions (not 0x0)
+  const boundingBox = await timelineContainer.boundingBox();
   expect(boundingBox).not.toBeNull();
   expect(boundingBox!.width).toBeGreaterThan(0);
   expect(boundingBox!.height).toBeGreaterThan(0);
@@ -177,8 +177,8 @@ test('should persist active tab state', async ({ page }) => {
   await timelineTab.click();
 
   // Verify Timeline is active
-  const canvas = page.locator('canvas');
-  await expect(canvas).toBeVisible();
+  const timelineContainer = page.getByTestId('timeline-canvas-container');
+  await expect(timelineContainer).toBeVisible();
 
   // Reload the page
   await page.reload();
@@ -186,6 +186,6 @@ test('should persist active tab state', async ({ page }) => {
   // Wait for app to load again
   await page.waitForSelector('header', { state: 'visible', timeout: 10000 });
 
-  // Verify Timeline tab is still active (canvas visible)
-  await expect(canvas).toBeVisible();
+  // Verify Timeline tab is still active (container visible)
+  await expect(timelineContainer).toBeVisible();
 });
