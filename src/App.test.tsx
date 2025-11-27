@@ -3,12 +3,19 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 import { useAppStore } from './stores/app.store';
+import { useBranchStore } from './stores/branch.store';
 
 // Mock the database service to avoid WASM loading in tests
+// Use a stable mock database object to prevent infinite re-renders
+const mockDatabase = {
+  exec: vi.fn(() => []), // Return empty result array (no items)
+  run: vi.fn(),
+};
+
 vi.mock('@/services/database.service', () => ({
   databaseService: {
     initialize: vi.fn().mockResolvedValue(undefined),
-    getDatabase: vi.fn(),
+    getDatabase: vi.fn(() => mockDatabase),
     isReady: vi.fn().mockReturnValue(true),
   },
 }));
@@ -31,22 +38,29 @@ vi.mock('next-themes', () => ({
   }),
 }));
 
-// Mock branch store
-vi.mock('@/stores/branch.store', () => ({
-  useBranchStore: () => ({
-    currentBranch: 'main',
-  }),
-}));
+// Don't mock the branch store - use real store but initialize it in beforeEach
 
 describe('App', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset store to initialized state with timeline tab as default
+    // Reset app store to initialized state with timeline tab as default
     useAppStore.setState({
       activeTab: 'timeline',
       isInitialized: true,
       isInitializing: false,
       initError: null,
+    });
+    // Initialize branch store with mock data
+    useBranchStore.setState({
+      currentBranch: 'main',
+      viewBranch: 'main',
+      importBranch: 'main',
+      compareBranchA: 'main',
+      compareBranchB: 'main',
+      comparisonResult: null,
+      branches: [
+        { branch_id: 'main', label: 'Main', created_from: null, note: null, created_at: '' },
+      ],
     });
   });
 

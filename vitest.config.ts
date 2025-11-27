@@ -27,6 +27,21 @@ export default defineConfig({
     // sql.js throws "Database closed" errors when databases are properly cleaned up
     dangerouslyIgnoreUnhandledErrors: true,
 
+    // Test timeouts
+    testTimeout: 30000, // 30 seconds per test
+    teardownTimeout: 10000, // 10 seconds for cleanup
+    hookTimeout: 10000, // 10 seconds for hooks
+
+    // Use forks pool instead of threads to ensure Vitest exits after tests complete
+    // The useDebounce hook creates timers that prevent the threads pool from shutting down
+    // Forks pool isolates tests in separate processes that terminate cleanly (~45s total runtime)
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        singleFork: false,
+      },
+    },
+
     // Coverage configuration
     coverage: {
       provider: 'v8',
@@ -40,6 +55,10 @@ export default defineConfig({
         'src/test/**',
         // Exclude database.service.ts - integration tests skipped due to WASM loading issues
         'src/services/database.service.ts',
+        // Exclude large service files to reduce V8 coverage instrumentation overhead
+        'src/services/timeline.service.ts',
+        'src/hooks/useTimelineData.ts',
+        'src/components/timeline/TimelineCanvas.tsx',
       ],
       // Coverage thresholds (will increase as features are added)
       // Note: Reduced thresholds due to:

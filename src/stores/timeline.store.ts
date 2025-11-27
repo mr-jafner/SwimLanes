@@ -26,11 +26,13 @@ interface TimelineState {
   // Pan/drag state
   panOffset: PanOffset;
   isDragging: boolean;
-  dragStart: PanOffset;
+  dragStart: PanOffset | null;
 
   // Filters
   filterType: string; // '' = show all
   filterProject: string; // '' = show all, supports partial match
+  filterStartDate: string; // '' = no start filter, ISO date string
+  filterEndDate: string; // '' = no end filter, ISO date string
 
   // Calculated state (derived from items)
   dateRange: { minDate: string | null; maxDate: string | null; timeRange: number };
@@ -43,9 +45,11 @@ interface TimelineState {
   setLaneGroupBy: (groupBy: LaneGroupBy) => void;
   setPanOffset: (offset: PanOffset) => void;
   setIsDragging: (dragging: boolean) => void;
-  setDragStart: (position: PanOffset) => void;
+  setDragStart: (position: PanOffset | null) => void;
   setFilterType: (type: string) => void;
   setFilterProject: (project: string) => void;
+  setFilterStartDate: (date: string) => void;
+  setFilterEndDate: (date: string) => void;
   resetPan: () => void;
   updateCalculatedState: (items: Item[]) => void;
 }
@@ -74,9 +78,11 @@ export const useTimelineStore = create<TimelineState>()((set, get) => ({
   laneGroupBy: 'lane',
   panOffset: { x: 0, y: 0 },
   isDragging: false,
-  dragStart: { x: 0, y: 0 },
+  dragStart: null,
   filterType: '',
   filterProject: '',
+  filterStartDate: '',
+  filterEndDate: '',
   dateRange: { minDate: null, maxDate: null, timeRange: 0 },
   laneNames: [],
   laneHeight: 40,
@@ -90,6 +96,8 @@ export const useTimelineStore = create<TimelineState>()((set, get) => ({
   setDragStart: (position) => set({ dragStart: position }),
   setFilterType: (type) => set({ filterType: type }),
   setFilterProject: (project) => set({ filterProject: project }),
+  setFilterStartDate: (date) => set({ filterStartDate: date }),
+  setFilterEndDate: (date) => set({ filterEndDate: date }),
   resetPan: () => set({ panOffset: { x: 0, y: 0 } }),
 
   /**

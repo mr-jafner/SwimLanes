@@ -8,12 +8,16 @@ import { TimelineCanvas } from '@/components/timeline/TimelineCanvas';
 import { ImportForm } from '@/components/import/ImportForm';
 import { useAppStore } from '@/stores/app.store';
 import { databaseService } from '@/services/database.service';
+import { useTimelineData } from '@/hooks/useTimelineData';
 
 function App() {
   const { activeTab, isInitialized, initError, setInitialized, setInitializing, setInitError } =
     useAppStore();
 
   const initializationStartedRef = useRef(false);
+
+  // Fetch timeline data (Phase 2: with calculations)
+  const timelineData = useTimelineData();
 
   // Initialize database on app startup
   useEffect(() => {
@@ -88,7 +92,13 @@ function App() {
         )}
         {activeTab === 'timeline' && (
           <div className="h-full">
-            <TimelineCanvas />
+            <TimelineCanvas
+              items={timelineData.items}
+              laneGroups={timelineData.laneGroups}
+              dateRange={timelineData.dateRange}
+              timeAxisTicks={timelineData.timeAxisTicks}
+              config={timelineData.config}
+            />
           </div>
         )}
         {activeTab === 'branches' && (
