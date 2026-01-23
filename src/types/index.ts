@@ -20,6 +20,7 @@ export type {
   ImportProfile,
   AppParam,
   SchemaVersion,
+  View,
 } from './database.types';
 
 // Import workflow types
@@ -66,3 +67,23 @@ export type {
   MergeConflict,
   MergeOptions,
 } from './branch.types';
+
+// View system types
+export type {
+  ViewType,
+  FilterOperator,
+  FilterRule,
+  FilterConfig,
+  SortDirection,
+  SortConfig,
+  TimelineDisplayConfig,
+  TableColumn,
+  TableDisplayConfig,
+  KanbanDisplayConfig,
+  CalendarDisplayConfig,
+  ListDisplayConfig,
+  ViewDisplayConfig,
+  ViewDefinition,
+  GroupedItems,
+  ViewQueryResult,
+} from './view.types';

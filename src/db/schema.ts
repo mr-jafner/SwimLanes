@@ -120,6 +120,29 @@ export const CREATE_APP_PARAMS_TABLE = `
 `;
 
 /**
+ * SQL statement to create the views table.
+ *
+ * Views store saved query configurations (filter, sort, group) and view-specific
+ * display settings. Views are global (not branch-scoped) and work across all branches.
+ *
+ * Each view can be one of: timeline, table, kanban, calendar, list
+ */
+export const CREATE_VIEWS_TABLE = `
+  CREATE TABLE IF NOT EXISTS views (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    view_type TEXT NOT NULL CHECK (view_type IN ('timeline', 'table', 'kanban', 'calendar', 'list')),
+    filter_config TEXT DEFAULT '{"rules":[],"combinator":"and"}',
+    sort_config TEXT DEFAULT '[]',
+    group_by TEXT,
+    display_config TEXT NOT NULL,
+    is_default INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+  )
+`;
+
+/**
  * SQL statement to create the schema version table.
  *
  * Tracks which schema version is currently applied to the database.
@@ -165,6 +188,13 @@ export const CREATE_IDX_ITEM_DATES = `
  */
 export const CREATE_IDX_ITEM_PROJECT = `
   CREATE INDEX IF NOT EXISTS idx_item_project ON item(project)
+`;
+
+/**
+ * SQL statement to create index on views for quick lookup of default view.
+ */
+export const CREATE_IDX_VIEWS_DEFAULT = `
+  CREATE INDEX IF NOT EXISTS idx_views_default ON views(is_default) WHERE is_default = 1
 `;
 
 /**
@@ -235,6 +265,7 @@ export const SCHEMA_STATEMENTS = [
   CREATE_BRANCHES_TABLE,
   CREATE_IMPORT_PROFILES_TABLE,
   CREATE_APP_PARAMS_TABLE,
+  CREATE_VIEWS_TABLE,
   CREATE_SCHEMA_VERSION_TABLE,
 
   // Indexes
@@ -243,6 +274,7 @@ export const SCHEMA_STATEMENTS = [
   CREATE_IDX_ITEM_BRANCH,
   CREATE_IDX_ITEM_DATES,
   CREATE_IDX_ITEM_PROJECT,
+  CREATE_IDX_VIEWS_DEFAULT,
 
   // Triggers
   CREATE_TRIGGER_INSERT_HISTORY,

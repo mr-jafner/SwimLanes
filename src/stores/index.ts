@@ -24,3 +24,5 @@ export { useTimelineStore } from './timeline.store';
 
 export { useUndoStore } from './undo.store';
 export type { UndoAction } from './undo.store';
+
+export { useViewStore } from './view.store';

@@ -259,3 +259,58 @@ export interface SchemaVersion {
   /** Timestamp when this version was applied */
   applied_at: string;
 }
+
+/**
+ * View database record.
+ *
+ * Represents a saved view configuration stored in the database.
+ * This is the raw database record - the application uses ViewDefinition
+ * from view.types.ts which has parsed JSON fields.
+ *
+ * @example
+ * ```typescript
+ * const view: View = {
+ *   id: '550e8400-e29b-41d4-a716-446655440000',
+ *   name: 'All Tasks 2025',
+ *   view_type: 'table',
+ *   filter_config: '{"rules":[{"field":"type","operator":"equals","value":"task"}],"combinator":"and"}',
+ *   sort_config: '[{"field":"start_date","direction":"asc"}]',
+ *   group_by: null,
+ *   display_config: '{"type":"table","columns":[],"frozenColumnCount":1,"rowHeight":"normal"}',
+ *   is_default: 0,
+ *   created_at: '2025-02-01T10:30:00Z',
+ *   updated_at: '2025-02-01T10:30:00Z'
+ * };
+ * ```
+ */
+export interface View {
+  /** Unique view identifier (UUID) */
+  id: string;
+
+  /** Human-readable view name */
+  name: string;
+
+  /** Type of view (timeline, table, kanban, calendar, list) */
+  view_type: string;
+
+  /** JSON-serialized FilterConfig */
+  filter_config: string;
+
+  /** JSON-serialized SortConfig[] */
+  sort_config: string;
+
+  /** Field to group by (null = no grouping) */
+  group_by: string | null;
+
+  /** JSON-serialized ViewDisplayConfig */
+  display_config: string;
+
+  /** Whether this is the default view (0 or 1) */
+  is_default: number;
+
+  /** Creation timestamp */
+  created_at: string;
+
+  /** Last update timestamp */
+  updated_at: string;
+}
