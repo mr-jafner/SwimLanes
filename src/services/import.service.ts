@@ -70,9 +70,10 @@ const AUTO_DETECT_PATTERNS: AutoDetectPatterns = {
     'resource names',
     'responsible',
   ],
-  lane: ['lane', 'swim lane', 'swimlane', 'track', 'status', 'state'],
+  lane: ['lane', 'swim lane', 'swimlane', 'track'],
   project: ['project', 'epic', 'initiative', 'program', 'portfolio'],
   tags: ['tags', 'labels', 'keywords', 'categories'],
+  status: ['status', 'state', 'workflow status', 'progress', 'stage'],
   id: ['id', 'key', 'issue key', 'item id', 'task id', 'wbs'],
 };
 
@@ -163,6 +164,7 @@ function mapRowToItem(
   const owner = mapping.owner ? sanitizeString(row[mapping.owner]) : null;
   const lane = mapping.lane ? sanitizeString(row[mapping.lane]) : null;
   const project = mapping.project ? sanitizeString(row[mapping.project]) : null;
+  const status = mapping.status ? sanitizeString(row[mapping.status]) : null;
 
   // Parse tags
   const tagsRaw = mapping.tags ? sanitizeString(row[mapping.tags]) : null;
@@ -193,6 +195,7 @@ function mapRowToItem(
     lane,
     project,
     tags,
+    status,
     source_id: null,
     source_row_hash: sourceRowHash,
     updated_at: new Date().toISOString(),

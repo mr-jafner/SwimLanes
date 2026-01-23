@@ -180,8 +180,8 @@ export function insertItem(db: Database, item: Item): void {
   const sql = `
     INSERT INTO item (
       id, branch_id, type, title, start_date, end_date,
-      owner, lane, project, tags, source_id, source_row_hash, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      owner, lane, project, tags, status, source_id, source_row_hash, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   db.run(sql, [
@@ -195,6 +195,7 @@ export function insertItem(db: Database, item: Item): void {
     item.lane ?? null,
     item.project ?? null,
     item.tags ?? null,
+    item.status ?? null,
     item.source_id ?? null,
     item.source_row_hash ?? null,
     item.updated_at,

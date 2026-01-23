@@ -13,8 +13,12 @@
  *
  * Increment this when making breaking schema changes. The database service
  * will check this version against the database to detect schema mismatches.
+ *
+ * Version History:
+ * - v1: Initial schema (items, branches, history, import_profiles, app_params)
+ * - v2: Added status column to item and item_history tables
  */
-export const CURRENT_SCHEMA_VERSION = 1;
+export const CURRENT_SCHEMA_VERSION = 2;
 
 /**
  * SQL statement to create the main item table.
@@ -38,6 +42,7 @@ export const CREATE_ITEM_TABLE = `
     lane TEXT,
     project TEXT,
     tags TEXT,
+    status TEXT,
     source_id TEXT,
     source_row_hash TEXT,
     branch_id TEXT DEFAULT 'main',
@@ -72,6 +77,7 @@ export const CREATE_ITEM_HISTORY_TABLE = `
     lane TEXT,
     project TEXT,
     tags TEXT,
+    status TEXT,
     PRIMARY KEY(id, branch_id, version)
   )
 `;
@@ -207,10 +213,10 @@ export const CREATE_TRIGGER_INSERT_HISTORY = `
   CREATE TRIGGER IF NOT EXISTS item_insert_history
   AFTER INSERT ON item
   BEGIN
-    INSERT INTO item_history (id, branch_id, version, op, type, title, start_date, end_date, owner, lane, project, tags)
+    INSERT INTO item_history (id, branch_id, version, op, type, title, start_date, end_date, owner, lane, project, tags, status)
     SELECT NEW.id, NEW.branch_id,
            COALESCE((SELECT MAX(version) FROM item_history WHERE id = NEW.id AND branch_id = NEW.branch_id), 0) + 1,
-           'insert', NEW.type, NEW.title, NEW.start_date, NEW.end_date, NEW.owner, NEW.lane, NEW.project, NEW.tags;
+           'insert', NEW.type, NEW.title, NEW.start_date, NEW.end_date, NEW.owner, NEW.lane, NEW.project, NEW.tags, NEW.status;
   END
 `;
 
@@ -224,10 +230,10 @@ export const CREATE_TRIGGER_UPDATE_HISTORY = `
   CREATE TRIGGER IF NOT EXISTS item_update_history
   AFTER UPDATE ON item
   BEGIN
-    INSERT INTO item_history (id, branch_id, version, op, type, title, start_date, end_date, owner, lane, project, tags)
+    INSERT INTO item_history (id, branch_id, version, op, type, title, start_date, end_date, owner, lane, project, tags, status)
     SELECT NEW.id, NEW.branch_id,
            (SELECT MAX(version) FROM item_history WHERE id = NEW.id AND branch_id = NEW.branch_id) + 1,
-           'update', NEW.type, NEW.title, NEW.start_date, NEW.end_date, NEW.owner, NEW.lane, NEW.project, NEW.tags;
+           'update', NEW.type, NEW.title, NEW.start_date, NEW.end_date, NEW.owner, NEW.lane, NEW.project, NEW.tags, NEW.status;
   END
 `;
 

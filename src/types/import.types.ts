@@ -66,6 +66,9 @@ export interface ColumnMapping {
   /** CSV column name for tags/labels */
   tags: string;
 
+  /** CSV column name for status */
+  status: string;
+
   /** CSV column name to use as item ID (only used when idStrategy='column') */
   id: string;
 
@@ -101,6 +104,7 @@ export interface AutoDetectPatterns {
   lane: string[];
   project: string[];
   tags: string[];
+  status: string[];
   id: string[];
 }
 

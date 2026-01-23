@@ -38,6 +38,7 @@ const createMockItem = (overrides: Partial<Item> = {}): Item => ({
   lane: 'Development',
   project: 'Project A',
   tags: 'test',
+  status: null,
   source_row_hash: 'hash123',
   updated_at: '2025-01-01T00:00:00Z',
   ...overrides,

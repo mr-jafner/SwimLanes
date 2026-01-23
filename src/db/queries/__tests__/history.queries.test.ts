@@ -64,6 +64,7 @@ describe('History Query Builders', () => {
         lane: 'Backend',
         project: 'Project A',
         tags: 'test',
+        status: null,
         source_row_hash: null,
         updated_at: new Date().toISOString(),
       };
@@ -89,6 +90,7 @@ describe('History Query Builders', () => {
         lane: 'Backend',
         project: 'Project A',
         tags: 'test',
+        status: null,
         source_row_hash: null,
         updated_at: new Date().toISOString(),
       };
@@ -119,6 +121,7 @@ describe('History Query Builders', () => {
         lane: 'Backend',
         project: 'Project A',
         tags: 'test',
+        status: null,
         source_row_hash: null,
         updated_at: new Date().toISOString(),
       };
@@ -144,6 +147,7 @@ describe('History Query Builders', () => {
         lane: 'Backend',
         project: 'Project A',
         tags: 'test',
+        status: null,
         source_row_hash: null,
         updated_at: new Date().toISOString(),
       };
@@ -184,6 +188,7 @@ describe('History Query Builders', () => {
         lane: 'Backend',
         project: 'Project A',
         tags: 'test',
+        status: null,
         source_row_hash: null,
         updated_at: new Date().toISOString(),
       };
@@ -212,6 +217,7 @@ describe('History Query Builders', () => {
           lane: 'Backend',
           project: 'Project A',
           tags: 'shared',
+          status: null,
           source_row_hash: null,
           updated_at: new Date().toISOString(),
         },
@@ -226,6 +232,7 @@ describe('History Query Builders', () => {
           lane: 'Frontend',
           project: 'Project B',
           tags: 'removed',
+          status: null,
           source_row_hash: null,
           updated_at: new Date().toISOString(),
         },
@@ -240,6 +247,7 @@ describe('History Query Builders', () => {
           lane: 'DevOps',
           project: 'Project C',
           tags: 'will-change',
+          status: null,
           source_row_hash: null,
           updated_at: new Date().toISOString(),
         },
@@ -271,6 +279,7 @@ describe('History Query Builders', () => {
         lane: 'Release',
         project: 'Project D',
         tags: 'new',
+        status: null,
         source_row_hash: null,
         updated_at: new Date().toISOString(),
       };
@@ -358,6 +367,7 @@ describe('History Query Builders', () => {
           lane: 'Backend',
           project: 'Project A',
           tags: 'test',
+          status: null,
           source_row_hash: null,
           updated_at: new Date().toISOString(),
         };
@@ -388,6 +398,7 @@ describe('History Query Builders', () => {
         lane: 'Backend',
         project: 'Project A',
         tags: 'test',
+        status: null,
         source_row_hash: null,
         updated_at: new Date().toISOString(),
       };
@@ -418,6 +429,7 @@ describe('History Query Builders', () => {
           lane: 'Backend',
           project: 'Auth',
           tags: 'security',
+          status: null,
           source_row_hash: null,
           updated_at: new Date().toISOString(),
         },
@@ -432,6 +444,7 @@ describe('History Query Builders', () => {
           lane: 'Backend',
           project: 'Auth',
           tags: 'security',
+          status: null,
           source_row_hash: null,
           updated_at: new Date().toISOString(),
         },
@@ -446,6 +459,7 @@ describe('History Query Builders', () => {
           lane: 'Design',
           project: 'UI',
           tags: 'design',
+          status: null,
           source_row_hash: null,
           updated_at: new Date().toISOString(),
         },

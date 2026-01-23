@@ -81,6 +81,9 @@ export interface Item {
   /** Comma-separated tags or labels for filtering */
   tags: string | null;
 
+  /** Status of the item (e.g., 'todo', 'in_progress', 'done', 'blocked') */
+  status: string | null;
+
   /** JSON array of item IDs this item depends on (future feature) */
   dependencies?: string | null;
 
@@ -149,6 +152,7 @@ export interface ItemHistory {
   lane: string | null;
   project: string | null;
   tags: string | null;
+  status: string | null;
   dependencies?: string | null;
 }
 

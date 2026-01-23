@@ -109,11 +109,11 @@ export function createBranch(
   const copyItemsSql = `
     INSERT INTO item (
       id, branch_id, type, title, start_date, end_date,
-      owner, lane, project, tags, source_id, source_row_hash, updated_at
+      owner, lane, project, tags, status, source_id, source_row_hash, updated_at
     )
     SELECT
       id, ? as branch_id, type, title, start_date, end_date,
-      owner, lane, project, tags, source_id, source_row_hash, updated_at
+      owner, lane, project, tags, status, source_id, source_row_hash, updated_at
     FROM item
     WHERE branch_id = ?
   `;

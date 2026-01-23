@@ -401,6 +401,7 @@ function extractItemFromRow(row: Record<string, unknown>, suffix: 'a' | 'b'): It
     lane: row[`lane_${suffix}`] as string | null,
     project: row[`project_${suffix}`] as string | null,
     tags: row[`tags_${suffix}`] as string | null,
+    status: row[`status_${suffix}`] as string | null,
     source_id: row[`source_id_${suffix}`] as string | null,
     source_row_hash: row[`source_row_hash_${suffix}`] as string | null,
     updated_at: row[`updated_at_${suffix}`] as string,

@@ -66,6 +66,7 @@ describe('TimelineCanvas', () => {
       lane: 'Lane 1',
       project: 'Project A',
       tags: null,
+      status: null,
       dependencies: null,
       source_row_hash: null,
       branch_id: 'main',
