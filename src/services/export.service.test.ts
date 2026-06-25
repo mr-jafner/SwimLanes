@@ -7,8 +7,10 @@ import {
   filterItems,
   buildRenderModel,
   renderSvg,
-  renderChartSvg,
-  renderGutterSvg,
+  renderCornerSvg,
+  renderAxisSvg,
+  renderLabelsSvg,
+  renderBodySvg,
   escapeXml,
   parseDependencies,
   generateTimelineArtifact,
@@ -195,32 +197,44 @@ describe('export.service', () => {
     });
   });
 
-  describe('renderChartSvg / renderGutterSvg (frozen lane labels)', () => {
-    it('chart svg omits lane labels and crops the left margin via viewBox', () => {
-      const model = buildRenderModel(SAMPLE_ITEMS, 'month', 'lane');
-      const chart = renderChartSvg(model);
-      expect(chart).not.toContain('class="lane-label"');
-      // viewBox starts at the left margin (default 150), so the gutter area is cropped.
-      expect(chart).toContain(`viewBox="${model.config.margin.left} 0`);
-      // Chart still has the timeline content.
-      expect(chart).toContain('<rect');
-      expect(chart).toContain('class="axis-label"');
+  describe('frozen-pane renderers (corner / axis / labels / body)', () => {
+    const model = buildRenderModel(SAMPLE_ITEMS, 'month', 'lane'); // range 2025-01-01..03-01
+
+    it('corner pane is the margin size and labels the lane column', () => {
+      const corner = renderCornerSvg(model);
+      expect(corner).toContain(`width="${model.config.margin.left}"`);
+      expect(corner).toContain(`height="${model.config.margin.top}"`);
+      expect(corner).toContain('Lanes');
     });
 
-    it('gutter svg contains the lane labels and is the margin width', () => {
-      const model = buildRenderModel(SAMPLE_ITEMS, 'month', 'lane');
-      const gutter = renderGutterSvg(model);
-      expect(gutter).toContain('class="lane-label"');
-      expect(gutter).toContain(`width="${model.config.margin.left}"`);
-      // Lane names appear in the gutter, not the chart.
-      expect(gutter).toContain('Backend');
+    it('axis pane has ticks but no lane labels, cropped to the top strip', () => {
+      const axis = renderAxisSvg(model);
+      expect(axis).toContain('class="axis-label"');
+      expect(axis).not.toContain('class="lane-label"');
+      expect(axis).toContain(`viewBox="${model.config.margin.left} 0`);
+      expect(axis).toContain(`height="${model.config.margin.top}"`);
     });
 
-    it('draws a Today marker only when the date is within range', () => {
-      const model = buildRenderModel(SAMPLE_ITEMS, 'month', 'lane'); // range 2025-01-01..03-01
-      expect(renderChartSvg(model, { nowDate: '2025-02-01' })).toContain('class="today-line"');
-      expect(renderChartSvg(model, { nowDate: '2030-01-01' })).not.toContain('class="today-line"');
-      expect(renderChartSvg(model)).not.toContain('class="today-line"');
+    it('labels pane has lane labels, cropped below the axis', () => {
+      const labels = renderLabelsSvg(model);
+      expect(labels).toContain('class="lane-label"');
+      expect(labels).toContain('Backend');
+      expect(labels).toContain(`viewBox="0 ${model.config.margin.top}`);
+      expect(labels).not.toContain('class="axis-label"');
+    });
+
+    it('body pane has items and crops out the label margin and axis', () => {
+      const body = renderBodySvg(model);
+      expect(body).toContain('<rect');
+      expect(body).not.toContain('class="lane-label"');
+      expect(body).not.toContain('class="axis-label"');
+      expect(body).toContain(`viewBox="${model.config.margin.left} ${model.config.margin.top}`);
+    });
+
+    it('draws a Today marker in the body only when the date is within range', () => {
+      expect(renderBodySvg(model, { nowDate: '2025-02-01' })).toContain('class="today-line"');
+      expect(renderBodySvg(model, { nowDate: '2030-01-01' })).not.toContain('class="today-line"');
+      expect(renderBodySvg(model)).not.toContain('class="today-line"');
     });
   });
 
@@ -229,11 +243,42 @@ describe('export.service', () => {
       { branchId: 'main', label: 'Main', items: SAMPLE_ITEMS },
     ];
 
-    it('wraps each branch in a frozen-gutter frame', () => {
+    it('wraps each branch in a frozen-pane grid (corner/axis/labels/body)', () => {
       const html = generateTimelineArtifact(branches, { activeBranchId: 'main' });
-      expect(html).toContain('class="timeline-frame"');
-      expect(html).toContain('class="lane-gutter"');
-      expect(html).toContain('class="timeline-scroll"');
+      expect(html).toContain('class="timeline-viewport"');
+      expect(html).toContain('class="timeline-grid"');
+      expect(html).toContain('class="corner"');
+      expect(html).toContain('class="axis-col"');
+      expect(html).toContain('class="labels-col"');
+      expect(html).toContain('class="body-col"');
+    });
+
+    it('bakes multiple zoom levels with a zoom switcher and dynamic meta', () => {
+      const html = generateTimelineArtifact(branches, {
+        activeBranchId: 'main',
+        zoomLevel: 'month',
+        zoomLevels: ['week', 'month', 'quarter'],
+      });
+      expect(html).toContain('class="zoom-switcher"');
+      expect(html).toContain('data-zoom="week"');
+      expect(html).toContain('data-zoom="quarter"');
+      expect(html).toContain('id="meta-zoom"');
+      expect(html).toContain("querySelectorAll('.zoom-pane')");
+      // The active zoom button is pressed.
+      const monthBtn = html
+        .split('\n')
+        .find((l) => l.includes('data-zoom="month"') && l.includes('zoom-btn'));
+      expect(monthBtn).toContain('aria-pressed="true"');
+    });
+
+    it('omits the zoom switcher when only one zoom level is baked', () => {
+      const html = generateTimelineArtifact(branches, {
+        activeBranchId: 'main',
+        zoomLevel: 'month',
+        zoomLevels: ['month'],
+      });
+      expect(html).not.toContain('class="zoom-switcher"');
+      expect(html).not.toContain("querySelectorAll('.zoom-pane')");
     });
 
     it('produces a self-contained HTML document with inlined svg and data', () => {

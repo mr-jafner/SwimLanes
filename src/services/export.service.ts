@@ -414,8 +414,9 @@ function emptySvg(width: number, height: number): string {
 
 /**
  * Renders the full timeline model to a single self-contained SVG (chart + lane
- * labels together). Used standalone; the artifact uses {@link renderChartSvg} +
- * {@link renderGutterSvg} for a frozen label column.
+ * labels + axis together). Used standalone; the artifact uses the four quadrant
+ * panes ({@link renderCornerSvg}, {@link renderAxisSvg}, {@link renderLabelsSvg},
+ * {@link renderBodySvg}) so both the labels and the axis stay frozen.
  *
  * @param model - Render model from {@link buildRenderModel}
  * @param options - Optional render options (e.g. today marker)
@@ -436,48 +437,82 @@ export function renderSvg(model: ExportRenderModel, options: RenderSvgOptions = 
   ]);
 }
 
-/**
- * Renders the scrollable chart (everything except the left lane-label column).
- * The viewBox crops the left margin so x=0 begins at the chart area, letting a
- * separate frozen gutter ({@link renderGutterSvg}) sit to its left.
- */
-export function renderChartSvg(model: ExportRenderModel, options: RenderSvgOptions = {}): string {
-  const { svgWidth, svgHeight, laneGroups, dateRange, config } = model;
-  const chartWidth = Math.max(svgWidth - config.margin.left, 1);
-  if (laneGroups.length === 0 || !dateRange.minDate) return emptySvg(chartWidth, svgHeight);
+/** Chart content width (timeline area, excluding the left label margin). */
+function chartContentWidth(model: ExportRenderModel): number {
+  return Math.max(model.svgWidth - model.config.margin.left, 1);
+}
 
-  const { laneTops, positioned, posMap } = computeLayout(model);
-  const viewBox = `${config.margin.left} 0 ${chartWidth} ${svgHeight}`;
-  return svgWrap(chartWidth, svgHeight, viewBox, [
-    depArrowDefs(),
-    ...emitBackgrounds(model, laneTops, svgWidth),
-    ...emitTodayMarker(model, options.nowDate),
-    ...emitArrows(positioned, posMap),
-    ...emitItems(positioned),
-    ...emitAxis(model, svgWidth),
+/** Body height (timeline rows, excluding the top axis margin). */
+function bodyHeight(model: ExportRenderModel): number {
+  return Math.max(model.svgHeight - model.config.margin.top, 1);
+}
+
+/**
+ * Top-left corner pane (frozen on both axes). Zoom-independent: just the corner
+ * fill and a "Lanes" caption aligned with the axis.
+ */
+export function renderCornerSvg(model: ExportRenderModel): string {
+  const { config } = model;
+  const w = config.margin.left;
+  const h = config.margin.top;
+  return svgWrap(w, h, `0 0 ${w} ${h}`, [
+    `<rect class="axis-strip" x="0" y="0" width="${w}" height="${h}"/>`,
+    `<text class="lane-corner" x="10" y="${h - 16}" font-size="11">Lanes</text>`,
   ]);
 }
 
 /**
- * Renders the frozen left gutter: alternating lane backgrounds, the top-left
- * corner, and the lane labels. Stays fixed while the chart scrolls.
+ * Time-axis pane (frozen vertically, scrolls horizontally with the body).
+ * viewBox crops to the top strip, right of the label margin.
  */
-export function renderGutterSvg(model: ExportRenderModel): string {
-  const { svgHeight, laneGroups, dateRange, config } = model;
-  const width = config.margin.left;
+export function renderAxisSvg(model: ExportRenderModel): string {
+  const { laneGroups, dateRange, config } = model;
+  const w = chartContentWidth(model);
+  const h = config.margin.top;
   if (laneGroups.length === 0 || !dateRange.minDate) {
-    return svgWrap(width, svgHeight, `0 0 ${width} ${svgHeight}`, [
-      `<rect class="axis-strip" x="0" y="0" width="${width}" height="${svgHeight}"/>`,
+    return svgWrap(w, h, `${config.margin.left} 0 ${w} ${h}`, [
+      `<rect class="axis-strip" x="${config.margin.left}" y="0" width="${w}" height="${h}"/>`,
     ]);
   }
+  return svgWrap(w, h, `${config.margin.left} 0 ${w} ${h}`, emitAxis(model, model.svgWidth));
+}
 
+/**
+ * Lane-labels pane (frozen horizontally, scrolls vertically with the body).
+ * Zoom-independent. viewBox crops to the left margin, below the axis.
+ */
+export function renderLabelsSvg(model: ExportRenderModel): string {
+  const { laneGroups, dateRange, config } = model;
+  const w = config.margin.left;
+  const h = bodyHeight(model);
+  if (laneGroups.length === 0 || !dateRange.minDate) {
+    return svgWrap(w, h, `0 ${config.margin.top} ${w} ${h}`, []);
+  }
   const { laneTops } = computeLayout(model);
-  return svgWrap(width, svgHeight, `0 0 ${width} ${svgHeight}`, [
-    ...emitBackgrounds(model, laneTops, width),
+  return svgWrap(w, h, `0 ${config.margin.top} ${w} ${h}`, [
+    ...emitBackgrounds(model, laneTops, w),
     ...emitLaneLabels(model, laneTops),
-    // Top-left corner over the lane backgrounds, aligned with the time axis.
-    `<rect class="axis-strip" x="0" y="0" width="${width}" height="${config.margin.top}"/>`,
-    `<text class="lane-corner" x="10" y="${config.margin.top - 16}" font-size="11">Lanes</text>`,
+  ]);
+}
+
+/**
+ * Body pane: lane backgrounds, dependency arrows, items, and the Today marker.
+ * Scrolls on both axes. viewBox crops out the label margin and axis strip.
+ */
+export function renderBodySvg(model: ExportRenderModel, options: RenderSvgOptions = {}): string {
+  const { laneGroups, dateRange, config } = model;
+  const w = chartContentWidth(model);
+  const h = bodyHeight(model);
+  if (laneGroups.length === 0 || !dateRange.minDate) return emptySvg(w, h);
+
+  const { laneTops, positioned, posMap } = computeLayout(model);
+  const viewBox = `${config.margin.left} ${config.margin.top} ${w} ${h}`;
+  return svgWrap(w, h, viewBox, [
+    depArrowDefs(),
+    ...emitBackgrounds(model, laneTops, model.svgWidth),
+    ...emitTodayMarker(model, options.nowDate),
+    ...emitArrows(positioned, posMap),
+    ...emitItems(positioned),
   ]);
 }
 
@@ -500,8 +535,77 @@ interface RenderedBranch {
   branchId: string;
   label: string;
   itemCount: number;
-  gutterSvg: string;
-  chartSvg: string;
+  /** Frozen-corner pane (zoom-independent). */
+  cornerSvg: string;
+  /** Frozen lane-labels pane (zoom-independent). */
+  labelsSvg: string;
+  /** Per-zoom axis + body panes. */
+  charts: { zoom: ZoomLevel; axisSvg: string; bodySvg: string }[];
+}
+
+const ZOOM_LABELS: Record<ZoomLevel, string> = {
+  day: 'Day',
+  week: 'Week',
+  month: 'Month',
+  quarter: 'Quarter',
+  year: 'Year',
+};
+
+/** Default zoom levels baked into the artifact (day excluded to limit size). */
+const DEFAULT_ZOOM_LEVELS: ZoomLevel[] = ['week', 'month', 'quarter', 'year'];
+
+/** Orders/dedupes requested zoom levels into the canonical day→year order. */
+function resolveZoomLevels(requested: ZoomLevel[], active: ZoomLevel): ZoomLevel[] {
+  const order: ZoomLevel[] = ['day', 'week', 'month', 'quarter', 'year'];
+  const wanted = new Set<ZoomLevel>([...requested, active]);
+  return order.filter((z) => wanted.has(z));
+}
+
+/**
+ * Builds the zoom switcher markup (one button per baked zoom level). Returns an
+ * empty string when only one zoom is baked.
+ */
+function renderZoomSwitcher(zoomLevels: ZoomLevel[], activeZoom: ZoomLevel): string {
+  if (zoomLevels.length <= 1) return '';
+  const buttons = zoomLevels
+    .map((z) => {
+      const on = z === activeZoom;
+      return (
+        `<button type="button" class="zoom-btn${on ? ' active' : ''}" data-zoom="${z}" ` +
+        `aria-pressed="${on ? 'true' : 'false'}">${ZOOM_LABELS[z]}</button>`
+      );
+    })
+    .join('\n    ');
+  return `<div class="zoom-switcher" role="group" aria-label="Zoom">
+    <span class="switcher-label">Zoom:</span>
+    ${buttons}
+  </div>`;
+}
+
+/**
+ * Runtime script that switches which zoom's panes are visible across all branch
+ * views and keeps the header in sync. Only emitted when >1 zoom is baked.
+ */
+function renderZoomScript(): string {
+  return `<script>
+(function () {
+  var panes = document.querySelectorAll('.zoom-pane');
+  var btns = document.querySelectorAll('.zoom-btn');
+  var metaZoom = document.getElementById('meta-zoom');
+  function activate(zoom) {
+    panes.forEach(function (p) { p.hidden = p.getAttribute('data-zoom') !== zoom; });
+    btns.forEach(function (b) {
+      var on = b.getAttribute('data-zoom') === zoom;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    if (metaZoom) metaZoom.textContent = zoom;
+  }
+  btns.forEach(function (b) {
+    b.addEventListener('click', function () { activate(b.getAttribute('data-zoom')); });
+  });
+})();
+</script>`;
 }
 
 /**
@@ -602,6 +706,7 @@ export function generateTimelineArtifact(
   const laneGroupBy = options.laneGroupBy ?? DEFAULT_GROUP_BY;
   const filters = options.filters ?? {};
   const generatedAt = options.generatedAt ?? new Date();
+  const zoomLevels = resolveZoomLevels(options.zoomLevels ?? DEFAULT_ZOOM_LEVELS, zoomLevel);
 
   const active = branches.find((b) => b.branchId === options.activeBranchId);
   if (!active) {
@@ -614,29 +719,47 @@ export function generateTimelineArtifact(
   // "Today" marker date (the generation date), drawn if within a branch's range.
   const nowDate = generatedAt.toISOString().split('T')[0];
 
-  // Filter + render every branch (active shown initially, the rest hidden).
+  // Filter + render every branch at every baked zoom level. Lane structure is
+  // zoom-independent, so corner/labels are rendered once (from the active zoom).
   const rendered: RenderedBranch[] = branches.map((b) => {
     const items = filterItems(b.items, filters);
-    const model = buildRenderModel(items, zoomLevel, laneGroupBy);
+    const baseModel = buildRenderModel(items, zoomLevel, laneGroupBy);
     return {
       branchId: b.branchId,
       label: b.label || b.branchId,
       itemCount: items.length,
-      gutterSvg: renderGutterSvg(model),
-      chartSvg: renderChartSvg(model, { nowDate }),
+      cornerSvg: renderCornerSvg(baseModel),
+      labelsSvg: renderLabelsSvg(baseModel),
+      charts: zoomLevels.map((zoom) => {
+        const model = buildRenderModel(items, zoom, laneGroupBy);
+        return { zoom, axisSvg: renderAxisSvg(model), bodySvg: renderBodySvg(model, { nowDate }) };
+      }),
     };
   });
 
   const activeBranchId = options.activeBranchId;
   const activeRendered = rendered.find((r) => r.branchId === activeBranchId)!;
 
+  const zoomPane = (zoom: ZoomLevel, cls: string, svg: string): string => {
+    const hidden = zoom === zoomLevel ? '' : ' hidden';
+    return `<div class="zoom-pane ${cls}" data-zoom="${zoom}"${hidden}>${svg}</div>`;
+  };
+
   const branchViews = rendered
     .map((r) => {
       const hidden = r.branchId === activeBranchId ? '' : ' hidden';
+      const axisPanes = r.charts.map((c) => zoomPane(c.zoom, 'axis-pane', c.axisSvg)).join('');
+      const bodyPanes = r.charts.map((c) => zoomPane(c.zoom, 'body-pane', c.bodySvg)).join('');
       return `<section class="branch-view" data-branch-id="${escapeXml(r.branchId)}"${hidden}>
   <div class="timeline-frame">
-    <div class="lane-gutter">${r.gutterSvg}</div>
-    <div class="timeline-scroll">${r.chartSvg}</div>
+    <div class="timeline-viewport">
+      <div class="timeline-grid">
+        <div class="corner">${r.cornerSvg}</div>
+        <div class="axis-col">${axisPanes}</div>
+        <div class="labels-col">${r.labelsSvg}</div>
+        <div class="body-col">${bodyPanes}</div>
+      </div>
+    </div>
   </div>
 </section>`;
     })
@@ -644,6 +767,8 @@ export function generateTimelineArtifact(
 
   const switcher = renderSwitcher(rendered, activeBranchId);
   const switcherScript = rendered.length > 1 ? renderSwitcherScript() : '';
+  const zoomSwitcher = renderZoomSwitcher(zoomLevels, zoomLevel);
+  const zoomScript = zoomLevels.length > 1 ? renderZoomScript() : '';
 
   // Build the N-branch payload (each branch's items pre-filtered).
   const payload: ExportPayload = {
@@ -740,20 +865,39 @@ export function generateTimelineArtifact(
     font-size: 11px; text-align: center; border-radius: 9px; background: var(--count-bg);
   }
   .scenario-btn.active .count { background: rgba(255, 255, 255, 0.25); }
-  .branch-view[hidden] { display: none; }
-  /* Frozen lane-label gutter + scrollable chart */
-  .timeline-frame {
-    display: flex; align-items: flex-start; margin: 16px 20px 40px;
-    border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
-    background: var(--svg-bg);
+  /* Zoom switcher reuses the scenario button styles */
+  .zoom-switcher {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    padding: 10px 20px; background: var(--panel); border-bottom: 1px solid var(--border);
   }
-  .lane-gutter { flex: 0 0 auto; border-right: 1px solid var(--border); }
-  .timeline-scroll { flex: 1 1 auto; min-width: 0; overflow-x: auto; overflow-y: hidden; }
-  .lane-gutter svg, .timeline-scroll svg { display: block; }
+  .zoom-switcher .switcher-label {
+    font-size: 12px; font-weight: 600; color: var(--muted); margin-right: 4px;
+  }
+  .zoom-btn {
+    font: inherit; font-size: 13px; padding: 6px 12px; border: 1px solid var(--btn-border);
+    border-radius: 6px; background: var(--btn-bg); color: var(--btn-text); cursor: pointer;
+  }
+  .zoom-btn:hover { background: var(--btn-hover); }
+  .zoom-btn.active { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+  .branch-view[hidden] { display: none; }
+  /* Frozen-pane timeline: corner + axis (top) + labels (left) + body */
+  .timeline-frame {
+    margin: 16px 20px 40px; border: 1px solid var(--border); border-radius: 8px;
+    overflow: hidden; background: var(--svg-bg);
+  }
+  .timeline-viewport { overflow: auto; max-height: 72vh; }
+  .timeline-grid { display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto; width: max-content; }
+  .timeline-grid > div { background: var(--svg-bg); }
+  .corner { position: sticky; top: 0; left: 0; z-index: 4; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .axis-col { position: sticky; top: 0; z-index: 3; border-bottom: 1px solid var(--border); }
+  .labels-col { position: sticky; left: 0; z-index: 2; border-right: 1px solid var(--border); }
+  .body-col { z-index: 1; }
+  .timeline-grid svg { display: block; }
+  .zoom-pane[hidden] { display: none; }
   .lane-corner { fill: var(--muted); font-weight: 600; }
   .today-line { stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 4 3; opacity: 0.85; }
   .today-label { fill: var(--accent); font-weight: 600; }
-  .timeline-scroll g:hover rect, .timeline-scroll g:hover polygon { opacity: 1; }
+  .body-col g:hover rect, .body-col g:hover polygon { opacity: 1; }
   /* Theme-able SVG chrome */
   .lane-bg-even { fill: var(--lane-even); }
   .lane-bg-odd { fill: var(--lane-odd); }
@@ -770,8 +914,9 @@ export function generateTimelineArtifact(
   @media print {
     body { background: #ffffff; }
     .no-print { display: none !important; }
-    .timeline-frame { overflow: visible; max-width: none; }
-    .timeline-scroll { overflow: visible; }
+    .timeline-frame { overflow: visible; }
+    .timeline-viewport { overflow: visible; max-height: none; }
+    .corner, .axis-col, .labels-col { position: static; }
     @page { size: landscape; margin: 1cm; }
   }
 </style>
@@ -783,7 +928,7 @@ export function generateTimelineArtifact(
     <div class="meta">
       <span>Branch: <strong id="meta-branch">${escapeXml(activeLabel)}</strong></span>
       <span>Items: <strong id="meta-items">${itemCount}</strong></span>
-      <span>Zoom: ${escapeXml(zoomLevel)}</span>
+      <span>Zoom: <strong id="meta-zoom">${escapeXml(zoomLevel)}</strong></span>
       <span>Grouped by: ${escapeXml(laneGroupBy)}</span>
       <span>Filters: ${escapeXml(filterSummary)}</span>
       <span>Generated: ${escapeXml(generatedDisplay)}</span>
@@ -800,6 +945,7 @@ export function generateTimelineArtifact(
   </button>
 </header>
 ${switcher}
+${zoomSwitcher}
 <main>
 ${branchViews}
 </main>
@@ -809,6 +955,7 @@ ${payloadJson}
 </script>
 ${renderThemeScript()}
 ${switcherScript}
+${zoomScript}
 </body>
 </html>`;
 }

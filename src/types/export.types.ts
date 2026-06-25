@@ -60,8 +60,14 @@ export interface ExportOptions {
   /** Branch rendered as the active/visible timeline */
   activeBranchId: string;
 
-  /** Zoom level used for layout (defaults to 'month') */
+  /** Initial/active zoom level used for layout (defaults to 'month') */
   zoomLevel?: ZoomLevel;
+
+  /**
+   * Zoom levels to bake in so the reader can switch zoom inside the artifact.
+   * The active `zoomLevel` is always included. Defaults to a sensible set.
+   */
+  zoomLevels?: ZoomLevel[];
 
   /** How to group items into swim lanes (defaults to 'lane') */
   laneGroupBy?: LaneGroupBy;
