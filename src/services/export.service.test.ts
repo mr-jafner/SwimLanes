@@ -236,6 +236,29 @@ describe('export.service', () => {
       expect(renderBodySvg(model, { nowDate: '2030-01-01' })).not.toContain('class="today-line"');
       expect(renderBodySvg(model)).not.toContain('class="today-line"');
     });
+
+    it('shades alternating period bands at month zoom and weekends at day zoom', () => {
+      // Jan–Mar spans >1 month, so an alternating month band is drawn.
+      expect(renderBodySvg(model, { zoom: 'month' })).toContain('class="period-band"');
+      // A multi-quarter range yields an alternating quarter band.
+      const wide = buildRenderModel(
+        [makeItem({ id: 'w', lane: 'A', start_date: '2025-01-01', end_date: '2025-09-30' })],
+        'quarter',
+        'lane'
+      );
+      expect(renderBodySvg(wide, { zoom: 'quarter' })).toContain('class="period-band"');
+      const dayModel = buildRenderModel(SAMPLE_ITEMS, 'day', 'lane');
+      expect(renderBodySvg(dayModel, { zoom: 'day' })).toContain('class="weekend-band"');
+      // No zoom -> no bands
+      expect(renderBodySvg(model)).not.toContain('period-band');
+    });
+
+    it('shows a per-lane item count badge in the labels pane', () => {
+      const labels = renderLabelsSvg(model);
+      expect(labels).toContain('class="lane-count"');
+      // SAMPLE_ITEMS: Backend lane has 1 item (API work); count text present.
+      expect(labels).toMatch(/class="lane-count"[^>]*>\d+<\/text>/);
+    });
   });
 
   describe('generateTimelineArtifact', () => {

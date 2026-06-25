@@ -208,6 +208,9 @@ interface PositionedItem {
 export interface RenderSvgOptions {
   /** If set (ISO YYYY-MM-DD) and within range, draws a "Today" marker line. */
   nowDate?: string;
+
+  /** Zoom level, used to choose period-shading bands (weekends vs month/quarter/year). */
+  zoom?: ZoomLevel;
 }
 
 /** Computes lane tops and positioned items for a model. */
@@ -345,6 +348,99 @@ function dateToX(model: ExportRenderModel, isoDate: string): number | null {
   return config.margin.left + (ms / dateRange.timeRange) * chartWidth;
 }
 
+/** Maps a timestamp to an x position, clamped to the chart bounds. */
+function xForMs(model: ExportRenderModel, ms: number): number {
+  const { config, dateRange } = model;
+  const chartW = config.canvasWidth - config.margin.left - config.margin.right;
+  const start = new Date(dateRange.minDate as string).getTime();
+  const x =
+    config.margin.left + (dateRange.timeRange ? (ms - start) / dateRange.timeRange : 0) * chartW;
+  return Math.max(config.margin.left, Math.min(config.margin.left + chartW, x));
+}
+
+/** The calendar period to alternate-shade for a given zoom (null = weekends). */
+type BandKind = 'month' | 'quarter' | 'year';
+function bandKindForZoom(zoom: ZoomLevel): BandKind | null {
+  switch (zoom) {
+    case 'day':
+      return null; // weekend shading instead
+    case 'week':
+    case 'month':
+      return 'month';
+    case 'quarter':
+      return 'quarter';
+    case 'year':
+      return 'year';
+  }
+}
+
+/** Computes period start timestamps (UTC) spanning the range, plus a trailing sentinel. */
+function periodStarts(minMs: number, maxMs: number, kind: BandKind): number[] {
+  const d = new Date(minMs);
+  const y = d.getUTCFullYear();
+  let m = d.getUTCMonth();
+  if (kind === 'quarter') m = Math.floor(m / 3) * 3;
+  if (kind === 'year') m = 0;
+  const step = (cur: number): number => {
+    const c = new Date(cur);
+    const cy = c.getUTCFullYear();
+    const cm = c.getUTCMonth();
+    if (kind === 'month') return Date.UTC(cy, cm + 1, 1);
+    if (kind === 'quarter') return Date.UTC(cy, cm + 3, 1);
+    return Date.UTC(cy + 1, 0, 1);
+  };
+  const starts: number[] = [];
+  let cur = Date.UTC(y, m, 1);
+  while (cur <= maxMs) {
+    starts.push(cur);
+    cur = step(cur);
+  }
+  starts.push(cur); // trailing sentinel so the last band has an end
+  return starts;
+}
+
+/**
+ * Emits faint vertical period-shading bands behind the chart to aid reading
+ * dates after scrolling. Weekends at day zoom; alternating months/quarters/years
+ * otherwise. Drawn over lane backgrounds (semi-transparent) and under items.
+ */
+function emitPeriodBands(model: ExportRenderModel, zoom: ZoomLevel | undefined): string[] {
+  if (!zoom) return [];
+  const { dateRange, config, svgHeight } = model;
+  if (!dateRange.minDate || !dateRange.maxDate || dateRange.timeRange <= 0) return [];
+
+  const top = config.margin.top;
+  const h = svgHeight - top;
+  const minMs = new Date(dateRange.minDate).getTime();
+  const maxMs = new Date(dateRange.maxDate).getTime();
+  const out: string[] = [];
+  const band = (x0: number, x1: number, cls: string): void => {
+    const w = x1 - x0;
+    if (w > 0.5) out.push(`<rect class="${cls}" x="${x0}" y="${top}" width="${w}" height="${h}"/>`);
+  };
+
+  const kind = bandKindForZoom(zoom);
+  if (kind === null) {
+    // Weekend shading (Sat/Sun) at day zoom.
+    const dayMs = 86400000;
+    const d0 = new Date(minMs);
+    let cur = Date.UTC(d0.getUTCFullYear(), d0.getUTCMonth(), d0.getUTCDate());
+    while (cur <= maxMs) {
+      const dow = new Date(cur).getUTCDay();
+      if (dow === 0 || dow === 6)
+        band(xForMs(model, cur), xForMs(model, cur + dayMs), 'weekend-band');
+      cur += dayMs;
+    }
+    return out;
+  }
+
+  const starts = periodStarts(minMs, maxMs, kind);
+  for (let i = 0; i + 1 < starts.length; i++) {
+    if (i % 2 === 1) band(xForMs(model, starts[i]!), xForMs(model, starts[i + 1]!), 'period-band');
+  }
+  return out;
+}
+
 /** Emits a "Today" marker line if nowDate falls within the timeline range. */
 function emitTodayMarker(model: ExportRenderModel, nowDate: string | undefined): string[] {
   if (!nowDate) return [];
@@ -384,11 +480,16 @@ function emitLaneLabels(model: ExportRenderModel, laneTops: number[]): string[] 
     out.push(
       `<rect class="lane-strip" x="0" y="${top}" width="${marginLeft}" height="${lane.height}"/>`
     );
-    const labelText = truncateToWidth(lane.laneName, marginLeft - 20, 7.5);
+    // Leave room on the right for the item-count badge.
+    const labelText = truncateToWidth(lane.laneName, marginLeft - 44, 7.5);
     out.push(
       `<text class="lane-label" x="10" y="${centerY}" dominant-baseline="middle" font-size="14" ` +
         `font-weight="bold"><title>${escapeXml(lane.laneName)}</title>` +
         `${escapeXml(labelText)}</text>`
+    );
+    out.push(
+      `<text class="lane-count" x="${marginLeft - 10}" y="${centerY}" text-anchor="end" ` +
+        `dominant-baseline="middle" font-size="11">${lane.items.length}</text>`
     );
   });
   return out;
@@ -429,6 +530,7 @@ export function renderSvg(model: ExportRenderModel, options: RenderSvgOptions = 
   return svgWrap(svgWidth, svgHeight, `0 0 ${svgWidth} ${svgHeight}`, [
     depArrowDefs(),
     ...emitBackgrounds(model, laneTops, svgWidth),
+    ...emitPeriodBands(model, options.zoom),
     ...emitTodayMarker(model, options.nowDate),
     ...emitArrows(positioned, posMap),
     ...emitItems(positioned),
@@ -510,6 +612,7 @@ export function renderBodySvg(model: ExportRenderModel, options: RenderSvgOption
   return svgWrap(w, h, viewBox, [
     depArrowDefs(),
     ...emitBackgrounds(model, laneTops, model.svgWidth),
+    ...emitPeriodBands(model, options.zoom),
     ...emitTodayMarker(model, options.nowDate),
     ...emitArrows(positioned, posMap),
     ...emitItems(positioned),
@@ -732,7 +835,11 @@ export function generateTimelineArtifact(
       labelsSvg: renderLabelsSvg(baseModel),
       charts: zoomLevels.map((zoom) => {
         const model = buildRenderModel(items, zoom, laneGroupBy);
-        return { zoom, axisSvg: renderAxisSvg(model), bodySvg: renderBodySvg(model, { nowDate }) };
+        return {
+          zoom,
+          axisSvg: renderAxisSvg(model),
+          bodySvg: renderBodySvg(model, { nowDate, zoom }),
+        };
       }),
     };
   });
@@ -809,6 +916,7 @@ export function generateTimelineArtifact(
     --lane-even: #e5e7eb; --lane-odd: #ffffff; --strip: #ffffff;
     --axis: #333333; --tick-minor: #999999; --milestone-label: #374151;
     --count-bg: rgba(0,0,0,0.08);
+    --band: rgba(15,23,42,0.045); --weekend: rgba(15,23,42,0.07);
   }
   :root[data-theme="dark"] {
     color-scheme: dark;
@@ -820,6 +928,7 @@ export function generateTimelineArtifact(
     --lane-even: #1e293b; --lane-odd: #0f172a; --strip: #111827;
     --axis: #cbd5e1; --tick-minor: #64748b; --milestone-label: #e5e7eb;
     --count-bg: rgba(255,255,255,0.18);
+    --band: rgba(148,163,184,0.10); --weekend: rgba(148,163,184,0.16);
   }
   * { box-sizing: border-box; }
   body {
@@ -895,6 +1004,9 @@ export function generateTimelineArtifact(
   .timeline-grid svg { display: block; }
   .zoom-pane[hidden] { display: none; }
   .lane-corner { fill: var(--muted); font-weight: 600; }
+  .lane-count { fill: var(--muted); }
+  .period-band { fill: var(--band); }
+  .weekend-band { fill: var(--weekend); }
   .today-line { stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 4 3; opacity: 0.85; }
   .today-label { fill: var(--accent); font-weight: 600; }
   .body-col g:hover rect, .body-col g:hover polygon { opacity: 1; }
