@@ -54,6 +54,16 @@ export type {
   TimelineInteraction,
 } from './timeline.types';
 
+// HTML artifact export types
+export type {
+  ExportFilters,
+  ExportBranchInput,
+  ExportOptions,
+  ExportRenderModel,
+  ExportPayload,
+  ExportPayloadBranch,
+} from './export.types';
+
 // Branch comparison types
 export type {
   ComparisonStatus,
