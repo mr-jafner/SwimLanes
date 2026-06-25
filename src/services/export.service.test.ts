@@ -8,6 +8,7 @@ import {
   buildRenderModel,
   renderSvg,
   escapeXml,
+  parseDependencies,
   generateTimelineArtifact,
   EXPORT_FORMAT_VERSION,
 } from './export.service';
@@ -98,6 +99,23 @@ describe('export.service', () => {
     });
   });
 
+  describe('parseDependencies', () => {
+    it('parses a JSON array of ids', () => {
+      expect(parseDependencies('["a","b"]')).toEqual(['a', 'b']);
+    });
+
+    it('returns [] for null, empty, or invalid JSON', () => {
+      expect(parseDependencies(null)).toEqual([]);
+      expect(parseDependencies('')).toEqual([]);
+      expect(parseDependencies('not json')).toEqual([]);
+      expect(parseDependencies('{"a":1}')).toEqual([]);
+    });
+
+    it('drops non-string entries', () => {
+      expect(parseDependencies('["a",1,null,"b"]')).toEqual(['a', 'b']);
+    });
+  });
+
   describe('buildRenderModel', () => {
     it('computes lane groups, date range, and positive SVG dimensions', () => {
       const model = buildRenderModel(SAMPLE_ITEMS, 'month', 'lane');
@@ -141,6 +159,29 @@ describe('export.service', () => {
       const model = buildRenderModel([], 'month', 'lane');
       const svg = renderSvg(model);
       expect(svg).toContain('No dated items to display');
+    });
+
+    it('draws a dependency arrow when an item depends on another visible item', () => {
+      const items = [
+        makeItem({ id: 'a', title: 'First', start_date: '2025-01-01', end_date: '2025-01-15' }),
+        makeItem({
+          id: 'b',
+          title: 'Second',
+          start_date: '2025-01-20',
+          end_date: '2025-02-01',
+          dependencies: '["a"]',
+        }),
+      ];
+      const svg = renderSvg(buildRenderModel(items, 'month', 'lane'));
+      expect(svg).toContain('class="dep-arrow"');
+      expect(svg).toContain('marker-end="url(#dep-arrowhead)"');
+      expect(svg).toContain('id="dep-arrowhead"');
+    });
+
+    it('does not draw an arrow when the dependency is not present', () => {
+      const items = [makeItem({ id: 'b', title: 'Second', dependencies: '["missing"]' })];
+      const svg = renderSvg(buildRenderModel(items, 'month', 'lane'));
+      expect(svg).not.toContain('class="dep-arrow"');
     });
 
     it('escapes item titles to prevent markup injection', () => {
@@ -218,10 +259,11 @@ describe('export.service', () => {
 
     it('renders a single branch without a switcher or switcher script', () => {
       const html = generateTimelineArtifact(branches, { activeBranchId: 'main' });
-      // No switcher markup or buttons (the .scenario-* CSS rules are always present).
+      // No switcher markup, buttons, or switcher script (the .scenario-* CSS
+      // rules and the theme script are always present, so target specifics).
       expect(html).not.toContain('<div class="scenario-switcher"');
       expect(html).not.toContain('class="scenario-btn');
-      expect(html).not.toContain('addEventListener');
+      expect(html).not.toContain("querySelectorAll('.scenario-btn')");
       // Exactly one branch view, shown (not hidden)
       const views = html.match(/<section class="branch-view"/g) ?? [];
       expect(views).toHaveLength(1);
@@ -231,6 +273,15 @@ describe('export.service', () => {
       expect(() =>
         generateTimelineArtifact(branches, { activeBranchId: 'does-not-exist' })
       ).toThrow(/not found/);
+    });
+
+    it('includes a theme toggle, theme script, and print styles', () => {
+      const html = generateTimelineArtifact(branches, { activeBranchId: 'main' });
+      expect(html).toContain('id="theme-toggle"');
+      expect(html).toContain("setAttribute('data-theme'");
+      expect(html).toContain('prefers-color-scheme: dark');
+      expect(html).toContain('@media print');
+      expect(html).toContain('data-theme="dark"'); // dark theme CSS block
     });
 
     it('uses the branch label and generation time in the header', () => {

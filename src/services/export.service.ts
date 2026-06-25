@@ -167,6 +167,17 @@ function truncateToWidth(text: string, maxPx: number, pxPerChar: number): string
 // SVG rendering
 // ---------------------------------------------------------------------------
 
+/** Parses an item's `dependencies` field (a JSON array of item ids). */
+export function parseDependencies(raw: string | null | undefined): string[] {
+  if (!raw) return [];
+  try {
+    const value = JSON.parse(raw);
+    return Array.isArray(value) ? value.filter((x): x is string => typeof x === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
 /** Builds the multi-line hover tooltip text for an item (one item per `<title>`). */
 function itemTooltip(item: Item): string {
   const lines: string[] = [`${item.title} (${item.type})`];
@@ -179,12 +190,31 @@ function itemTooltip(item: Item): string {
   return escapeXml(lines.join('\n'));
 }
 
+/** Geometry of a positioned item, used for arrows and rendering. */
+interface PositionedItem {
+  item: Item;
+  isMilestone: boolean;
+  startX: number;
+  endX: number;
+  centerY: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  color: string;
+}
+
 /**
  * Renders the timeline render model to an SVG string.
  *
  * Visual encoding matches the app: tasks=blue, milestones=green diamonds,
  * releases=orange, meetings=purple. Lanes alternate background shades, with
- * fixed lane labels on the left and a time axis across the top.
+ * fixed lane labels on the left and a time axis across the top. Dependency
+ * arrows connect items whose `dependencies` reference another visible item.
+ *
+ * Theme-able chrome (backgrounds, axis, labels) is emitted with CSS classes so
+ * the surrounding document can recolor it for light/dark; item/brand colors
+ * stay inline. See {@link generateTimelineArtifact} for the class definitions.
  *
  * @param model - Render model from {@link buildRenderModel}
  * @returns Standalone `<svg>...</svg>` markup
@@ -202,26 +232,35 @@ export function renderSvg(model: ExportRenderModel): string {
   // Empty state
   if (laneGroups.length === 0 || !dateRange.minDate) {
     parts.push(
-      `<text x="${svgWidth / 2}" y="${svgHeight / 2}" text-anchor="middle" ` +
-        `font-size="16" fill="#6b7280">No dated items to display</text>`
+      `<text class="empty-msg" x="${svgWidth / 2}" y="${svgHeight / 2}" text-anchor="middle" ` +
+        `font-size="16">No dated items to display</text>`
     );
     parts.push('</svg>');
     return parts.join('\n');
   }
+
+  // Arrowhead marker for dependency connectors.
+  parts.push(
+    `<defs><marker id="dep-arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="4" ` +
+      `orient="auto" markerUnits="userSpaceOnUse">` +
+      `<path d="M0,0 L8,4 L0,8 z" fill="#6b7280"/></marker></defs>`
+  );
 
   // --- Layer 1: lane backgrounds (alternating shades) ---
   let cumulativeY = margin.top;
   const laneTops: number[] = [];
   laneGroups.forEach((lane, index) => {
     laneTops.push(cumulativeY);
-    const fill = index % 2 === 0 ? '#e5e7eb' : '#ffffff';
+    const cls = index % 2 === 0 ? 'lane-bg-even' : 'lane-bg-odd';
     parts.push(
-      `<rect x="0" y="${cumulativeY}" width="${svgWidth}" height="${lane.height}" fill="${fill}"/>`
+      `<rect class="${cls}" x="0" y="${cumulativeY}" width="${svgWidth}" height="${lane.height}"/>`
     );
     cumulativeY += lane.height;
   });
 
-  // --- Layer 2: items ---
+  // --- Pass: compute positions for every item (for arrows + drawing) ---
+  const positioned: PositionedItem[] = [];
+  const posMap = new Map<string, PositionedItem>();
   laneGroups.forEach((lane, laneIndex) => {
     const laneTop = laneTops[laneIndex] ?? margin.top;
     const rowMap = assignItemRows(lane.items);
@@ -233,73 +272,107 @@ export function renderSvg(model: ExportRenderModel): string {
       const rowIndex = rowMap.get(item.id) ?? 0;
       const itemY =
         laneTop + config.itemPadding + rowIndex * (config.itemHeight + config.itemPadding);
-      const color = DEFAULT_ITEM_COLORS[item.type];
-      const tooltip = itemTooltip(item);
+      const isMilestone = item.type === 'milestone';
+      const centerY = itemY + pos.height / 2;
+      const r = pos.height / 2;
+      const cx = pos.x + pos.width / 2;
 
-      if (item.type === 'milestone') {
-        // Diamond centered on the start date
-        const cx = pos.x + pos.width / 2;
-        const cy = itemY + pos.height / 2;
-        const r = pos.height / 2;
-        const points = `${cx},${cy - r} ${cx + r},${cy} ${cx},${cy + r} ${cx - r},${cy}`;
-        parts.push(
-          `<g><title>${tooltip}</title>` +
-            `<polygon points="${points}" fill="${color}" stroke="${color}" ` +
-            `stroke-width="2" opacity="0.85"/>` +
-            `<text x="${cx + r + 8}" y="${cy}" dominant-baseline="middle" ` +
-            `font-size="11" fill="#374151">${escapeXml(item.title)}</text>` +
-            `</g>`
-        );
-      } else {
-        // Bar for task / release / meeting
-        const label =
-          pos.width > 50
-            ? `<text x="${pos.x + 6}" y="${itemY + pos.height / 2}" dominant-baseline="middle" ` +
-              `font-size="11" font-weight="bold" fill="#ffffff">` +
-              `${escapeXml(truncateToWidth(item.title, pos.width - 12, 6.2))}</text>`
-            : '';
-        parts.push(
-          `<g><title>${tooltip}</title>` +
-            `<rect x="${pos.x}" y="${itemY}" width="${pos.width}" height="${pos.height}" ` +
-            `rx="4" fill="${color}" opacity="0.9"/>` +
-            label +
-            `</g>`
-        );
-      }
+      const entry: PositionedItem = {
+        item,
+        isMilestone,
+        startX: isMilestone ? cx - r : pos.x,
+        endX: isMilestone ? cx + r : pos.x + pos.width,
+        centerY,
+        x: pos.x,
+        y: itemY,
+        width: pos.width,
+        height: pos.height,
+        color: DEFAULT_ITEM_COLORS[item.type],
+      };
+      positioned.push(entry);
+      // Last writer wins on duplicate ids; fine for arrow anchoring.
+      posMap.set(item.id, entry);
     });
   });
 
-  // --- Layer 3: time axis (white strip across the top, drawn over item tops) ---
-  parts.push(`<rect x="0" y="0" width="${svgWidth}" height="${margin.top}" fill="#ffffff"/>`);
+  // --- Layer 2: dependency arrows (under items, so bars sit on top) ---
+  positioned.forEach((target) => {
+    parseDependencies(target.item.dependencies).forEach((depId) => {
+      const source = posMap.get(depId);
+      if (!source) return;
+      const sx = source.endX;
+      const sy = source.centerY;
+      const tx = target.startX;
+      const ty = target.centerY;
+      const dx = Math.max(16, Math.abs(tx - sx) / 2);
+      parts.push(
+        `<path class="dep-arrow" d="M ${sx} ${sy} C ${sx + dx} ${sy}, ${tx - dx} ${ty}, ` +
+          `${tx} ${ty}" marker-end="url(#dep-arrowhead)"/>`
+      );
+    });
+  });
+
+  // --- Layer 3: items ---
+  positioned.forEach((p) => {
+    const tooltip = itemTooltip(p.item);
+    if (p.isMilestone) {
+      const cx = p.x + p.width / 2;
+      const cy = p.centerY;
+      const r = p.height / 2;
+      const points = `${cx},${cy - r} ${cx + r},${cy} ${cx},${cy + r} ${cx - r},${cy}`;
+      parts.push(
+        `<g><title>${tooltip}</title>` +
+          `<polygon points="${points}" fill="${p.color}" stroke="${p.color}" ` +
+          `stroke-width="2" opacity="0.85"/>` +
+          `<text class="milestone-label" x="${cx + r + 8}" y="${cy}" dominant-baseline="middle" ` +
+          `font-size="11">${escapeXml(p.item.title)}</text>` +
+          `</g>`
+      );
+    } else {
+      const label =
+        p.width > 50
+          ? `<text x="${p.x + 6}" y="${p.centerY}" dominant-baseline="middle" ` +
+            `font-size="11" font-weight="bold" fill="#ffffff">` +
+            `${escapeXml(truncateToWidth(p.item.title, p.width - 12, 6.2))}</text>`
+          : '';
+      parts.push(
+        `<g><title>${tooltip}</title>` +
+          `<rect x="${p.x}" y="${p.y}" width="${p.width}" height="${p.height}" ` +
+          `rx="4" fill="${p.color}" opacity="0.9"/>` +
+          label +
+          `</g>`
+      );
+    }
+  });
+
+  // --- Layer 4: time axis (strip across the top, drawn over item tops) ---
+  parts.push(`<rect class="axis-strip" x="0" y="0" width="${svgWidth}" height="${margin.top}"/>`);
   timeAxisTicks.forEach((tick) => {
-    const stroke = tick.isMajor ? '#333333' : '#999999';
-    const strokeWidth = tick.isMajor ? 2 : 1;
+    const cls = tick.isMajor ? 'tick-major' : 'tick-minor';
     parts.push(
-      `<line x1="${tick.x}" y1="${margin.top - 10}" x2="${tick.x}" y2="${margin.top}" ` +
-        `stroke="${stroke}" stroke-width="${strokeWidth}"/>`
+      `<line class="${cls}" x1="${tick.x}" y1="${margin.top - 10}" x2="${tick.x}" ` +
+        `y2="${margin.top}"/>`
     );
     parts.push(
-      `<text x="${tick.x}" y="${margin.top - 16}" text-anchor="middle" font-size="12" ` +
-        `fill="#333333">${escapeXml(tick.label)}</text>`
+      `<text class="axis-label" x="${tick.x}" y="${margin.top - 16}" text-anchor="middle" ` +
+        `font-size="12">${escapeXml(tick.label)}</text>`
     );
   });
   parts.push(
-    `<line x1="0" y1="${margin.top}" x2="${svgWidth}" y2="${margin.top}" ` +
-      `stroke="#333333" stroke-width="2"/>`
+    `<line class="axis-line" x1="0" y1="${margin.top}" x2="${svgWidth}" y2="${margin.top}"/>`
   );
 
-  // --- Layer 4: lane labels (white strip down the left, drawn over item starts) ---
+  // --- Layer 5: lane labels (strip down the left, drawn over item starts) ---
   laneGroups.forEach((lane, index) => {
     const top = laneTops[index] ?? margin.top;
     const centerY = top + lane.height / 2;
     parts.push(
-      `<rect x="0" y="${top}" width="${margin.left}" height="${lane.height}" ` +
-        `fill="#ffffff" opacity="0.97"/>`
+      `<rect class="lane-strip" x="0" y="${top}" width="${margin.left}" height="${lane.height}"/>`
     );
     const labelText = truncateToWidth(lane.laneName, margin.left - 20, 7.5);
     parts.push(
-      `<text x="10" y="${centerY}" dominant-baseline="middle" font-size="14" ` +
-        `font-weight="bold" fill="#4b5563"><title>${escapeXml(lane.laneName)}</title>` +
+      `<text class="lane-label" x="10" y="${centerY}" dominant-baseline="middle" font-size="14" ` +
+        `font-weight="bold"><title>${escapeXml(lane.laneName)}</title>` +
         `${escapeXml(labelText)}</text>`
     );
   });
@@ -381,6 +454,28 @@ function renderSwitcherScript(): string {
       activate(b.getAttribute('data-branch-id'), b.getAttribute('data-label'), b.getAttribute('data-item-count'));
     });
   });
+})();
+</script>`;
+}
+
+/**
+ * Runtime script for the light/dark theme toggle. Initializes from the OS
+ * preference and lets the reader flip it; the choice is not persisted (the
+ * artifact is a stateless snapshot).
+ */
+function renderThemeScript(): string {
+  return `<script>
+(function () {
+  var root = document.documentElement;
+  var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  root.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+  var btn = document.getElementById('theme-toggle');
+  if (btn) {
+    btn.addEventListener('click', function () {
+      var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+    });
+  }
 })();
 </script>`;
 }
@@ -470,77 +565,131 @@ ${r.svg}
 <meta name="generator" content="SwimLanes"/>
 <title>${escapeXml(title)}</title>
 <style>
-  :root { color-scheme: light; }
+  :root {
+    color-scheme: light;
+    --bg: #f9fafb; --panel: #ffffff; --border: #e5e7eb;
+    --text: #1f2937; --muted: #6b7280; --label: #4b5563;
+    --btn-bg: #f9fafb; --btn-border: #d1d5db; --btn-text: #374151; --btn-hover: #f3f4f6;
+    --accent: #2563eb; --accent-text: #ffffff;
+    --svg-bg: #ffffff;
+    --lane-even: #e5e7eb; --lane-odd: #ffffff; --strip: #ffffff;
+    --axis: #333333; --tick-minor: #999999; --milestone-label: #374151;
+    --count-bg: rgba(0,0,0,0.08);
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0b1220; --panel: #111827; --border: #1f2937;
+    --text: #e5e7eb; --muted: #9ca3af; --label: #cbd5e1;
+    --btn-bg: #1f2937; --btn-border: #374151; --btn-text: #e5e7eb; --btn-hover: #374151;
+    --accent: #3b82f6; --accent-text: #ffffff;
+    --svg-bg: #0f172a;
+    --lane-even: #1e293b; --lane-odd: #0f172a; --strip: #111827;
+    --axis: #cbd5e1; --tick-minor: #64748b; --milestone-label: #e5e7eb;
+    --count-bg: rgba(255,255,255,0.18);
+  }
   * { box-sizing: border-box; }
   body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
-    color: #1f2937;
-    background: #f9fafb;
+    color: var(--text); background: var(--bg);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
   header {
-    padding: 16px 20px;
-    background: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+    padding: 16px 20px; background: var(--panel); border-bottom: 1px solid var(--border);
   }
   header h1 { margin: 0 0 4px; font-size: 18px; }
-  header .meta { font-size: 12px; color: #6b7280; }
+  header .meta { font-size: 12px; color: var(--muted); }
   header .meta span { margin-right: 16px; white-space: nowrap; }
-  .legend { margin-top: 8px; font-size: 12px; color: #4b5563; }
+  .legend { margin-top: 8px; font-size: 12px; color: var(--label); }
   .legend .swatch {
     display: inline-block; width: 10px; height: 10px; border-radius: 2px;
     margin: 0 4px 0 12px; vertical-align: middle;
   }
   .legend .swatch:first-child { margin-left: 0; }
+  .theme-toggle {
+    flex: none; font: inherit; font-size: 13px; padding: 6px 12px;
+    border: 1px solid var(--btn-border); border-radius: 6px;
+    background: var(--btn-bg); color: var(--btn-text); cursor: pointer;
+  }
+  .theme-toggle:hover { background: var(--btn-hover); }
   .scenario-switcher {
     display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
-    padding: 12px 20px; background: #ffffff; border-bottom: 1px solid #e5e7eb;
+    padding: 12px 20px; background: var(--panel); border-bottom: 1px solid var(--border);
   }
   .scenario-switcher .switcher-label {
-    font-size: 12px; font-weight: 600; color: #6b7280; margin-right: 4px;
+    font-size: 12px; font-weight: 600; color: var(--muted); margin-right: 4px;
   }
   .scenario-btn {
-    font: inherit; font-size: 13px; padding: 6px 12px; border: 1px solid #d1d5db;
-    border-radius: 6px; background: #f9fafb; color: #374151; cursor: pointer;
+    font: inherit; font-size: 13px; padding: 6px 12px; border: 1px solid var(--btn-border);
+    border-radius: 6px; background: var(--btn-bg); color: var(--btn-text); cursor: pointer;
   }
-  .scenario-btn:hover { background: #f3f4f6; }
-  .scenario-btn.active { background: #2563eb; border-color: #2563eb; color: #ffffff; }
+  .scenario-btn:hover { background: var(--btn-hover); }
+  .scenario-btn.active { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
   .scenario-btn .count {
     display: inline-block; min-width: 18px; padding: 0 4px; margin-left: 4px;
-    font-size: 11px; text-align: center; border-radius: 9px;
-    background: rgba(0, 0, 0, 0.08);
+    font-size: 11px; text-align: center; border-radius: 9px; background: var(--count-bg);
   }
   .scenario-btn.active .count { background: rgba(255, 255, 255, 0.25); }
   .branch-view[hidden] { display: none; }
   .timeline-scroll { overflow: auto; padding: 16px 20px 40px; }
-  .timeline-scroll svg { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; }
+  .timeline-scroll svg {
+    background: var(--svg-bg); border: 1px solid var(--border); border-radius: 8px;
+  }
+  /* Theme-able SVG chrome */
+  .lane-bg-even { fill: var(--lane-even); }
+  .lane-bg-odd { fill: var(--lane-odd); }
+  .axis-strip { fill: var(--strip); }
+  .lane-strip { fill: var(--strip); fill-opacity: 0.97; }
+  .axis-line, .tick-major { stroke: var(--axis); stroke-width: 2; }
+  .tick-minor { stroke: var(--tick-minor); stroke-width: 1; }
+  .axis-label { fill: var(--axis); }
+  .lane-label { fill: var(--label); }
+  .milestone-label { fill: var(--milestone-label); }
+  .empty-msg { fill: var(--muted); }
+  .dep-arrow { stroke: #6b7280; stroke-width: 1.5; fill: none; opacity: 0.75; }
+  footer { padding: 12px 20px 28px; font-size: 11px; color: var(--muted); }
+  @media print {
+    body { background: #ffffff; }
+    .no-print { display: none !important; }
+    .timeline-scroll { overflow: visible; padding: 0; }
+    .timeline-scroll svg { border: none; }
+    @page { size: landscape; margin: 1cm; }
+  }
 </style>
 </head>
 <body>
 <header>
-  <h1>${escapeXml(title)}</h1>
-  <div class="meta">
-    <span>Branch: <strong id="meta-branch">${escapeXml(activeLabel)}</strong></span>
-    <span>Items: <strong id="meta-items">${itemCount}</strong></span>
-    <span>Zoom: ${escapeXml(zoomLevel)}</span>
-    <span>Grouped by: ${escapeXml(laneGroupBy)}</span>
-    <span>Filters: ${escapeXml(filterSummary)}</span>
-    <span>Generated: ${escapeXml(generatedDisplay)}</span>
+  <div class="header-main">
+    <h1>${escapeXml(title)}</h1>
+    <div class="meta">
+      <span>Branch: <strong id="meta-branch">${escapeXml(activeLabel)}</strong></span>
+      <span>Items: <strong id="meta-items">${itemCount}</strong></span>
+      <span>Zoom: ${escapeXml(zoomLevel)}</span>
+      <span>Grouped by: ${escapeXml(laneGroupBy)}</span>
+      <span>Filters: ${escapeXml(filterSummary)}</span>
+      <span>Generated: ${escapeXml(generatedDisplay)}</span>
+    </div>
+    <div class="legend">
+      <span class="swatch" style="background:${DEFAULT_ITEM_COLORS.task}"></span>Task
+      <span class="swatch" style="background:${DEFAULT_ITEM_COLORS.milestone}"></span>Milestone
+      <span class="swatch" style="background:${DEFAULT_ITEM_COLORS.release}"></span>Release
+      <span class="swatch" style="background:${DEFAULT_ITEM_COLORS.meeting}"></span>Meeting
+    </div>
   </div>
-  <div class="legend">
-    <span class="swatch" style="background:${DEFAULT_ITEM_COLORS.task}"></span>Task
-    <span class="swatch" style="background:${DEFAULT_ITEM_COLORS.milestone}"></span>Milestone
-    <span class="swatch" style="background:${DEFAULT_ITEM_COLORS.release}"></span>Release
-    <span class="swatch" style="background:${DEFAULT_ITEM_COLORS.meeting}"></span>Meeting
-  </div>
+  <button type="button" id="theme-toggle" class="theme-toggle no-print" aria-label="Toggle theme">
+    Theme
+  </button>
 </header>
 ${switcher}
 <main class="timeline-scroll">
 ${branchViews}
 </main>
+<footer>Generated by SwimLanes · self-contained, offline timeline artifact</footer>
 <script type="application/json" id="swimlanes-data">
 ${payloadJson}
 </script>
+${renderThemeScript()}
 ${switcherScript}
 </body>
 </html>`;
