@@ -6,6 +6,7 @@ import { TabNavigation } from '@/components/layout/TabNavigation';
 import { PlaceholderPanel } from '@/components/layout/PlaceholderPanel';
 import { TimelineCanvas } from '@/components/timeline/TimelineCanvas';
 import { ImportForm } from '@/components/import/ImportForm';
+import { ExportPanel } from '@/components/export/ExportPanel';
 import { useAppStore } from '@/stores/app.store';
 import { databaseService } from '@/services/database.service';
 import { useTimelineData } from '@/hooks/useTimelineData';
@@ -114,10 +115,9 @@ function App() {
           />
         )}
         {activeTab === 'export' && (
-          <PlaceholderPanel
-            title="Export Data"
-            description="Export your timeline data to various formats."
-          />
+          <div className="min-h-full">
+            <ExportPanel />
+          </div>
         )}
       </main>
     </div>

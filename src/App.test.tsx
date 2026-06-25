@@ -176,7 +176,7 @@ describe('App', () => {
     expect(reloadSpy).toHaveBeenCalled();
   });
 
-  it('renders export tab placeholder', () => {
+  it('renders the export panel on the export tab', () => {
     // Set to export tab
     useAppStore.setState({
       activeTab: 'export',
@@ -187,6 +187,6 @@ describe('App', () => {
 
     render(<App />);
 
-    expect(screen.getByText(/export data/i)).toBeInTheDocument();
+    expect(screen.getByText('Export Timeline → HTML')).toBeInTheDocument();
   });
 });
