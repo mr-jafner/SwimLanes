@@ -1,5 +1,13 @@
 import { useEffect, useState } from 'react';
-import { FileUp, LineChart, GitBranch, History, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  FileUp,
+  LineChart,
+  GitBranch,
+  History,
+  Download,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -27,6 +35,7 @@ const tabs: TabConfig[] = [
   { id: 'timeline', label: 'Timeline', icon: LineChart },
   { id: 'branches', label: 'Branches', icon: GitBranch },
   { id: 'history', label: 'History', icon: History },
+  { id: 'export', label: 'Export', icon: Download },
 ];
 
 /**
