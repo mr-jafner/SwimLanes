@@ -216,6 +216,17 @@ describe('export.service', () => {
       expect(dataBlock).not.toContain('</script><script>bad()');
     });
 
+    it('renders a single branch without a switcher or switcher script', () => {
+      const html = generateTimelineArtifact(branches, { activeBranchId: 'main' });
+      // No switcher markup or buttons (the .scenario-* CSS rules are always present).
+      expect(html).not.toContain('<div class="scenario-switcher"');
+      expect(html).not.toContain('class="scenario-btn');
+      expect(html).not.toContain('addEventListener');
+      // Exactly one branch view, shown (not hidden)
+      const views = html.match(/<section class="branch-view"/g) ?? [];
+      expect(views).toHaveLength(1);
+    });
+
     it('throws when the active branch is missing', () => {
       expect(() =>
         generateTimelineArtifact(branches, { activeBranchId: 'does-not-exist' })
@@ -230,6 +241,62 @@ describe('export.service', () => {
       });
       expect(html).toContain('Main');
       expect(html).toContain('SwimLanes Timeline');
+    });
+  });
+
+  describe('generateTimelineArtifact (multi-scenario)', () => {
+    const multi: ExportBranchInput[] = [
+      { branchId: 'main', label: 'Main', items: SAMPLE_ITEMS },
+      {
+        branchId: 'aggressive',
+        label: 'Aggressive',
+        items: [
+          ...SAMPLE_ITEMS,
+          makeItem({ id: 'd', title: 'Extra feature', project: 'Auth', lane: 'Backend' }),
+        ],
+      },
+    ];
+
+    it('bakes every branch into one file with a switcher button each', () => {
+      const html = generateTimelineArtifact(multi, { activeBranchId: 'main' });
+      const buttons = html.match(/class="scenario-btn/g) ?? [];
+      expect(buttons).toHaveLength(2);
+      expect(html).toContain('data-branch-id="main"');
+      expect(html).toContain('data-branch-id="aggressive"');
+      // Per-branch item counts surfaced on the buttons (3 vs 4)
+      expect(html).toContain('data-item-count="3"');
+      expect(html).toContain('data-item-count="4"');
+    });
+
+    it('renders all branch views with only the active one visible', () => {
+      const html = generateTimelineArtifact(multi, { activeBranchId: 'aggressive' });
+      const views = html.match(/<section class="branch-view"[^>]*>/g) ?? [];
+      expect(views).toHaveLength(2);
+      // The active branch's section is not hidden; the other is.
+      const activeSection = views.find((v) => v.includes('data-branch-id="aggressive"'));
+      const otherSection = views.find((v) => v.includes('data-branch-id="main"'));
+      expect(activeSection).toBeDefined();
+      expect(activeSection).not.toContain('hidden');
+      expect(otherSection).toContain('hidden');
+    });
+
+    it('marks the active scenario button pressed and embeds the toggle script', () => {
+      const html = generateTimelineArtifact(multi, { activeBranchId: 'aggressive' });
+      expect(html).toContain('addEventListener');
+      const activeBtn = html
+        .split('\n')
+        .find((l) => l.includes('data-branch-id="aggressive"') && l.includes('scenario-btn'));
+      expect(activeBtn).toContain('aria-pressed="true"');
+      expect(activeBtn).toContain('active');
+    });
+
+    it('embeds all branches in the JSON payload', () => {
+      const html = generateTimelineArtifact(multi, { activeBranchId: 'main' });
+      const match = html.match(
+        /<script type="application\/json" id="swimlanes-data">\s*([\s\S]*?)\s*<\/script>/
+      );
+      const payload = JSON.parse(match![1]!) as ExportPayload;
+      expect(payload.branches.map((b) => b.branchId)).toEqual(['main', 'aggressive']);
     });
   });
 });

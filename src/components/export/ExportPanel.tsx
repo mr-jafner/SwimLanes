@@ -49,13 +49,14 @@ export function ExportPanel() {
     useTimelineStore();
 
   const [branchId, setBranchId] = useState(viewBranch);
+  const [selectedBranchIds, setSelectedBranchIds] = useState<string[]>([viewBranch]);
   const [zoom, setZoom] = useState<ZoomLevel>(zoomLevel);
   const [groupBy, setGroupBy] = useState<LaneGroupBy>(laneGroupBy);
   const [applyFilters, setApplyFilters] = useState(true);
   const [title, setTitle] = useState('');
   const [isExporting, setIsExporting] = useState(false);
 
-  // Ensure branch list is loaded for the selector
+  // Ensure branch list is loaded for the selectors
   useEffect(() => {
     refreshBranches().catch(() => {
       /* surfaced on export attempt */
@@ -63,6 +64,22 @@ export function ExportPanel() {
   }, [refreshBranches]);
 
   const hasActiveFilters = Boolean(filterType || filterProject || filterStartDate || filterEndDate);
+
+  /** The initial scenario is always included. */
+  const includedBranchIds = selectedBranchIds.includes(branchId)
+    ? selectedBranchIds
+    : [branchId, ...selectedBranchIds];
+
+  const toggleBranch = (id: string, checked: boolean) => {
+    setSelectedBranchIds((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      // Never drop the initial scenario.
+      next.add(branchId);
+      return Array.from(next);
+    });
+  };
 
   const handleExport = () => {
     setIsExporting(true);
@@ -72,10 +89,6 @@ export function ExportPanel() {
       }
 
       const db = databaseService.getDatabase();
-      const items = getItems(db, branchId);
-
-      const branch = branches.find((b) => b.branch_id === branchId);
-      const label = branch?.label || branchId;
 
       const filters: ExportFilters = applyFilters
         ? {
@@ -86,8 +99,23 @@ export function ExportPanel() {
           }
         : {};
 
+      // Bake the initial scenario first, then any other selected scenarios.
+      const orderedIds = [branchId, ...includedBranchIds.filter((id) => id !== branchId)];
+      const branchInputs = orderedIds.map((id) => {
+        const branch = branches.find((b) => b.branch_id === id);
+        return {
+          branchId: id,
+          label: branch?.label || id,
+          items: getItems(db, id),
+        };
+      });
+
+      const activeBranch = branches.find((b) => b.branch_id === branchId);
+      const activeLabel = activeBranch?.label || branchId;
+      const activeCount = branchInputs.find((b) => b.branchId === branchId)?.items.length ?? 0;
+
       const generatedAt = new Date();
-      const html = generateTimelineArtifact([{ branchId, label, items }], {
+      const html = generateTimelineArtifact(branchInputs, {
         activeBranchId: branchId,
         zoomLevel: zoom,
         laneGroupBy: groupBy,
@@ -96,8 +124,10 @@ export function ExportPanel() {
         generatedAt,
       });
 
-      downloadTextFile(buildArtifactFilename(label, generatedAt), html);
-      toast.success(`Exported timeline for "${label}" (${items.length} items)`);
+      downloadTextFile(buildArtifactFilename(activeLabel, generatedAt), html);
+      const scenarioNote =
+        branchInputs.length > 1 ? ` + ${branchInputs.length - 1} scenario(s)` : '';
+      toast.success(`Exported "${activeLabel}" (${activeCount} items)${scenarioNote}`);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to export timeline';
       console.error('Export failed:', error);
@@ -114,14 +144,15 @@ export function ExportPanel() {
           <h2 className="text-xl font-semibold">Export Timeline → HTML</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Generate a single, self-contained HTML file with the timeline and data baked in. It
-            opens in any browser offline — no app or server required.
+            opens in any browser offline — no app or server required. Include multiple branches to
+            bake in scenarios the reader can toggle between.
           </p>
         </div>
 
         <div className="space-y-4">
-          {/* Branch */}
+          {/* Initial scenario */}
           <div className="space-y-1.5">
-            <Label htmlFor="export-branch">Branch</Label>
+            <Label htmlFor="export-branch">Initial scenario (branch)</Label>
             <Select value={branchId} onValueChange={setBranchId}>
               <SelectTrigger id="export-branch" className="w-full">
                 <SelectValue />
@@ -135,6 +166,41 @@ export function ExportPanel() {
               </SelectContent>
             </Select>
           </div>
+
+          {/* Additional scenarios to bake in */}
+          {branches.length > 1 && (
+            <div className="space-y-1.5">
+              <Label>Include scenarios</Label>
+              <div className="rounded-md border border-border p-3 space-y-2">
+                {branches.map((branch) => {
+                  const isActive = branch.branch_id === branchId;
+                  const checked = isActive || includedBranchIds.includes(branch.branch_id);
+                  return (
+                    <div key={branch.branch_id} className="flex items-center gap-2">
+                      <input
+                        id={`scenario-${branch.branch_id}`}
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-border accent-primary"
+                        checked={checked}
+                        disabled={isActive}
+                        onChange={(e) => toggleBranch(branch.branch_id, e.target.checked)}
+                      />
+                      <Label
+                        htmlFor={`scenario-${branch.branch_id}`}
+                        className="cursor-pointer font-normal"
+                      >
+                        {branch.label || branch.branch_id}
+                        {isActive && <span className="ml-1 text-muted-foreground">(initial)</span>}
+                      </Label>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Readers can switch between included scenarios in the exported file.
+              </p>
+            </div>
+          )}
 
           {/* Zoom + Group by */}
           <div className="grid grid-cols-2 gap-4">

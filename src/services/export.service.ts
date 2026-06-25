@@ -322,14 +322,78 @@ function describeFilters(filters: ExportFilters): string {
   return parts.length > 0 ? parts.join(', ') : 'none';
 }
 
+/** One branch rendered to SVG, with the metadata the switcher/header need. */
+interface RenderedBranch {
+  branchId: string;
+  label: string;
+  itemCount: number;
+  svg: string;
+}
+
+/**
+ * Builds the scenario switcher markup (one button per branch). Returns an empty
+ * string when there is only a single branch (no switcher needed).
+ */
+function renderSwitcher(rendered: RenderedBranch[], activeBranchId: string): string {
+  if (rendered.length <= 1) return '';
+
+  const buttons = rendered
+    .map((r) => {
+      const on = r.branchId === activeBranchId;
+      return (
+        `<button type="button" class="scenario-btn${on ? ' active' : ''}" ` +
+        `data-branch-id="${escapeXml(r.branchId)}" data-label="${escapeXml(r.label)}" ` +
+        `data-item-count="${r.itemCount}" aria-pressed="${on ? 'true' : 'false'}">` +
+        `${escapeXml(r.label)} <span class="count">${r.itemCount}</span></button>`
+      );
+    })
+    .join('\n    ');
+
+  return `<div class="scenario-switcher" role="group" aria-label="Scenarios">
+    <span class="switcher-label">Scenario:</span>
+    ${buttons}
+  </div>`;
+}
+
+/**
+ * Runtime script (vanilla JS) that toggles which branch view is visible and
+ * updates the header counts. Only emitted when there is more than one branch.
+ */
+function renderSwitcherScript(): string {
+  return `<script>
+(function () {
+  var views = document.querySelectorAll('.branch-view');
+  var btns = document.querySelectorAll('.scenario-btn');
+  var metaBranch = document.getElementById('meta-branch');
+  var metaItems = document.getElementById('meta-items');
+  function activate(id, label, count) {
+    views.forEach(function (v) { v.hidden = v.getAttribute('data-branch-id') !== id; });
+    btns.forEach(function (b) {
+      var on = b.getAttribute('data-branch-id') === id;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    if (metaBranch && label != null) metaBranch.textContent = label;
+    if (metaItems && count != null) metaItems.textContent = count;
+  }
+  btns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      activate(b.getAttribute('data-branch-id'), b.getAttribute('data-label'), b.getAttribute('data-item-count'));
+    });
+  });
+})();
+</script>`;
+}
+
 /**
  * Generates the complete self-contained HTML artifact for one or more branches.
  *
- * v1 renders the active branch's timeline as inline SVG and embeds every
- * provided branch's data as JSON (for v2 to consume). No external requests,
- * no runtime dependencies.
+ * When multiple branches are supplied, all are rendered into the single file and
+ * an embedded vanilla-JS switcher lets the reader toggle between scenarios
+ * offline. The active branch is shown initially. Every branch's data is also
+ * embedded as JSON. No external requests, no runtime dependencies.
  *
- * @param branches - Branch data to bake in (v1 callers pass one)
+ * @param branches - Branch data to bake in (one for a single-scenario export)
  * @param options - Export options (active branch, zoom, grouping, filters, title)
  * @returns A full HTML document string
  * @throws If the active branch is not present in `branches`
@@ -351,12 +415,33 @@ export function generateTimelineArtifact(
   const activeLabel = active.label || active.branchId;
   const title = options.title || `SwimLanes Timeline — ${activeLabel}`;
 
-  // Filter then render the active branch.
-  const filteredActiveItems = filterItems(active.items, filters);
-  const model = buildRenderModel(filteredActiveItems, zoomLevel, laneGroupBy);
-  const svg = renderSvg(model);
+  // Filter + render every branch (active shown initially, the rest hidden).
+  const rendered: RenderedBranch[] = branches.map((b) => {
+    const items = filterItems(b.items, filters);
+    return {
+      branchId: b.branchId,
+      label: b.label || b.branchId,
+      itemCount: items.length,
+      svg: renderSvg(buildRenderModel(items, zoomLevel, laneGroupBy)),
+    };
+  });
 
-  // Build the N-branch payload (each branch's items pre-filtered for v2 reuse).
+  const activeBranchId = options.activeBranchId;
+  const activeRendered = rendered.find((r) => r.branchId === activeBranchId)!;
+
+  const branchViews = rendered
+    .map((r) => {
+      const hidden = r.branchId === activeBranchId ? '' : ' hidden';
+      return `<section class="branch-view" data-branch-id="${escapeXml(r.branchId)}"${hidden}>
+${r.svg}
+</section>`;
+    })
+    .join('\n');
+
+  const switcher = renderSwitcher(rendered, activeBranchId);
+  const switcherScript = rendered.length > 1 ? renderSwitcherScript() : '';
+
+  // Build the N-branch payload (each branch's items pre-filtered).
   const payload: ExportPayload = {
     formatVersion: EXPORT_FORMAT_VERSION,
     title,
@@ -364,7 +449,7 @@ export function generateTimelineArtifact(
     zoomLevel,
     laneGroupBy,
     filters,
-    activeBranchId: options.activeBranchId,
+    activeBranchId,
     branches: branches.map((b) => ({
       branchId: b.branchId,
       label: b.label ?? null,
@@ -373,7 +458,7 @@ export function generateTimelineArtifact(
   };
   const payloadJson = escapeForScript(JSON.stringify(payload));
 
-  const itemCount = filteredActiveItems.length;
+  const itemCount = activeRendered.itemCount;
   const generatedDisplay = generatedAt.toLocaleString();
   const filterSummary = describeFilters(filters);
 
@@ -407,6 +492,26 @@ export function generateTimelineArtifact(
     margin: 0 4px 0 12px; vertical-align: middle;
   }
   .legend .swatch:first-child { margin-left: 0; }
+  .scenario-switcher {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    padding: 12px 20px; background: #ffffff; border-bottom: 1px solid #e5e7eb;
+  }
+  .scenario-switcher .switcher-label {
+    font-size: 12px; font-weight: 600; color: #6b7280; margin-right: 4px;
+  }
+  .scenario-btn {
+    font: inherit; font-size: 13px; padding: 6px 12px; border: 1px solid #d1d5db;
+    border-radius: 6px; background: #f9fafb; color: #374151; cursor: pointer;
+  }
+  .scenario-btn:hover { background: #f3f4f6; }
+  .scenario-btn.active { background: #2563eb; border-color: #2563eb; color: #ffffff; }
+  .scenario-btn .count {
+    display: inline-block; min-width: 18px; padding: 0 4px; margin-left: 4px;
+    font-size: 11px; text-align: center; border-radius: 9px;
+    background: rgba(0, 0, 0, 0.08);
+  }
+  .scenario-btn.active .count { background: rgba(255, 255, 255, 0.25); }
+  .branch-view[hidden] { display: none; }
   .timeline-scroll { overflow: auto; padding: 16px 20px 40px; }
   .timeline-scroll svg { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; }
 </style>
@@ -415,8 +520,8 @@ export function generateTimelineArtifact(
 <header>
   <h1>${escapeXml(title)}</h1>
   <div class="meta">
-    <span>Branch: <strong>${escapeXml(activeLabel)}</strong></span>
-    <span>Items: <strong>${itemCount}</strong></span>
+    <span>Branch: <strong id="meta-branch">${escapeXml(activeLabel)}</strong></span>
+    <span>Items: <strong id="meta-items">${itemCount}</strong></span>
     <span>Zoom: ${escapeXml(zoomLevel)}</span>
     <span>Grouped by: ${escapeXml(laneGroupBy)}</span>
     <span>Filters: ${escapeXml(filterSummary)}</span>
@@ -429,12 +534,14 @@ export function generateTimelineArtifact(
     <span class="swatch" style="background:${DEFAULT_ITEM_COLORS.meeting}"></span>Meeting
   </div>
 </header>
+${switcher}
 <main class="timeline-scroll">
-${svg}
+${branchViews}
 </main>
 <script type="application/json" id="swimlanes-data">
 ${payloadJson}
 </script>
+${switcherScript}
 </body>
 </html>`;
 }
