@@ -204,65 +204,29 @@ interface PositionedItem {
   color: string;
 }
 
-/**
- * Renders the timeline render model to an SVG string.
- *
- * Visual encoding matches the app: tasks=blue, milestones=green diamonds,
- * releases=orange, meetings=purple. Lanes alternate background shades, with
- * fixed lane labels on the left and a time axis across the top. Dependency
- * arrows connect items whose `dependencies` reference another visible item.
- *
- * Theme-able chrome (backgrounds, axis, labels) is emitted with CSS classes so
- * the surrounding document can recolor it for light/dark; item/brand colors
- * stay inline. See {@link generateTimelineArtifact} for the class definitions.
- *
- * @param model - Render model from {@link buildRenderModel}
- * @returns Standalone `<svg>...</svg>` markup
- */
-export function renderSvg(model: ExportRenderModel): string {
-  const { config, dateRange, laneGroups, timeAxisTicks, svgWidth, svgHeight } = model;
+/** Options shared by the SVG renderers. */
+export interface RenderSvgOptions {
+  /** If set (ISO YYYY-MM-DD) and within range, draws a "Today" marker line. */
+  nowDate?: string;
+}
+
+/** Computes lane tops and positioned items for a model. */
+function computeLayout(model: ExportRenderModel): {
+  laneTops: number[];
+  positioned: PositionedItem[];
+  posMap: Map<string, PositionedItem>;
+} {
+  const { config, dateRange, laneGroups } = model;
   const { margin } = config;
 
-  const parts: string[] = [];
-  parts.push(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="${svgHeight}" ` +
-      `viewBox="0 0 ${svgWidth} ${svgHeight}" font-family="-apple-system, system-ui, sans-serif">`
-  );
-
-  // Empty state
-  if (laneGroups.length === 0 || !dateRange.minDate) {
-    parts.push(
-      `<text class="empty-msg" x="${svgWidth / 2}" y="${svgHeight / 2}" text-anchor="middle" ` +
-        `font-size="16">No dated items to display</text>`
-    );
-    parts.push('</svg>');
-    return parts.join('\n');
-  }
-
-  // Arrowhead marker for dependency connectors.
-  parts.push(
-    `<defs><marker id="dep-arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="4" ` +
-      `orient="auto" markerUnits="userSpaceOnUse">` +
-      `<path d="M0,0 L8,4 L0,8 z" fill="#6b7280"/></marker></defs>`
-  );
-
-  // --- Layer 1: lane backgrounds (alternating shades) ---
   let cumulativeY = margin.top;
   const laneTops: number[] = [];
-  laneGroups.forEach((lane, index) => {
-    laneTops.push(cumulativeY);
-    const cls = index % 2 === 0 ? 'lane-bg-even' : 'lane-bg-odd';
-    parts.push(
-      `<rect class="${cls}" x="0" y="${cumulativeY}" width="${svgWidth}" height="${lane.height}"/>`
-    );
-    cumulativeY += lane.height;
-  });
-
-  // --- Pass: compute positions for every item (for arrows + drawing) ---
   const positioned: PositionedItem[] = [];
   const posMap = new Map<string, PositionedItem>();
+
   laneGroups.forEach((lane, laneIndex) => {
-    const laneTop = laneTops[laneIndex] ?? margin.top;
+    laneTops[laneIndex] = cumulativeY;
+    const laneTop = cumulativeY;
     const rowMap = assignItemRows(lane.items);
 
     lane.items.forEach((item) => {
@@ -273,7 +237,6 @@ export function renderSvg(model: ExportRenderModel): string {
       const itemY =
         laneTop + config.itemPadding + rowIndex * (config.itemHeight + config.itemPadding);
       const isMilestone = item.type === 'milestone';
-      const centerY = itemY + pos.height / 2;
       const r = pos.height / 2;
       const cx = pos.x + pos.width / 2;
 
@@ -282,7 +245,7 @@ export function renderSvg(model: ExportRenderModel): string {
         isMilestone,
         startX: isMilestone ? cx - r : pos.x,
         endX: isMilestone ? cx + r : pos.x + pos.width,
-        centerY,
+        centerY: itemY + pos.height / 2,
         x: pos.x,
         y: itemY,
         width: pos.width,
@@ -293,9 +256,33 @@ export function renderSvg(model: ExportRenderModel): string {
       // Last writer wins on duplicate ids; fine for arrow anchoring.
       posMap.set(item.id, entry);
     });
+
+    cumulativeY += lane.height;
   });
 
-  // --- Layer 2: dependency arrows (under items, so bars sit on top) ---
+  return { laneTops, positioned, posMap };
+}
+
+/** Marker def for dependency arrowheads. */
+function depArrowDefs(): string {
+  return (
+    `<defs><marker id="dep-arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="4" ` +
+    `orient="auto" markerUnits="userSpaceOnUse">` +
+    `<path d="M0,0 L8,4 L0,8 z" fill="#6b7280"/></marker></defs>`
+  );
+}
+
+/** Emits alternating lane background rects spanning [0, width]. */
+function emitBackgrounds(model: ExportRenderModel, laneTops: number[], width: number): string[] {
+  return model.laneGroups.map((lane, index) => {
+    const cls = index % 2 === 0 ? 'lane-bg-even' : 'lane-bg-odd';
+    return `<rect class="${cls}" x="0" y="${laneTops[index]}" width="${width}" height="${lane.height}"/>`;
+  });
+}
+
+/** Emits dependency arrow paths between positioned items. */
+function emitArrows(positioned: PositionedItem[], posMap: Map<string, PositionedItem>): string[] {
+  const out: string[] = [];
   positioned.forEach((target) => {
     parseDependencies(target.item.dependencies).forEach((depId) => {
       const source = posMap.get(depId);
@@ -305,80 +292,193 @@ export function renderSvg(model: ExportRenderModel): string {
       const tx = target.startX;
       const ty = target.centerY;
       const dx = Math.max(16, Math.abs(tx - sx) / 2);
-      parts.push(
+      out.push(
         `<path class="dep-arrow" d="M ${sx} ${sy} C ${sx + dx} ${sy}, ${tx - dx} ${ty}, ` +
           `${tx} ${ty}" marker-end="url(#dep-arrowhead)"/>`
       );
     });
   });
+  return out;
+}
 
-  // --- Layer 3: items ---
-  positioned.forEach((p) => {
+/** Emits item bars/diamonds with hover tooltips. */
+function emitItems(positioned: PositionedItem[]): string[] {
+  return positioned.map((p) => {
     const tooltip = itemTooltip(p.item);
     if (p.isMilestone) {
       const cx = p.x + p.width / 2;
       const cy = p.centerY;
       const r = p.height / 2;
       const points = `${cx},${cy - r} ${cx + r},${cy} ${cx},${cy + r} ${cx - r},${cy}`;
-      parts.push(
+      return (
         `<g><title>${tooltip}</title>` +
-          `<polygon points="${points}" fill="${p.color}" stroke="${p.color}" ` +
-          `stroke-width="2" opacity="0.85"/>` +
-          `<text class="milestone-label" x="${cx + r + 8}" y="${cy}" dominant-baseline="middle" ` +
-          `font-size="11">${escapeXml(p.item.title)}</text>` +
-          `</g>`
-      );
-    } else {
-      const label =
-        p.width > 50
-          ? `<text x="${p.x + 6}" y="${p.centerY}" dominant-baseline="middle" ` +
-            `font-size="11" font-weight="bold" fill="#ffffff">` +
-            `${escapeXml(truncateToWidth(p.item.title, p.width - 12, 6.2))}</text>`
-          : '';
-      parts.push(
-        `<g><title>${tooltip}</title>` +
-          `<rect x="${p.x}" y="${p.y}" width="${p.width}" height="${p.height}" ` +
-          `rx="4" fill="${p.color}" opacity="0.9"/>` +
-          label +
-          `</g>`
+        `<polygon points="${points}" fill="${p.color}" stroke="${p.color}" ` +
+        `stroke-width="2" opacity="0.85"/>` +
+        `<text class="milestone-label" x="${cx + r + 8}" y="${cy}" dominant-baseline="middle" ` +
+        `font-size="11">${escapeXml(p.item.title)}</text>` +
+        `</g>`
       );
     }
-  });
-
-  // --- Layer 4: time axis (strip across the top, drawn over item tops) ---
-  parts.push(`<rect class="axis-strip" x="0" y="0" width="${svgWidth}" height="${margin.top}"/>`);
-  timeAxisTicks.forEach((tick) => {
-    const cls = tick.isMajor ? 'tick-major' : 'tick-minor';
-    parts.push(
-      `<line class="${cls}" x1="${tick.x}" y1="${margin.top - 10}" x2="${tick.x}" ` +
-        `y2="${margin.top}"/>`
+    const label =
+      p.width > 50
+        ? `<text x="${p.x + 6}" y="${p.centerY}" dominant-baseline="middle" ` +
+          `font-size="11" font-weight="bold" fill="#ffffff">` +
+          `${escapeXml(truncateToWidth(p.item.title, p.width - 12, 6.2))}</text>`
+        : '';
+    return (
+      `<g><title>${tooltip}</title>` +
+      `<rect x="${p.x}" y="${p.y}" width="${p.width}" height="${p.height}" ` +
+      `rx="4" fill="${p.color}" opacity="0.9"/>` +
+      label +
+      `</g>`
     );
-    parts.push(
-      `<text class="axis-label" x="${tick.x}" y="${margin.top - 16}" text-anchor="middle" ` +
+  });
+}
+
+/** Computes the x position of a date within the chart, or null if out of range. */
+function dateToX(model: ExportRenderModel, isoDate: string): number | null {
+  const { config, dateRange } = model;
+  if (!dateRange.minDate || !dateRange.maxDate || dateRange.timeRange <= 0) return null;
+  if (isoDate < dateRange.minDate || isoDate > dateRange.maxDate) return null;
+  const chartWidth = config.canvasWidth - config.margin.left - config.margin.right;
+  const ms = new Date(isoDate).getTime() - new Date(dateRange.minDate).getTime();
+  return config.margin.left + (ms / dateRange.timeRange) * chartWidth;
+}
+
+/** Emits a "Today" marker line if nowDate falls within the timeline range. */
+function emitTodayMarker(model: ExportRenderModel, nowDate: string | undefined): string[] {
+  if (!nowDate) return [];
+  const x = dateToX(model, nowDate);
+  if (x === null) return [];
+  const top = model.config.margin.top;
+  return [
+    `<line class="today-line" x1="${x}" y1="${top}" x2="${x}" y2="${model.svgHeight}">` +
+      `<title>Today: ${escapeXml(nowDate)}</title></line>`,
+    `<text class="today-label" x="${x + 4}" y="${top + 12}" font-size="10">Today</text>`,
+  ];
+}
+
+/** Emits the top time axis (strip, ticks, labels, baseline) across [0, width]. */
+function emitAxis(model: ExportRenderModel, width: number): string[] {
+  const top = model.config.margin.top;
+  const out: string[] = [`<rect class="axis-strip" x="0" y="0" width="${width}" height="${top}"/>`];
+  model.timeAxisTicks.forEach((tick) => {
+    const cls = tick.isMajor ? 'tick-major' : 'tick-minor';
+    out.push(`<line class="${cls}" x1="${tick.x}" y1="${top - 10}" x2="${tick.x}" y2="${top}"/>`);
+    out.push(
+      `<text class="axis-label" x="${tick.x}" y="${top - 16}" text-anchor="middle" ` +
         `font-size="12">${escapeXml(tick.label)}</text>`
     );
   });
-  parts.push(
-    `<line class="axis-line" x1="0" y1="${margin.top}" x2="${svgWidth}" y2="${margin.top}"/>`
-  );
+  out.push(`<line class="axis-line" x1="0" y1="${top}" x2="${width}" y2="${top}"/>`);
+  return out;
+}
 
-  // --- Layer 5: lane labels (strip down the left, drawn over item starts) ---
-  laneGroups.forEach((lane, index) => {
-    const top = laneTops[index] ?? margin.top;
+/** Emits lane label strips + text spanning [0, marginLeft]. */
+function emitLaneLabels(model: ExportRenderModel, laneTops: number[]): string[] {
+  const marginLeft = model.config.margin.left;
+  const out: string[] = [];
+  model.laneGroups.forEach((lane, index) => {
+    const top = laneTops[index] ?? model.config.margin.top;
     const centerY = top + lane.height / 2;
-    parts.push(
-      `<rect class="lane-strip" x="0" y="${top}" width="${margin.left}" height="${lane.height}"/>`
+    out.push(
+      `<rect class="lane-strip" x="0" y="${top}" width="${marginLeft}" height="${lane.height}"/>`
     );
-    const labelText = truncateToWidth(lane.laneName, margin.left - 20, 7.5);
-    parts.push(
+    const labelText = truncateToWidth(lane.laneName, marginLeft - 20, 7.5);
+    out.push(
       `<text class="lane-label" x="10" y="${centerY}" dominant-baseline="middle" font-size="14" ` +
         `font-weight="bold"><title>${escapeXml(lane.laneName)}</title>` +
         `${escapeXml(labelText)}</text>`
     );
   });
+  return out;
+}
 
-  parts.push('</svg>');
-  return parts.join('\n');
+/** Wraps body markup in an `<svg>` element. */
+function svgWrap(width: number, height: number, viewBox: string, body: string[]): string {
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" ` +
+    `viewBox="${viewBox}" font-family="-apple-system, system-ui, sans-serif">\n` +
+    body.join('\n') +
+    `\n</svg>`
+  );
+}
+
+/** Renders the empty-state SVG. */
+function emptySvg(width: number, height: number): string {
+  return svgWrap(width, height, `0 0 ${width} ${height}`, [
+    `<text class="empty-msg" x="${width / 2}" y="${height / 2}" text-anchor="middle" ` +
+      `font-size="16">No dated items to display</text>`,
+  ]);
+}
+
+/**
+ * Renders the full timeline model to a single self-contained SVG (chart + lane
+ * labels together). Used standalone; the artifact uses {@link renderChartSvg} +
+ * {@link renderGutterSvg} for a frozen label column.
+ *
+ * @param model - Render model from {@link buildRenderModel}
+ * @param options - Optional render options (e.g. today marker)
+ */
+export function renderSvg(model: ExportRenderModel, options: RenderSvgOptions = {}): string {
+  const { svgWidth, svgHeight, laneGroups, dateRange } = model;
+  if (laneGroups.length === 0 || !dateRange.minDate) return emptySvg(svgWidth, svgHeight);
+
+  const { laneTops, positioned, posMap } = computeLayout(model);
+  return svgWrap(svgWidth, svgHeight, `0 0 ${svgWidth} ${svgHeight}`, [
+    depArrowDefs(),
+    ...emitBackgrounds(model, laneTops, svgWidth),
+    ...emitTodayMarker(model, options.nowDate),
+    ...emitArrows(positioned, posMap),
+    ...emitItems(positioned),
+    ...emitAxis(model, svgWidth),
+    ...emitLaneLabels(model, laneTops),
+  ]);
+}
+
+/**
+ * Renders the scrollable chart (everything except the left lane-label column).
+ * The viewBox crops the left margin so x=0 begins at the chart area, letting a
+ * separate frozen gutter ({@link renderGutterSvg}) sit to its left.
+ */
+export function renderChartSvg(model: ExportRenderModel, options: RenderSvgOptions = {}): string {
+  const { svgWidth, svgHeight, laneGroups, dateRange, config } = model;
+  const chartWidth = Math.max(svgWidth - config.margin.left, 1);
+  if (laneGroups.length === 0 || !dateRange.minDate) return emptySvg(chartWidth, svgHeight);
+
+  const { laneTops, positioned, posMap } = computeLayout(model);
+  const viewBox = `${config.margin.left} 0 ${chartWidth} ${svgHeight}`;
+  return svgWrap(chartWidth, svgHeight, viewBox, [
+    depArrowDefs(),
+    ...emitBackgrounds(model, laneTops, svgWidth),
+    ...emitTodayMarker(model, options.nowDate),
+    ...emitArrows(positioned, posMap),
+    ...emitItems(positioned),
+    ...emitAxis(model, svgWidth),
+  ]);
+}
+
+/**
+ * Renders the frozen left gutter: alternating lane backgrounds, the top-left
+ * corner, and the lane labels. Stays fixed while the chart scrolls.
+ */
+export function renderGutterSvg(model: ExportRenderModel): string {
+  const { svgHeight, laneGroups, dateRange, config } = model;
+  const width = config.margin.left;
+  if (laneGroups.length === 0 || !dateRange.minDate) {
+    return svgWrap(width, svgHeight, `0 0 ${width} ${svgHeight}`, [
+      `<rect class="axis-strip" x="0" y="0" width="${width}" height="${svgHeight}"/>`,
+    ]);
+  }
+
+  const { laneTops } = computeLayout(model);
+  return svgWrap(width, svgHeight, `0 0 ${width} ${svgHeight}`, [
+    ...emitBackgrounds(model, laneTops, width),
+    ...emitLaneLabels(model, laneTops),
+    // Top-left corner over the lane backgrounds, aligned with the time axis.
+    `<rect class="axis-strip" x="0" y="0" width="${width}" height="${config.margin.top}"/>`,
+    `<text class="lane-corner" x="10" y="${config.margin.top - 16}" font-size="11">Lanes</text>`,
+  ]);
 }
 
 // ---------------------------------------------------------------------------
@@ -400,7 +500,8 @@ interface RenderedBranch {
   branchId: string;
   label: string;
   itemCount: number;
-  svg: string;
+  gutterSvg: string;
+  chartSvg: string;
 }
 
 /**
@@ -510,14 +611,19 @@ export function generateTimelineArtifact(
   const activeLabel = active.label || active.branchId;
   const title = options.title || `SwimLanes Timeline — ${activeLabel}`;
 
+  // "Today" marker date (the generation date), drawn if within a branch's range.
+  const nowDate = generatedAt.toISOString().split('T')[0];
+
   // Filter + render every branch (active shown initially, the rest hidden).
   const rendered: RenderedBranch[] = branches.map((b) => {
     const items = filterItems(b.items, filters);
+    const model = buildRenderModel(items, zoomLevel, laneGroupBy);
     return {
       branchId: b.branchId,
       label: b.label || b.branchId,
       itemCount: items.length,
-      svg: renderSvg(buildRenderModel(items, zoomLevel, laneGroupBy)),
+      gutterSvg: renderGutterSvg(model),
+      chartSvg: renderChartSvg(model, { nowDate }),
     };
   });
 
@@ -528,7 +634,10 @@ export function generateTimelineArtifact(
     .map((r) => {
       const hidden = r.branchId === activeBranchId ? '' : ' hidden';
       return `<section class="branch-view" data-branch-id="${escapeXml(r.branchId)}"${hidden}>
-${r.svg}
+  <div class="timeline-frame">
+    <div class="lane-gutter">${r.gutterSvg}</div>
+    <div class="timeline-scroll">${r.chartSvg}</div>
+  </div>
 </section>`;
     })
     .join('\n');
@@ -632,10 +741,19 @@ ${r.svg}
   }
   .scenario-btn.active .count { background: rgba(255, 255, 255, 0.25); }
   .branch-view[hidden] { display: none; }
-  .timeline-scroll { overflow: auto; padding: 16px 20px 40px; }
-  .timeline-scroll svg {
-    background: var(--svg-bg); border: 1px solid var(--border); border-radius: 8px;
+  /* Frozen lane-label gutter + scrollable chart */
+  .timeline-frame {
+    display: flex; align-items: flex-start; margin: 16px 20px 40px;
+    border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+    background: var(--svg-bg);
   }
+  .lane-gutter { flex: 0 0 auto; border-right: 1px solid var(--border); }
+  .timeline-scroll { flex: 1 1 auto; min-width: 0; overflow-x: auto; overflow-y: hidden; }
+  .lane-gutter svg, .timeline-scroll svg { display: block; }
+  .lane-corner { fill: var(--muted); font-weight: 600; }
+  .today-line { stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 4 3; opacity: 0.85; }
+  .today-label { fill: var(--accent); font-weight: 600; }
+  .timeline-scroll g:hover rect, .timeline-scroll g:hover polygon { opacity: 1; }
   /* Theme-able SVG chrome */
   .lane-bg-even { fill: var(--lane-even); }
   .lane-bg-odd { fill: var(--lane-odd); }
@@ -652,8 +770,8 @@ ${r.svg}
   @media print {
     body { background: #ffffff; }
     .no-print { display: none !important; }
-    .timeline-scroll { overflow: visible; padding: 0; }
-    .timeline-scroll svg { border: none; }
+    .timeline-frame { overflow: visible; max-width: none; }
+    .timeline-scroll { overflow: visible; }
     @page { size: landscape; margin: 1cm; }
   }
 </style>
@@ -682,7 +800,7 @@ ${r.svg}
   </button>
 </header>
 ${switcher}
-<main class="timeline-scroll">
+<main>
 ${branchViews}
 </main>
 <footer>Generated by SwimLanes · self-contained, offline timeline artifact</footer>

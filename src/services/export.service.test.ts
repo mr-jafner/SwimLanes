@@ -7,6 +7,8 @@ import {
   filterItems,
   buildRenderModel,
   renderSvg,
+  renderChartSvg,
+  renderGutterSvg,
   escapeXml,
   parseDependencies,
   generateTimelineArtifact,
@@ -193,10 +195,46 @@ describe('export.service', () => {
     });
   });
 
+  describe('renderChartSvg / renderGutterSvg (frozen lane labels)', () => {
+    it('chart svg omits lane labels and crops the left margin via viewBox', () => {
+      const model = buildRenderModel(SAMPLE_ITEMS, 'month', 'lane');
+      const chart = renderChartSvg(model);
+      expect(chart).not.toContain('class="lane-label"');
+      // viewBox starts at the left margin (default 150), so the gutter area is cropped.
+      expect(chart).toContain(`viewBox="${model.config.margin.left} 0`);
+      // Chart still has the timeline content.
+      expect(chart).toContain('<rect');
+      expect(chart).toContain('class="axis-label"');
+    });
+
+    it('gutter svg contains the lane labels and is the margin width', () => {
+      const model = buildRenderModel(SAMPLE_ITEMS, 'month', 'lane');
+      const gutter = renderGutterSvg(model);
+      expect(gutter).toContain('class="lane-label"');
+      expect(gutter).toContain(`width="${model.config.margin.left}"`);
+      // Lane names appear in the gutter, not the chart.
+      expect(gutter).toContain('Backend');
+    });
+
+    it('draws a Today marker only when the date is within range', () => {
+      const model = buildRenderModel(SAMPLE_ITEMS, 'month', 'lane'); // range 2025-01-01..03-01
+      expect(renderChartSvg(model, { nowDate: '2025-02-01' })).toContain('class="today-line"');
+      expect(renderChartSvg(model, { nowDate: '2030-01-01' })).not.toContain('class="today-line"');
+      expect(renderChartSvg(model)).not.toContain('class="today-line"');
+    });
+  });
+
   describe('generateTimelineArtifact', () => {
     const branches: ExportBranchInput[] = [
       { branchId: 'main', label: 'Main', items: SAMPLE_ITEMS },
     ];
+
+    it('wraps each branch in a frozen-gutter frame', () => {
+      const html = generateTimelineArtifact(branches, { activeBranchId: 'main' });
+      expect(html).toContain('class="timeline-frame"');
+      expect(html).toContain('class="lane-gutter"');
+      expect(html).toContain('class="timeline-scroll"');
+    });
 
     it('produces a self-contained HTML document with inlined svg and data', () => {
       const html = generateTimelineArtifact(branches, { activeBranchId: 'main' });
